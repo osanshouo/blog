@@ -46,7 +46,8 @@ body > footer { font-size: small; margin-top: 32px; }
 .main {
     width: 96vw;
     max-width: 720px;
-    min-height: calc(100vh - 2.6rem - 48px - 5px);
+    /*min-height: calc(100vh - 2.6rem - 48px - 5px);*/
+    min-height: calc(100vh - 2.6em - 32px);
     box-sizing: border-box;
     margin: auto;
 
