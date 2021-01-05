@@ -17,13 +17,24 @@
 <section class="list">
     <div class="head">
         <h2>新着記事</h2>
-        <div>(<a href="./article">一覧</a>)</div>
+        <div>(<a href="./2021/">一覧</a>)</div>
     </div>
 
     <div class="article-list">
-        {% set articles = get_section(path="article/_index.md") %}
-        {% set posts = articles.pages | sort(attribute="date") | reverse %}
-        {% for page in posts | slice(end=5) %}
+        {% set_global posts = [] %}
+      
+        {% set years = get_section(path="./_index.md") %}
+	{% for year in years.subsections %}
+	    {% set year = get_section(path=year) %}
+
+	    {% for month in year.subsections %}
+	        {% set month = get_section(path=month) %}
+	        {% set_global posts = posts | concat(with = month.pages) %}
+	    {% endfor %}
+        {% endfor %}
+	
+        {% set posts = posts | sort(attribute="date") | reverse %}
+	{% for page in posts | slice(end=5) %}
         <div class="article">
             <div class="article-title">
                 {% if page.draft %}📝{% endif %}
@@ -31,7 +42,8 @@
             </div>
             <div class="article-date">{{ page.date }}</div>
         </div>
-        {% endfor %}
+	{% endfor %}
+        
     </div>
 </section>
 
