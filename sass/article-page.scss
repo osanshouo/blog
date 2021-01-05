@@ -1,0 +1,45 @@
+@import "_base";
+
+.article {
+    > header {
+        > h1 { margin-bottom: 4px; }
+
+        .date { text-align: right; }
+        .tags-container {
+            display: flex;
+            align-items: center;
+            border-bottom: solid 2px gray;
+        }
+        .date { margin-left: auto; }
+        .tag { 
+            margin: 0 0.75em; 
+            padding: 0 0.5em;
+            font-size: small;
+            border-radius: 50px;
+            background-color: var(--tag-bg-color);
+            a { color: var(--tag-fg-color); text-decoration: none; }
+        }
+    }
+
+    .details-toc { width: 72vw; max-width: 420px; margin: auto; border-bottom: solid 1px; }
+    .toc { // 目次にセクション番号を付与する設定
+        ul { counter-reset: toc_section; list-style-type: none; }
+        li::before { counter-increment: toc_section; content: counters(toc_section, "-") ". "; }
+    }
+
+    text-align: left;
+    line-height: 1.75;
+    pre { padding: 0.5em 1em; line-height: 1.4; box-sizing: border-box; overflow-x: auto; }
+    code { background-color:var(--inline-code-bg-color); color:var(--inline-code-fg-color); padding: 0 4px; }
+    
+    > h1, > h2 { font-weight: normal; }
+    > h1 { font-size: 1.4em; margin-top: 24px; border-bottom: solid 1px gray; }
+    > h2 { font-size: 1.3em; margin-top: 20px; border-bottom: dotted 1px #555; }
+    > h3 { font-size: 1.2em; }
+
+    // セクション番号
+    counter-reset: section;
+    > h1:before { counter-increment: section; content: counter(section) ". "; }
+    > h1 { counter-reset: subsection; }
+    > h2:before { counter-increment: subsection; content: counter(section) "-" counter(subsection) ". "; }
+}

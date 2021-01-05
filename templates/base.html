@@ -5,11 +5,12 @@
   <meta charset="utf-8">
   <title>{% block title %}{% endblock %}</title>
   <link rel="stylesheet" href="{% block css %}{% endblock %}">
+  {% block mathjax %}{% endblock %}
 </head>
 
 <body>
   <header>
-    <div class="header-container"><a href="/">{{ config.title }}</a></div>
+    <div class="header-container"><a href="/blog/">{{ config.title }}</a></div>
   </header>
 
   <main class="main">
@@ -17,7 +18,7 @@
   </main>
 
   <footer>
-    <div class="footer-container">&copy;2020 osanshouo</div>
+    <div class="footer-container">&copy;2021 osanshouo</div>
   </footer>
 </body>
 

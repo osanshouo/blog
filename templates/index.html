@@ -2,10 +2,60 @@
 
 {% block title %}{{ config.title }}{% endblock %}
 
-{% block css %}/blog/index.css{% endblock css %}
+{% block css %}./index.css{% endblock css %}
 
 
 {% block content %}
-<div>Hello world!</div>
+<h1 class="title">鴨川デルタ</h1>
+
+<!-- 紹介 -->
+<div>
+  個人的な雑記ノートです.
+  <!--鴨川デルタは賀茂川と高野川の合流点であり, たまに台風で流されてきたオオサンショウウオが見つかります.-->
+</div>
+
+<section class="list">
+    <div class="head">
+        <h2>新着記事</h2>
+        <div>(<a href="./article">一覧</a>)</div>
+    </div>
+
+    <div class="article-list">
+        {% set articles = get_section(path="article/_index.md") %}
+        {% set posts = articles.pages | sort(attribute="date") | reverse %}
+        {% for page in posts | slice(end=5) %}
+        <div class="article">
+            <div class="article-title">
+                {% if page.draft %}📝{% endif %}
+                <a href="{{ page.permalink }}">{{ page.title }}</a>
+            </div>
+            <div class="article-date">{{ page.date }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<div class="list">
+    <div class="head">
+        <h2>タグ</h2>
+        <div>(<a href="./tags">一覧</a>)</div>
+    </div>
+    <div  class="tag-list">
+    {% set tags = get_taxonomy(kind="tags") %}
+    {% for term in tags["items"] | sort(attribute="pages") | reverse | slice(end=5) %}
+        <div class="tag"><a href="{{ term.permalink }}">{{ term.name }}</a> ({{ term.pages | length }})</div>
+    {% endfor %}
+    </div>
+</div>
+
+<section class="comment">
+    <h2>おことわり</h2>
+    <ul>
+        <li>
+            本ブログでは <a href="https://developer.mozilla.org/ja/docs/Web/CSS/@media/prefers-color-scheme">CSS prefers-color-scheme</a> を設定しています. 
+            OS をダークモードに設定すると自動的に黒背景に切り替わります.
+        </li>
+    </ul>
+</section>
 
 {% endblock content %}
