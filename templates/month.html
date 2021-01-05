@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }} - {{ config.title }}{% endblock %}
+
+{% block css %}/index.css{% endblock css %}
+
+
+{% block content %}
+<h1 class="title">
+  {{ section.title }}
+</h1>
+<div class="article-list">
+  {% for page in section.pages %}
+  <div class="article">
+    <div class="article-title"><a href="{{ page.permalink }}">{{ page.title }}</a></div>
+    <div class="article-date">{{ page.date }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock content %}

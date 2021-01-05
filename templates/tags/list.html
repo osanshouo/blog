@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block css %}/index.css{% endblock css %}
+
+{% block content %}
+<section class="article">
+  <h1 class="title">Tags</h1>
+  {% for term in terms %}
+  <div><a href="{{ term.permalink }}">{{ term.name }}</a> ({{ term.pages | length }})</div>
+  {% endfor %}
+</section>
+{% endblock content %}

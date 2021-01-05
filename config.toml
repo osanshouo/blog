@@ -1,6 +1,6 @@
 # The URL the site will be built for
 base_url = "https://osanshouo.github.io/blog"
-title = "鴨川デルタ"
+title = "鴨川のはりねずみ"
 
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true

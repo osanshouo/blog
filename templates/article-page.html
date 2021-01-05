@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ page.title }} - {{ config.title }}
+{% endblock %}
+
+{% block mathjax %}
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}
+
+{% block css %}/article-page.css{% endblock css %}
+
+
+{% block content %}
+<section class="article">
+  <header>
+    <h1 class="title">{{ page.title }}</h1>
+    <div class="tags-container">
+      {% if "tags" in page.taxonomies %}
+      {% for tag in page.taxonomies["tags"] %}
+      <div class="tag"><a href="../../tags/{{ tag | lower }}">{{ tag }}</a></div>
+      {% endfor %}
+      {% endif %}
+      <div class="date"><time datetime={{ page.date }}></time>{{ page.date }}</div>
+    </div>
+  </header>
+
+  {% if page.extra.toc %}
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        {% for h1 in page.toc %}
+        <li>
+          <a href="{{h1.permalink | safe}}">{{ h1.title }}</a>
+          {% if h1.children %}
+          <ul>
+            {% for h2 in h1.children %}
+            <li><a href="{{h2.permalink | safe}}">{{ h2.title }}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </details>
+  {% endif %}
+
+  <p>{{ page.content | safe }}</p>
+</section>
+{% endblock content %}
