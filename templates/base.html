@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{% block css %}{% endblock %}">
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="/">{{ config.title }}</a></div>
+  </header>
+
+  <main class="main">
+    {% block content %} {% endblock %}
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2020 osanshouo</div>
+  </footer>
+</body>
+
+</html>

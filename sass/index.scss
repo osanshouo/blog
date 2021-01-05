@@ -1,0 +1,36 @@
+@import "_base";
+
+.main {
+    .head {
+        // display: flex;
+        // align-items: center;
+        // justify-content: space-between;
+        margin: 16px 0;
+        h2 { display: inline; font-size: large; font-weight: normal; }
+        h2::before { content: "□ "; }
+        div { display: inline; }
+    }
+
+    .list {
+        max-width: 520px;
+        margin: 32px auto;
+        padding-bottom: 12px;
+        border-bottom: solid 1px;
+    }
+    .article-list {
+        .article { margin: 8px; clear: right; }
+
+        .article-date {
+            float: right;
+            margin-bottom: 16px;
+        }
+        .article-title { display: inline; text-align: left; clear: left; }
+    }
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+
+        div { line-height: 1.75; }
+    }
+}
