@@ -8,7 +8,7 @@ tags = ["physics", "acoustics", ]
 +++
 
 長さ $L$ の気柱の一方の端点が開いているとき, その中の音波に関する共鳴条件は
-$$k_n = \frac{ 2 n - 1 }{ 2 } \frac{  \pi c }{ L + l_\mathrm{E} } , \ \ n = 1, 2, 3, \cdots$$
+$$k_n = \frac{ 2 n - 1 }{ 2 } \frac{  \pi }{ L + l_\mathrm{E} } , \ \ n = 1, 2, 3, \cdots$$
 により与えられ, 気柱の長さ $L$ にある補正量 $l_\mathrm{E}$ を加えた長さの気柱として振る舞っているように見える.
 補正量 $l_\mathrm{E}$ を [__開口端補正__](https://ja.wikipedia.org/wiki/開口端補正) (end correction) と呼び, 気柱の半径 $a$ の 0.6-0.8 倍程度の値である.
 フランジなし円柱に関する開口端補正の解析的な表式は [Levine & Schwinger (1948)](https://doi.org/10.1103%2FPhysRev.73.383) 
