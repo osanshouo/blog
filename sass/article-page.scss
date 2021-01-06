@@ -42,4 +42,9 @@
     > h1:before { counter-increment: section; content: counter(section) ". "; }
     > h1 { counter-reset: subsection; }
     > h2:before { counter-increment: subsection; content: counter(section) "-" counter(subsection) ". "; }
+
+    figure > img { 
+        width: 80vw;
+        max-width: 640px;
+    }
 }
