@@ -19,5 +19,10 @@ taxonomies = [
   {name = "tags", rss = false}
 ]
 
+[slugify]
+path = "safe"
+taxonomies = "safe"
+anchors = "safe"
+
 [extra]
 # Put all your custom variables here
