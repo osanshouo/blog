@@ -26,7 +26,7 @@
     <div class="tags-container">
       {% if "tags" in page.taxonomies %}
       {% for tag in page.taxonomies["tags"] %}
-      <div class="tag"><a href="../../tags/{{ tag | lower }}">{{ tag }}</a></div>
+      <div class="tag"><a href="{{ config.base_url }}/tags/{{ tag | lower }}">{{ tag }}</a></div>
       {% endfor %}
       {% endif %}
       <div class="date"><time datetime={{ page.date }}></time>{{ page.date }}</div>
