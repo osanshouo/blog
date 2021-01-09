@@ -30,7 +30,8 @@
     text-align: left;
     line-height: 1.75;
     pre { padding: 0.5em 1em; line-height: 1.4; box-sizing: border-box; overflow-x: auto; }
-    code { background-color:var(--inline-code-bg-color); color:var(--inline-code-fg-color); padding: 0 4px; }
+    p > code, h1 > code, h2 > code, a > code 
+    { background-color:var(--inline-code-bg-color); color:var(--inline-code-fg-color); padding: 0 4px; }
     
     > h1, > h2 { font-weight: normal; }
     > h1 { font-size: 1.4em; margin-top: 24px; border-bottom: solid 1px gray; }
