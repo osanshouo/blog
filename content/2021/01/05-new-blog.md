@@ -2,7 +2,7 @@
 title = "ブログ新設"
 date = 2021-01-05
 [taxonomies]
-tags = ["etc"]
+tags = ["その他"]
 +++
 
 ブログ新設しました. [Zola](https://www.getzola.org/) により生成したウェブサイトを GitHub Pages でホストしています.

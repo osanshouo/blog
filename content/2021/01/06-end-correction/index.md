@@ -4,7 +4,7 @@ date = 2021-01-06
 [extra]
 toc = true
 [taxonomies]
-tags = ["physics", "acoustics", ]
+tags = ["物理学", "音響", ]
 +++
 
 長さ $L$ の気柱の一方の端点が開いているとき, その中の音波に関する共鳴条件は
@@ -49,15 +49,15 @@ $$\varphi = \frac{ B }{ 2 } ( e^{i k (x + L)} + e^{- i k (x + L)} ) = B \cos k (
 $$z = \frac{ 2 a }{ \pi } \left[ - i \sqrt{ w^2 - 1 } + \ln \frac{ w }{ \sqrt{ w^2 - 1 } + i } \right]$$
 によりこの領域は上半平面 $H^+$ へと写像される. そこで $H^+$ 上の関数
 $$\Phi ( w ) = D \ln w + F \tag{2}$$
-を複素速度ポテンシャルとみなすとき, 後で見るように正しく求める流れを与える.
+($D$, $F$ は定数) を複素速度ポテンシャルとみなすとき, 後で見るように正しく求める流れを与える.
 
 ## 領域 III
 
-領域 III の解は入射波 $e^{- i k x}$ と壁面によるその反射波 $e^{i k x}$, そして開口端からの放射の和である.
+領域 III の解は入射波 $e^{- i k x}$ と壁面による反射波 $e^{i k x}$, そして開口端からの放射の和である.
 このうち開口端からの放射については, 極座標 $( r, \theta )$ を用いるとき明らかに極角 $\theta$ に依存せず,
 従って2次元 Helmholtz 方程式の極座標系での表式
 $$\partial_r^2 \varphi + \frac{ 1 }{ r } \partial_r \varphi + k^2 \varphi = 0$$
-からその解は Bessel 関数である. これが遠方で外向き波であるためには, その解として Hankel 関数 $H_0^{(1)}$ を選べばよい.
+からその解は0次の Bessel 関数である. これが遠方で外向き波であるためには, その解として Hankel 関数 $H_0^{(1)}$ を選べばよい.
 従って領域 III の解は $T$ を係数として
 $$\varphi = 2 \cos k x + T H_0^{(1)} ( k r ) \tag{3}$$
 により与えられる. 
@@ -103,7 +103,7 @@ $$\Lambda = - \frac{ 2 }{ \pi } \ln \frac{ 2 \gamma k a }{ e \pi }$$
 と求まる. 
 
 さて, $Z = | B |^2 / 4$ という量を考えると, これは入射波と通路内の定在波のエネルギーの比に相当する量を表す. これは
-$$Z = \left[ ( \cos k L + k a \Lambda \sin k L )^2 + ( k a \sin k L )^2 \right]$$
+$$Z = \left[ ( \cos k L + k a \Lambda \sin k L )^2 + ( k a \sin k L )^2 \right]^{-1}$$
 と評価され, 特に $k a \to 0$ の極限では
 $$Z = \frac{ 1 }{ \cos^2 k L }$$
 に帰着する. これは
@@ -115,7 +115,7 @@ $$k_n = \frac{ 2 n - 1 }{ 2 } \frac{ \pi }{ L } , \ \ n = 1, 2, 3, \cdots$$
 $| \Delta k | \ll k_n$ のとき $Z$ は
 $$Z^{-1} = \left( \Delta k L + k_n a \Lambda \right)^2 + ( k_n a )^2$$
 と近似でき, $\Delta k = - k_n a \Lambda / L$ のときに $Z$ が極大値を取る. 従って共鳴波数は
-$$k_n + \Delta k = \frac{ 2 n - 1 }{ 2 } \frac{ \pi }{ L } \left( 1 - \frac{ a \Lambda }{ L } \right) = \frac{ 2 n - 1 }{ 2 } \frac{ \pi }{ L + l_\mathrm{E} }$$
+$$k_n + \Delta k = \frac{ 2 n - 1 }{ 2 } \frac{ \pi }{ L } \left( 1 - \frac{ a \Lambda }{ L } \right) \approx \frac{ 2 n - 1 }{ 2 } \frac{ \pi }{ L + l_\mathrm{E} }$$
 $$l_\mathrm{E} = a \Lambda = - \frac{ 2 }{ \pi } a \ln \frac{ 2 \gamma k_n a }{ e \pi }$$
 と求まる.
 
