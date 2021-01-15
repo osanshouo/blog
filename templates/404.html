@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}404 NOT FOUND - {{ config.title }}{% endblock %}
+
+{% block css %}./404.css{% endblock css %}
+
+
+{% block content %}
+<section class="article">
+    <h1 class="title">404 NOT FOUND</h1>
+
+    <div>ページが見つかりませんでした. URLを確認してください.</div>
+
+    <div class="tag-list">
+        <a href="{{ config.base_url }}">トップページ</a>
+        <a href="{{ config.base_url }}/tags">タグ一覧</a>
+    </div>
+</section>
+{% endblock content %}

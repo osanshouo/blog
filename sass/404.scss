@@ -1,0 +1,15 @@
+@import "_base";
+
+.main {
+    div {
+        margin-bottom: 2em;
+    }
+
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+
+        div { line-height: 1.75; }
+    }
+}
