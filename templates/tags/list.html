@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 
-{% block css %}{{ config.base_url }}/index.css{% endblock css %}
+{% block title %}タグ一覧 - {{ config.title }}{% endblock %}
+
+{% block css %}{{ config.base_url }}/tags-list.css{% endblock css %}
 
 {% block content %}
 <section class="article">
   <h1 class="title">Tags</h1>
-  {% for term in terms %}
-  <div><a href="{{ term.permalink }}">{{ term.name }}</a> ({{ term.pages | length }})</div>
-  {% endfor %}
+
+  <div class="tag-list">
+    {% for term in terms | sort(attribute="pages") | reverse %}
+    <div class="tag"><a href="{{ term.permalink }}">{{ term.name }}</a> ({{ term.pages | length }})</div>
+    {% endfor %}
+  </div>
 </section>
 {% endblock content %}
