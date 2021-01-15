@@ -9,7 +9,7 @@
   <h1 class="title">Tags</h1>
 
   <div class="tag-list">
-    {% for term in terms | sort(attribute="pages") | reverse %}
+    {% for term in terms |reverse | sort(attribute="pages") | reverse %}
     <div class="tag"><a href="{{ term.permalink }}">{{ term.name }}</a> ({{ term.pages | length }})</div>
     {% endfor %}
   </div>
