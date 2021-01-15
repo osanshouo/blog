@@ -3,9 +3,9 @@
 .main {
     .tag-list {
         display: grid;
-        grid-template-columns: repeat(3, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(9em, 1fr));
         gap: 8px;
 
-        div { line-height: 1.75; }
+        div { line-height: 2; }
     }
 }
