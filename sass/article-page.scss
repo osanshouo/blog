@@ -44,6 +44,9 @@
     > h1 { counter-reset: subsection; }
     > h2:before { counter-increment: subsection; content: counter(section) "-" counter(subsection) ". "; }
 
+    .text-align-center { text-align: center; }
+    .yspace { margin: 2em 0; }
+
     figure > img { 
         width: 80vw;
         max-width: 640px;
