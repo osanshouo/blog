@@ -4,7 +4,7 @@ date = 2021-01-19
 [extra]
 toc = true
 [taxonomies]
-tags = ["数値解析", "Rust", ]
+tags = ["数学", "数値解析", "Rust", ]
 +++
 
 数値積分法としては台形公式および Simpson の公式が有名ですが, 他にも優れたアルゴリズムが存在し,
