@@ -1,7 +1,6 @@
 +++
 title = "Chebyshev多項式"
 date = 2021-01-21
-draft = true
 [extra]
 toc = true
 [taxonomies]
