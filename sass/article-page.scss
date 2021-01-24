@@ -27,6 +27,28 @@
         li::before { counter-increment: toc_section; content: counters(toc_section, "-") ". "; }
     }
 
+    // 脚注
+    .footnote-definition {
+        display: grid;
+        grid-template-columns: 2em 1fr;
+
+        > sup::before { content: "注"; }
+        > sup::after { content: ":"; }
+        > sup {
+            vertical-align: baseline;
+            font-size: 0.9em;
+        }
+        > p { 
+            display: inline; 
+            font-size: 0.9em; 
+        }
+    }
+    .footnote-definition:first-of-type {
+        border-top: solid 1px;
+        margin-top: 3em;
+        padding-top: 1em;
+    }
+
     text-align: left;
     line-height: 1.75;
     pre { padding: 0.5em 1em; line-height: 1.4; box-sizing: border-box; overflow-x: auto; }
