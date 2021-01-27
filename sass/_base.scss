@@ -8,6 +8,7 @@
         --tag-bg-color: #444;
         --tag-fg-color: #999;
         --header-bg-color: rgb(39, 78, 150);
+        --quote-bg-color: #191919;
     }
 }
 @media (prefers-color-scheme: light) {
@@ -20,6 +21,7 @@
         --tag-bg-color: rgb(209, 246, 255);
         --tag-fg-color: #333;
         --header-bg-color: rgb(83, 130, 218);
+        --quote-bg-color: #eee;
     }
 }
 
