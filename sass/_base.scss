@@ -29,7 +29,8 @@ body {
     margin: 0;
     background: var(--bg-color);
     color: var(--fg-color);
-    font-family: "UD デジタル 教科書体 NK-R", sans;
+    font-family: "UD デジタル 教科書体 NK-R", "Noto Serif JP", serif;
+    font-size: 16px;
 }
 
 body > header, body > footer {
