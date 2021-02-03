@@ -49,6 +49,12 @@
         padding-top: 1em;
     }
 
+    /* 引用句 */
+    blockquote { 
+        background: var(--quote-bg-color); 
+        padding: 0 1em;
+    }
+    /* 証明 */
     .proof {
         background: var(--quote-bg-color);
         margin-bottom: 4px;
@@ -72,6 +78,7 @@
     > h2:before { counter-increment: subsection; content: counter(section) "-" counter(subsection) ". "; }
 
     .text-align-center { text-align: center; }
+    .text-align-right { text-align: right; }
     .yspace { margin: 2em 0; }
 
     figure > img { 
