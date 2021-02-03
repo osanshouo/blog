@@ -1,7 +1,6 @@
 +++
 title = "Euler法, Heun法, Runge-Kutta法の比較"
 date = 2021-02-03
-draft = true
 [extra]
 toc = true
 [taxonomies]
