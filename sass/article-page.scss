@@ -49,6 +49,15 @@
         margin-top: 3em;
         padding-top: 1em;
     }
+    // 脚注 ここまで
+
+    /* table */
+    table { margin: 0 auto; border-collapse: collapse; }
+    thead { border-bottom: 1px solid; } th { font-weight: normal; }
+    tr { border-top: 1px solid var(--tag-bg-color); }
+    tr:first-child { border-top: none; }
+    th, td { border-left: 1px solid; padding: 0 0.75em; }
+    th:first-child, td:first-child { border-left: none; }
 
     /* 引用句 */
     blockquote { 
