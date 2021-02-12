@@ -90,7 +90,7 @@ $$X_f = \sum_{i = 1}^n \left( - \frac{ \partial f }{ \partial q^i } \frac{ \part
 (というよりも, そうなるように $X_f$ を定義します. 従って $X_f$ の座標表示は深谷を除いてすべて一致します.)
 
 
-## Poisson 括弧 (2)
+# Poisson 括弧 (2)
 
 以上の定義のもとでは, $f$ と $g$ の Poisson 括弧は
 $$\\{ f, g \\} = - \omega ( X_f, X_g )$$
