@@ -40,7 +40,7 @@
                 {% if page.draft %}📝{% endif %}
                 <a href="{{ page.permalink }}">{{ page.title }}</a>
             </div>
-            <div class="article-date">{{ page.date }}</div>
+            <div class="article-date">{{ page.date | date(format="%m/%d") }}</div>
         </div>
 	{% endfor %}
         
