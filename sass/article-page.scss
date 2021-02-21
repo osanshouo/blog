@@ -100,4 +100,14 @@
         width: 80vw;
         max-width: 640px;
     }
+
+    @media screen and (max-width: 720px) {
+        mjx-container[display="true"] {
+            max-width: 100vh;
+            overflow-x: scroll;
+        }
+        mjx-container[display="true"]::-webkit-scrollbar {
+            display:none;
+        }
+    }
 }
