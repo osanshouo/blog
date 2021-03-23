@@ -4,7 +4,7 @@ date = 2021-03-20
 [extra]
 toc = true
 [taxonomies]
-tags = [ "Python", ]
+tags = [ "Python", "Linux", ]
 +++
 
 Win10 ノートを初期化して環境構築し直したので, 環境構築メモです.
