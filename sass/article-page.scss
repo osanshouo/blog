@@ -78,7 +78,7 @@
     line-height: 1.75;
     code { font-size: 1em; }
     pre { padding: 0.5em 1em; line-height: 1.4; box-sizing: border-box; overflow-x: auto; }
-    p > code, h1 > code, h2 > code, a > code 
+    p > code, h1 > code, h2 > code, a > code, li > code
     { background-color:var(--inline-code-bg-color); color:var(--inline-code-fg-color); padding: 0 4px; }
     
     > h1, > h2 { font-weight: normal; }
