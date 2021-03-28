@@ -40,6 +40,7 @@ docker はすぐにコマンドを忘れるんですよね...
     * `-v [HOST]:[CONTAINER]` でホスト側のパス `[HOST]` をコンテナ側のパス `[CONTAINER]` としてマウント
     * 注意: オプションはイメージ名の前で指定すること
 * `docker start [id]`: コンテナ `[id]` を起動
+    * オプション `-ai` で対話モードで起動しアタッチする (`--attach --interactive` の略)
 * `docker stop [id]`: コンテナ `[id]` を停止
 * `docker attach [id]`: 起動しているコンテナ `[id]` にアタッチ
 * `C-p C-q`: コンテナからデタッチ 
