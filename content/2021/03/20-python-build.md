@@ -50,7 +50,7 @@ Python は実行速度が遅いのでなるべく高速化するために自前�
 ```shell
 $ wget https://www.python.org/ftp/python/3.9.2/Python-3.9.2.tar.xz
 $ tar xf Python-3.9.2.tar.xz
-$ cd Python-3.9.2.tar.xz
+$ cd Python-3.9.2
 ```
 
 そして適当にオプションを設定したらビルドします. 
