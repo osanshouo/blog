@@ -12,7 +12,6 @@ WinRT でアプリのカラーテーマ[^1]を取得するには `Windows::UI::V
 メソッドを叩きます.
 
 
-
 # 環境
 
 本記事の内容は Win10 v20H2, Rust 1.51.0, windows-rs 0.7.0 で確認しました.
@@ -52,6 +51,8 @@ fn main() -> windows::Result<()> {
     let color = ui_settings.GetColorValue(UIColorType::Accent)?;
 
     println!("{:?}", &color);
+
+    Ok(())
 }
 ```
 
