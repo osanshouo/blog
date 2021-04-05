@@ -1,0 +1,12 @@
+.article-list {
+    a { color: var(--fg-color); }
+    a:hover { color: var(--link-color); }
+
+    summary { 
+        color: var(--tag-fg-color); font-size: 24px; margin-bottom: 12px;
+    }
+
+    details {
+        margin-bottom: 2em;
+    }
+}
