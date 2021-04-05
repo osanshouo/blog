@@ -18,7 +18,7 @@
   </div>
   {% endfor %}
 
-  {% for subsection in section.subsections | reverse %}
+  {% for subsection in section.subsections | sort | reverse %}
   {% set subsec = get_section(path=subsection) %}
     <h2><a href="{{ subsec.permalink }}">{{ subsec.title }}</a></h2>
   
