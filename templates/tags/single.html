@@ -7,7 +7,7 @@
 
 {% block content %}
 <section class="article">
-    <h1 class="title">Tag - {{ term.name }}</h1>
+    <h1 class="title"><a href="{{ config.base_url }}/tags/">Tag</a> - {{ term.name }}</h1>
     
     <div class="article-list">
         {% for page in term.pages %}
