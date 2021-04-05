@@ -20,16 +20,15 @@
 
   {% for subsection in section.subsections | sort | reverse %}
   {% set subsec = get_section(path=subsection) %}
-    <h2><a href="{{ subsec.permalink }}">{{ subsec.title }}</a></h2>
   
     {% set first = loop.first %}
     <details {% if first %} open {% endif %}>
-      <summary>記事リストを展開</summary>
+      <summary>{{ subsec.title }}</summary>
       
       {% for page in subsec.pages %}
         <div class="article">
           <div class="article-title"><a href="{{ page.permalink }}">{{ page.title }}</a></div>
-          <div class="article-date">{{ page.date }}</div>
+          <div class="article-date">{{ page.date | date(format="%m/%d") }}</div>
         </div>
       {% endfor %}
     </details>
