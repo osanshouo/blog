@@ -1,7 +1,6 @@
 +++
 title = "WebWorkerで並列計算"
 date = 2021-04-06
-draft = true
 [extra]
 toc = true
 [taxonomies]
