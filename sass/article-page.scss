@@ -75,7 +75,7 @@
     }
 
     text-align: left;
-    line-height: 1.75;
+    line-height: 1.875;
     code { font-size: 1em; }
     pre { padding: 0.5em 1em; line-height: 1.4; box-sizing: border-box; overflow-x: auto; }
     p > code, h1 > code, h2 > code, a > code, li > code
@@ -83,9 +83,9 @@
     p > a > code:hover { color:var(--link-color); text-decoration: var(--link-color) underline; }
     
     > h1, > h2 { font-weight: normal; }
-    > h1 { font-size: 1.4em; margin-top: 24px; border-bottom: solid 1px gray; }
-    > h2 { font-size: 1.3em; margin-top: 20px; border-bottom: dotted 1px #555; }
-    > h3 { font-size: 1.2em; }
+    > h1 { font-size: 1.5em; margin-top: 1.8em; border-bottom: solid 1px gray; }
+    > h2 { font-size: 1.2em; margin-top: 1.5em; border-bottom: dotted 1px #555; }
+    > h3 { font-size: 1.1em; }
 
     // セクション番号
     counter-reset: section;
