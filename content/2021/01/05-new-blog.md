@@ -10,5 +10,5 @@ tags = ["その他"]
 
 数式のテスト: $g_{\mu \nu}$ を計量, $R_{\mu \nu}$ を Ricci テンソル, $R$ を Ricci スカラー, $T_{\mu \nu}$ をエネルギー・運動量テンソルとして,
 Einstein 方程式は
-$$R_{\mu \nu} + \frac{ 1 }{ 2 } R g_{\mu \nu} = \frac{ 8 \pi G }{ c^4 } T_{\mu \nu}$$
+$$R_{\mu \nu} - \frac{ 1 }{ 2 } R g_{\mu \nu} = \frac{ 8 \pi G }{ c^4 } T_{\mu \nu}$$
 により与えられます.
