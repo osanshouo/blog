@@ -35,7 +35,7 @@ WINPATH="file:///$(wslpath -m ${1})"
 `~/.bashrc` あたりに
 
 ```bash
-export BROUWER=<上記スクリプトのフルパス>
+export BROWSER=<上記スクリプトのフルパス>
 ```
 
 と書き込んで bash を再読み込みします (`source ~/.bashrc` またはシェルを再起動). 以上で Rust のドキュメントがブラウザで開けるはずです.
