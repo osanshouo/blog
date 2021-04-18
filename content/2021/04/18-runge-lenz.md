@@ -2,7 +2,7 @@
 title = "[SymPy] Laplace-Runge-LenzベクトルのPoisson括弧"
 date = 2021-04-18
 [taxonomies]
-tags = ["物理学", "解析力学", "SymPy"]
+tags = ["物理学", "天体力学", "解析力学", "SymPy"]
 +++
 
 Kepler 問題の Hamiltonian は次式により与えられます.
