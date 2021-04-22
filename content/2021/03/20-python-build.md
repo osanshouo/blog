@@ -113,10 +113,10 @@ $ export TERM=xterm-color
 その後, `~/.profile` 等を編集し必要な環境変数を設定します (このパスも変更されているので注意してください).
 
 ```bash
-export MKL_ROOT_DIR=/opt/intel/oneapi/mkl/latest
-export LD_LIBRARY_PATH=$MKL_ROOT_DIR/lib/intel64:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/:$LD_LIBRARY_PATH
-export LIBRARY_PATH=$MKL_ROOT_DIR/lib/intel64:$LIBRARY_PATH
-export PKG_CONFIG_PATH=$MKL_ROOT_DIR/tools/pkgconfig:$PKG_CONFIG_PATH
+export MKLROOT=/opt/intel/oneapi/mkl/latest
+export LD_LIBRARY_PATH=$MKLROOT/lib/intel64:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/:$LD_LIBRARY_PATH
+export LIBRARY_PATH=$MKLROOT/lib/intel64:$LIBRARY_PATH
+export PKG_CONFIG_PATH=$MKLROOT/tools/pkgconfig:$PKG_CONFIG_PATH
 ```
 
 ## NumPy と SciPy
