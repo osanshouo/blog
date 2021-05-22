@@ -1,7 +1,6 @@
 +++
 title = "Rust for Windowsでウィンドウを表示"
 date = 2021-05-22
-draft = true
 [extra]
 toc = true
 [taxonomies]
