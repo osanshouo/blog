@@ -40,7 +40,8 @@ tags = ["EPUB"]
 
 * [EPUB OCF §4.3](https://imagedrive.github.io/Submission/epub32/epub-ocf.html#sec-zip-container-mime)
 
-EPUB ファイルには `mimetype` というファイルが存在しなければなりません. そして, その内容は `application/epub+zip` で, 余計な空白を入れてはいけません.
+EPUB ファイルには `mimetype` というファイルが存在しなければなりません. そして, その内容は `application/epub+zip` で, 余計な空白を入れてはいけません
+(従ってファイルサイズは 20 byte になります).
 
 
 ## META-INF
@@ -132,19 +133,27 @@ EPUB ファイルには `META-INF` ディレクトリが存在しなければな
 ## 目次
 
 目次は HTML をつくる感じで適当に作ればよいです. 必ずしも spine に含める必要はありません ([EPUB Packages §5.2](https://imagedrive.github.io/Submission/epub32/epub-packages.html#sec-package-nav-content-conf)).
+`ol` を入れ子にする場合は, 章題を表す `span` (または `a`) が必要です.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="ja" lang="ja">
 <head>
   <title>目次</title>
 </head>
 <body>
-  <nav epub:type="toc">
+  <nav xmlns:epub="http://www.idpf.org/2007/ops" epub:type="toc">
     <h1>目次</h1>
     <ol>
       <li><a href="001.xhtml">二次方程式の解の公式</a></li>
+	  <li>
+	    <span>Galois 理論</span>
+		<ol>
+		  <li>Galois 群</li>
+		  <li>五次方程式の解の公式</li>
+	    </ol>
+	  </li>
     </ol>
   </nav>
 </body>
@@ -163,7 +172,7 @@ EPUB 3 ではこの機能は上記ファイルに置き換えられたため, EP
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="ja" lang="ja">
 <head>
   <title>二次方程式の解の公式</title>
 </head>
