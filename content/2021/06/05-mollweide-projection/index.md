@@ -1,7 +1,6 @@
 +++
 title = "Mollweide図法"
 date = 2021-06-05
-draft = true
 [extra]
 toc = true
 [taxonomies]
