@@ -166,7 +166,7 @@ cargo cinstall --release \
 削除しておきます.
 
 ```bash
-rm ~/.ffmpeg-build/lib/librav1e-so*
+rm ~/.ffmpeg-build/lib/librav1e.so*
 ```
 
 
@@ -213,7 +213,7 @@ make install
 
 # 使ってみる
 
-`.bashrc` か `.profile` あたりでパスを通しておきます. なお既にパスの通った場所に bin ファイルを移動しても問題ありません.
+`.bashrc` か `.profile` あたりでパスを通しておきます. 既にパスの通った場所に bin ファイルを移動しても問題ありません.
 
 ```bahs
 PATH="$HOME/.ffmpeg/bin:$PATH"
@@ -221,23 +221,11 @@ PATH="$HOME/.ffmpeg/bin:$PATH"
 
 ## 動作確認
 
-    ffmpeg version N-102754-g604924a069 Copyright (c) 2000-2021 the FFmpeg developers
-      built with gcc 8 (Debian 8.3.0-6)
-      configuration: --prefix=/home/osanshouo/.ffmpeg-build --pkg-config-flags=--static --extra-cflags=-I/home/osanshouo/.ffmpeg-build/include --extra-ldflags=-L/home/osanshouo/.ffmpeg-build/lib --extra-libs='-lpthread -lm' --ld=g++ --bindir=/home/osanshouo/.ffmpeg/bin --disable-ffplay --enable-gpl --enable-openssl --enable-libaom --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libsvtav1 --enable-libdav1d --enable-librav1e --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-nonfree
-      libavutil      57.  0.100 / 57.  0.100
-      libavcodec     59.  1.101 / 59.  1.101
-      libavformat    59.  3.100 / 59.  3.100
-      libavdevice    59.  0.100 / 59.  0.100
-      libavfilter     8.  0.102 /  8.  0.102
-      libswscale      6.  0.100 /  6.  0.100
-      libswresample   4.  0.100 /  4.  0.100
-      libpostproc    56.  0.100 / 56.  0.100
+有効化したライブラリは `ffmpeg` を実行すれば確認できます.
 
-Hyper fast Audio and Video encoder
-usage: ffmpeg [options] [[infile options] -i infile]... {[outfile options] outfile}...
+> configuration: --prefix=/home/osanshouo/.ffmpeg-build --pkg-config-flags=--static --extra-cflags=-I/home/osanshouo/.ffmpeg-build/include --extra-ldflags=-L/home/osanshouo/.ffmpeg-build/lib --extra-libs='-lpthread -lm' --ld=g++ --bindir=/home/osanshouo/.ffmpeg/bin --disable-ffplay --enable-gpl --enable-openssl --enable-libaom --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libsvtav1 --enable-libdav1d --enable-librav1e --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-nonfree
 
-Use -h to get full help or, even better, run 'man ffmpeg'
-```
+また, システムのもの以外は静的にリンクされているので, ソースコードおよび中間生成物を削除しても構いません.
 
 ```bash
 $ ldd ffmpeg
