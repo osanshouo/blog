@@ -1,7 +1,6 @@
 +++
 title = "平均律, Pythagoras音律, 純正律"
 date = 2021-06-20
-draft = true
 [taxonomies]
 tags = ["音楽", "音響", ]
 [extra]
