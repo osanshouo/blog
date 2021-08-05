@@ -14,7 +14,7 @@ use std::f64::consts::PI as π;
 ```
 
 円周率の π なんて見慣れているはずですが, コード中にギリシャ文字が出てくると慣れるまではすこし驚くかもしれません.
-おそらくフォントの問題もあるでしょう (エディタに Computer Modern や Latin Modern Math を設定している人なんてほとんどいないと思います)
+おそらくフォントの問題もあるでしょう (エディタに Computer Modern や Latin Modern Math を設定している人なんてほとんどいないと思います).
 
 冒頭の mixed_script_confusables の許可ですが, これは non-ascii-ident が意図せず紛れ込んでいる可能性を警告するもので,
 コード中に特定の[用字](https://ja.wikipedia.org/wiki/%E7%94%A8%E5%AD%97_(Unicode))を含む識別子がひとつだけ存在するかをチェックします.
