@@ -66,5 +66,5 @@ for n in range(Nmax):
 
 # 参考文献
 * G. Hori, _Theory of General Perturbation with Unspecified Canonical Variable_, Publications of the Astronomical Society of Japan, __18__, 287 (1966). bibcode:[1966PASJ...18..287H](https://ui.adsabs.harvard.edu/abs/1966PASJ...18..287H/abstract)
-* Sylvio Ferraz-Mello, _Canonical Perturbation Theories_, Springer (2007). doi:[10.1007/978-0-387-38905-9](https:doi.org/10.1007/978-0-387-38905-9)
+* Sylvio Ferraz-Mello, _Canonical Perturbation Theories_, Springer (2007). doi:[10.1007/978-0-387-38905-9](https://doi.org/10.1007/978-0-387-38905-9)
 * [Commutator — SymPy 1.8 documentation](https://docs.sympy.org/latest/modules/physics/quantum/commutator.html)
