@@ -82,9 +82,9 @@ $$0 = \frac{ m_1 }{ r_{31}^3 } z_1 + \frac{ m_2 }{ r_{23}^3 } z_2 - \left( \frac
 
 $y_i = 0$ により式 (♢) の $y$ 成分は自明に満足されます. 従って非自明なのは $x$ 成分だけです.
 仮定により $r_{12} = x_1 - x_2$ などとなることに注意してそれを書き下してみます.
-$$\Omega^2 x_1 = G m_2 \frac{ 1 }{ ( x_1 - x_2 )^2 } + G m_3 \frac{ 1 }{ ( x_1 - x_3 )^2 } \tag{1}$$
-$$\Omega^2 x_2 = - G m_1 \frac{ 1 }{ ( x_1 - x_2 )^2 } + G m_3 \frac{ 1 }{ ( x_2 - x_3 )^2 } \tag{2}$$
-$$\Omega^2 x_3 = - G m_1 \frac{ 1 }{ ( x_1 - x_3 )^2 } - G m_2 \frac{ 1 }{ ( x_2 - x_3 )^2 } \tag{3}$$
+$$\Omega^2 x_1 = \frac{ G m_2 }{ ( x_1 - x_2 )^2 } + \frac{ G m_3 }{ ( x_1 - x_3 )^2 } \tag{1}$$
+$$\Omega^2 x_2 = - \frac{ G m_1 }{ ( x_1 - x_2 )^2 } + \frac{ G m_3 }{ ( x_2 - x_3 )^2 } \tag{2}$$
+$$\Omega^2 x_3 = - \frac{ G m_1 }{ ( x_1 - x_3 )^2 } - \frac{ G m_2 }{ ( x_2 - x_3 )^2 } \tag{3}$$
 なお以下では重力定数 $G$ は式から省略します ($G m_i$ を $m_i$ と略記していると解釈してください).
 
 式(1)から式(2)を差し引いたもの, また式(2)から式(3)を差し引いたものは $r_{ij}$ に関する等式に帰着されます.
@@ -133,7 +133,7 @@ $$r_{12} = r_{23} = r_{13}$$
 
 # 中心配位
 
-ここで求めたものは三体がなす図形の大きさが変化せず単に回転するもの (relative equilibirum と呼ばれます) でしたが, 
+ここで求めたものは三体がなす図形の大きさが変化せず単に回転するもの (relative equilibrium と呼ばれます) でしたが, 
 回転と同時に相似変形を許すような解 (homographic solution) は一般の $N$ 体問題において詳しく調べられており,
 そのような解における回転や相似変換を除いた $N$ 体の配置のことを中心配位 ([central configuration](https://en.wikipedia.org/wiki/Central_configuration)) と呼びます.
 これについては参考文献や [Scholarpedia の記事](http://www.scholarpedia.org/article/Central_configurations) をご覧ください.
