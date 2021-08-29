@@ -20,7 +20,7 @@
 
 
 {% block content %}
-<section class="article">
+<article class="article">
   <header>
     <h1 class="title">{{ page.title }}</h1>
     <div class="info-container">
@@ -31,7 +31,7 @@
         {% endfor %}
         {% endif %}
       </div>
-      <div class="date"><time datetime={{ page.date }}></time>{{ page.date }}</div>
+      <div class="date"><time datetime="{{ page.date }}">{{ page.date }}</time></div>
     </div>
   </header>
 
@@ -57,6 +57,6 @@
   </details>
   {% endif %}
 
-  <p>{{ page.content | safe }}</p>
-</section>
+  <div class="mainContent">{{ page.content | safe }}</div>
+</article>
 {% endblock content %}

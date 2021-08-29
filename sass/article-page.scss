@@ -82,16 +82,18 @@
     { background-color:var(--inline-code-bg-color); color:var(--inline-code-fg-color); padding: 0 4px; }
     p > a > code:hover { color:var(--link-color); text-decoration: var(--link-color) underline; }
     
-    > h1, > h2 { font-weight: normal; }
-    > h1 { font-size: 1.5em; margin-top: 1.6em; border-bottom: solid 1px gray; }
-    > h2 { font-size: 1.2em; margin-top: 1.4em; border-bottom: dotted 1px #555; }
-    > h3 { font-size: 1.1em; }
+    .mainContent {
+        > h1, > h2 { font-weight: normal; }
+        > h1 { font-size: 1.5em; margin-top: 1.6em; border-bottom: solid 1px gray; }
+        > h2 { font-size: 1.2em; margin-top: 1.4em; border-bottom: dotted 1px #555; }
+        > h3 { font-size: 1.1em; }
 
-    // セクション番号
-    counter-reset: section;
-    > h1:before { counter-increment: section; content: counter(section) ". "; }
-    > h1 { counter-reset: subsection; }
-    > h2:before { counter-increment: subsection; content: counter(section) "-" counter(subsection) ". "; }
+        // セクション番号
+        counter-reset: section;
+        > h1:before { counter-increment: section; content: counter(section) ". "; }
+        > h1 { counter-reset: subsection; }
+        > h2:before { counter-increment: subsection; content: counter(section) "-" counter(subsection) ". "; }
+    }
 
     .text-align-center { text-align: center; }
     .text-align-right { text-align: right; }
