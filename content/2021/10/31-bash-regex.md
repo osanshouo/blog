@@ -16,5 +16,5 @@ tags = [ "Linux", ]
 たとえば HTML 文書から `<h1>` タグおよび `<h2>` タグを抜き出すには次のようにします.
 
 ```bash
-grep -oP '<h1[\s\S]*?</h1>|<h2[\s\S]*?</h2>' index.html
+grep -Poz '<h1[\s\S]*?</h1>|<h2[\s\S]*?</h2>' index.html
 ```
