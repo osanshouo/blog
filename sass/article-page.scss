@@ -103,6 +103,9 @@
     figure > img { 
         width: 80vw;
         max-width: 640px;
+        @media (prefers-color-scheme: dark) {
+            background-color: #bbb;
+        }
     }
 
     @media screen and (max-width: 720px) {
