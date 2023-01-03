@@ -10,3 +10,18 @@
         margin-bottom: 2em;
     }
 }
+.year-list {
+    margin-top: 36px;
+    display: flex; 
+    flex-wrap: wrap;
+
+    a { 
+        margin: 0.25em 0.75em 0; 
+        padding: 0 0.5em;
+        font-family: "UD デジタル 教科書体 NK-R", sans-serif;
+        border-radius: 50px;
+        background-color: var(--tag-bg-color);
+        color: var(--tag-fg-color); 
+        text-decoration: none;
+    }
+}

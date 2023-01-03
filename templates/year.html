@@ -36,4 +36,15 @@
   {% endfor %}
   
 </div>
+
+<!-- 他の年の記事一覧へのリンク -->
+<div class="year-list">
+{% set years = get_section(path="./_index.md") %}
+{% set years = years.subsections | sort | reverse %}
+{% for year in years %}
+  {% set year = get_section(path=year) %}
+  <a class="year-title" href="{{ year.permalink }}"">{{ year.title }}</a>
+{% endfor %}
+</div>
+
 {% endblock content %}
