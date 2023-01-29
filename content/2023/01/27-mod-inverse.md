@@ -1,7 +1,6 @@
 +++
 title = "剰余環Z/mZにおける乗法の逆元について"
 date = 2023-01-27
-draft = true
 [extra]
 toc = true
 [taxonomies]
