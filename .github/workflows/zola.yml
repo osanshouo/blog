@@ -6,6 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     # if: github.ref == 'refs/heads/main'
     steps:
+      - name: Set up a Git safe directory
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
       - name: checkout
         uses: actions/checkout@v3.0.0
       - name: build_and_deploy
