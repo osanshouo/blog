@@ -1,7 +1,6 @@
 +++
 title = "素集合データ構造 (Union-Find木)"
 date = 2024-05-29
-draft = true
 [extra]
 toc = true
 [taxonomies]
