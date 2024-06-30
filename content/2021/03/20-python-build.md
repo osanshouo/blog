@@ -32,7 +32,7 @@ WSL2 のメリットは主にファイル I/O が爆速であることと, docke
 
 必要なパッケージをインストールしておきます. 
 
-```shell
+```bash
 $ sudo apt update
 $ sudo apt install build-essential gfortran wget
 $ sudo apt install sudo apt install libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev libgdbm-dev libbz2-dev liblzma-dev zlib1g-dev uuid-dev libffi-dev libdb-dev tk-dev
@@ -47,7 +47,7 @@ Python は実行速度が遅いのでなるべく高速化するために自前�
 
 [Python 公式](https://www.python.org/downloads/source/) から最新 stable のソースコードをダウンロードし解凍します.
 
-```shell
+```bash
 $ wget https://www.python.org/ftp/python/3.9.2/Python-3.9.2.tar.xz
 $ tar xf Python-3.9.2.tar.xz
 $ cd Python-3.9.2
@@ -57,7 +57,7 @@ $ cd Python-3.9.2
 実行速度向上のために LTO や PGO を有効化します.
 `make` の引数の `-j4` は 4 スレッド並列でコンパイルするという指示です. CPU に合わせて適当に増減してください.
 
-```shell
+```bash
 $ ./configure --prefix=$HOME/.local --with-ensurepip --enable-optimizations --with-lto
 $ make -j4
 $ make altinstall
@@ -65,7 +65,7 @@ $ make altinstall
 
 これでインストール完了です. 
 
-```shell
+```bash
 $ python3.9
 >>> print("Hello, world!")
 Hello, world!
@@ -74,7 +74,7 @@ Hello, world!
 
 実行できない場合, `~/.local/bin` にパスが通っていることを確認してください.必要に応じて symlink を設定すると便利でしょう.
 
-```shell
+```bash
 $ cd ~/.local/bin
 $ ln -s python3.9 python3
 $ ln -s pip3.9 pip3
@@ -85,7 +85,7 @@ $ ln -s pip3.9 pip3
 
 パッケージは pip で管理します. pip を最新バージョンに更新しておきます.
 
-```shell
+```bash
 $ pip3 install --upgrade pip
 ```
 
@@ -98,13 +98,13 @@ NumPy や SciPy を pip でインストールすると標準では openblas を�
 (オフライン版でもオンライン版でも構いません).
 シェルスクリプトになっているので `sudo` 付きで実行すると対話式のインストールが始まります.
 
-```shell
+```bash
 $ sudo sh l_onemkl_p_2021.1.1.52_offline.sh
 ```
 
 この際に最初は `Error opening terminal: xterm-256color` というエラーが出て困惑しましたが, その場合
 
-```shell
+```bash
 $ export TERM=xterm-color
 ``` 
 
@@ -133,7 +133,7 @@ lapack_libs =
 
 そうしたら, NumPy と SciPy もソースからビルドします. `gfortran` が必要なのでインストールし忘れに注意してください.
 
-```shell
+```bash
 $ pip3 install --no-binary :all: numpy
 $ pip3 install --no-binary :all: scipy
 ```
@@ -142,6 +142,6 @@ $ pip3 install --no-binary :all: scipy
 
 その他のパッケージはソースビルドしなくてよいでしょう. 必要なものをインストールしてください.
 
-```shell
+```bash
 $ pip3 install matplotlib sympy
 ```

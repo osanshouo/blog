@@ -215,7 +215,7 @@ make install
 
 `.bashrc` か `.profile` あたりでパスを通しておきます. 既にパスの通った場所に bin ファイルを移動しても問題ありません.
 
-```bahs
+```bash
 PATH="$HOME/.ffmpeg/bin:$PATH"
 ```
 
