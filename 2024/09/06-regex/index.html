@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+正規表現のまとめ - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">正規表現のまとめ</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/JavaScript">JavaScript</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-09-06">2024-09-06</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/09/06-regex/#文字集合と文字列集合">文字集合と文字列集合</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/09/06-regex/#文字集合">文字集合</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/09/06-regex/#文字列集合">文字列集合</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/09/06-regex/#正規表現">正規表現</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/09/06-regex/#集合の基本操作">集合の基本操作</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/09/06-regex/#直和">直和</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/09/06-regex/#直積">直積</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/09/06-regex/#シングルトン">シングルトン</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/09/06-regex/#リテラル">リテラル</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/09/06-regex/#エスケープと特殊文字">エスケープと特殊文字</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/09/06-regex/#文字クラス">文字クラス</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/09/06-regex/#.">.</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/09/06-regex/#量指定子">量指定子</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/09/06-regex/#後方参照">後方参照</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/09/06-regex/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><h1 id="文字集合と文字列集合">文字集合と文字列集合</h1>
+<h2 id="文字集合">文字集合</h2>
+<p>本記事では文字集合を記号 $\mathbb{A}$ により表します.
+これには ASCII 印字可能文字 (<code>U+0020</code> から <code>U+007E</code>) がすべて含まれていることを仮定しますが,
+通常は文字列集合 $\mathbb{A}$ として ASCII 制御文字を含む Unicode の符号化文字集合 (CCS) を選びます.</p>
+<p>正規表現の <strong>メタ文字</strong> とは, 文字 <code>.</code>, <code>[</code>, <code>]</code>, <code>(</code>, <code>)</code>, <code>|</code>, <code>^</code>, <code>$</code>, <code>\</code>, <code>*</code> のことをいいます.
+以下では文字列集合 $\mathbb{A}$ からこれらメタ文字および ASCII 制御文字を除いたものを $\mathbb{A}_L$ と表記します.</p>
+<h2 id="文字列集合">文字列集合</h2>
+<p>本記事では, <strong>文字列</strong> とは文字集合の元の (順序を持つ) 有限列のことをいいます.</p>
+<p>文字列の全体を記号 $\mathbb{S}$ により表します. ここには空文字列も含まれると解釈します.
+$$\mathbb{S} = \bigcup_{n = 0}^\infty \mathbb{A}^n$$
+文字列の全体 $\mathbb{S}$ の部分集合 $\mathbb{C}$ のことを (文字列) <strong>クラス</strong> といいます.
+$$\mathbb{C} \subset \mathbb{S}$$
+すべての文字列クラスの全体がなす集合のことを $\mathbb{S}$ のべき集合 $\mathscr{P}(\mathbb{S})$ というのでした.
+本記事では一貫して文字列クラスを表す記号としてフラクトゥールを用います.</p>
+<p>ふたつの文字列 $a, b \in \mathbb{S}$ に対して, その結合文字列を記号 $a b$ または $a \cdot b$ により表します.</p>
+<h2 id="正規表現">正規表現</h2>
+<p>正規表現とは, 以下で定義する文字列クラス $\mathbb{R}$, あるいはそこから文字列集合のべき集合への写像
+$$\mathrm{regex}: \mathbb{R} \to \mathscr{P} ( \mathbb{S} )$$
+のことです. ある文字列 $s \in \mathbb{S}$ が正規表現であるとは, それがクラス $\mathbb{R}$ の元であることをいいます.</p>
+<h1 id="集合の基本操作">集合の基本操作</h1>
+<h2 id="直和">直和</h2>
+<p>正規表現 $a$, $b$ に対して, その直和を表す正規表現を $( a | b )$ と定義します.
+つまり, $s \in ( a | b )$ は $s \in a$ または $s \in b$ を満たします.</p>
+<h2 id="直積">直積</h2>
+<p>正規表現 $a$, $b$ に対して, その直積を表す正規表現を $a b$ と定義します.
+つまり, $s\in a b$ は $\alpha \in a$ および $\beta \in b$ を用いて $s = \alpha \beta$ と表示できます.</p>
+<h1 id="シングルトン">シングルトン</h1>
+<p><a href="https://ja.wikipedia.org/wiki/%E5%8D%98%E9%9B%86%E5%90%88">シングルトン</a> とは, ひとつの文字列だけを含む文字列クラスのことです.</p>
+<h2 id="リテラル">リテラル</h2>
+<p>メタ文字を含まない文字列は正規表現であり, それ自身を要素とするシングルトンを与えます:
+$s \in \mathbb{A}_L^n$ のとき
+$$\mathrm{regex}: s \mapsto \{ s \} .$$</p>
+<h2 id="エスケープと特殊文字">エスケープと特殊文字</h2>
+<p>文字 <code>\</code> とメタ文字を結合した文字列 <code>\.</code>, <code>\[</code>, <code>\]</code>, <code>\^</code>, <code>\$</code>, <code>\\</code>, <code>\*</code> は正規表現であり,
+そのメタ文字を要素とするシングルトンを与えます:
+$m \in \mathbb{A} - \mathbb{A}_L$ のとき
+$$\mathrm{regex}: \text{\\}m \mapsto \{ m \} .$$</p>
+<p>メタ文字 <code>^</code>, <code>$</code> がエスケープされずに用いられた場合, それぞれ行頭および行末を表します.
+また, ASCII 制御文字のエスケープ表現や Unicode のコードポイント表示は正規表現として認められています.</p>
+<h1 id="文字クラス">文字クラス</h1>
+<p>四角括弧 <code>[</code>, <code>]</code> で囲まれた文字列は, その中のいずれかの1文字からなる文字列にマッチします.
+$$[\text{abc}] = \{ \text{a} , \text{b}, \text{c} \}$$
+またハイフンを使用することで範囲を指定することもできます.
+$$[\text{0-9a-zA-Z}] = \{ \text{0} , \cdots, \text{9}, \text{a}, \cdots. \text{z}, \text{A}, \cdots, \text{Z} \}$$
+また, 文字クラスの補集合は <code>[^</code> および <code>]</code> に囲まれた文字列として表現されます.</p>
+<p>実用上頻繁に用いられる文字クラスには専用の記号が割り当てられています.</p>
+<ul>
+<li><code>\d</code>: 数字1文字にマッチします. <code>[0-9]</code> と等価です.</li>
+<li><code>\D</code>: 数字以外1文字にマッチします. 文字集合 $\mathbb{A}$ から <code>\d</code> を除いたものと等価です.</li>
+<li><code>\s</code>: 空白1文字にマッチします. <code>[ \f\n\r\t\v]</code> と等価です.</li>
+<li><code>\S</code>: 空白以外1文字にマッチします. 文字集合 $\mathbb{A}$ から <code>\s</code> を除いたものと等価です.</li>
+<li><code>\w</code>: ASCII 印字可能文字のうち, 数字, アルファベット, アンダースコアにマッチします.</li>
+<li><code>\W</code>: 文字集合 $\mathbb{A}$ から <code>\w</code> を除いたものと等価です.</li>
+</ul>
+<p>ただし実装によっては, 例えば <code>\d</code> に非 ASCII の数字が含まれたりします.</p>
+<p>四角括弧内でのエスケープに関しては注意が必要です.</p>
+<ul>
+<li><a href="https://techracho.bpsinc.jp/hachi8833/2020_11_04/40673">正規表現: 文字クラス [ ] 内でエスケープしなくてもよい記号｜TechRacho by BPS株式会社</a></li>
+</ul>
+<h2 id="."><code>.</code></h2>
+<p>文字列 <code>.</code> は正規表現であり, 長さ 1 の文字列全体 (つまり $\mathbb{A}$) を表します.
+ただし改行を除外する場合もあります.</p>
+<h1 id="量指定子">量指定子</h1>
+<ul>
+<li><code>*</code>: 直前の正規表現の0回以上の反復.</li>
+<li><code>+</code>: 直前の正規表現の1回以上の反復.</li>
+<li><code>?</code>: 直前の正規表現の0回または1回の反復.</li>
+<li><code>{n}</code>: 直前の正規表現のn回の反復.</li>
+<li><code>{n,}</code>: 直前の正規表現のn回以上の反復.</li>
+<li><code>{n,m}</code>: 直前の正規表現のn回以上m回以下の反復.</li>
+</ul>
+<p>なお, 通常の実装ではこれらの量指定子を含む正規表現が与えられたとき, 最左最長一致を探索します.
+最左最短一致探索には <code>?</code> を後ろに追加します.</p>
+<ul>
+<li><a href="https://learn.microsoft.com/ja-jp/dotnet/standard/base-types/quantifiers-in-regular-expressions">量指定子 (正規表現) - .NET | Microsoft Learn</a></li>
+</ul>
+<h1 id="後方参照">後方参照</h1>
+<p>正規表現 <code>(x)</code> はマッチした文字列を記憶します (キャプチャグループ). 
+n番目にマッチしたグループを <code>\n</code> として参照することができます.
+<code>(?&lt;name&gt;x)</code> という形でキャプチャグループに名前 <code>&lt;name&gt;</code> を定義することもできます.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://developer.mozilla.org/ja/docs/Web/JavaScript/Guide/Regular_expressions/Cheatsheet">正規表現構文早見表 - JavaScript | MDN</a></li>
+<li><a href="https://learn.microsoft.com/ja-jp/dotnet/standard/base-types/regular-expression-language-quick-reference">正規表現言語 - クイック リファレンス - .NET | Microsoft Learn</a></li>
+<li><a href="https://ja.wikipedia.org/wiki/%E6%AD%A3%E8%A6%8F%E8%A1%A8%E7%8F%BE">正規表現 - Wikipedia</a></li>
+<li><a href="https://doc.mas3.net/regexp/">手を動かしながら覚える正規表現＜基礎入門編＞</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

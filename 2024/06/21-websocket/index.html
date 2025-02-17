@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] WebSocketを試してみた - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] WebSocketを試してみた</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Web">Web</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-06-21">2024-06-21</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/06/21-websocket/#サーバーサイド">サーバーサイド</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/06/21-websocket/#クライアントサイド">クライアントサイド</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/06/21-websocket/#HTML">HTML</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/06/21-websocket/#JavaScript">JavaScript</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/06/21-websocket/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>WebSocket はチャットやリアルタイム対戦ゲームなど, サーバーとクライアントがリアルタイムで双方向通信を行うための通信プロトコルです.
+HTTP ポーリングとは違い接続チャンネルが開かれたままになるため, サーバー側が任意のタイミングでクライアントにメッセージを送ることができます.</p>
+<h1 id="サーバーサイド">サーバーサイド</h1>
+<p>Rust 向けのクレートとしては <a href="https://crates.io/crates/websocket">websocket</a> や <a href="https://crates.io/crates/ws">ws</a> が以前からありましたが,
+現在は <a href="https://crates.io/crates/tungstenite">tungstenite</a> というものが人気を集めているようなので, これを試してみます.</p>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span>[dependencies]
+</span><span style="color:#bf616a;">tungstenite </span><span>= &quot;</span><span style="color:#a3be8c;">0.23.0</span><span>&quot;
+</span></code></pre>
+<p><code>src/main.rs</code> はこんな感じです. 接続成功時に <code>Hello from Rust!</code> というメッセージをクライアントに送る他,
+クライアントからテキストメッセージが送られてきたら, 
+それを標準出力に出力した上で, 同じメッセージをクライアントにオウム返しします (echo).</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::net::TcpListener;
+</span><span style="color:#b48ead;">use </span><span>std::thread;
+</span><span style="color:#b48ead;">use </span><span>tungstenite::{accept, protocol::Message};
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main </span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> server = TcpListener::bind(&quot;</span><span style="color:#a3be8c;">127.0.0.1:9001</span><span>&quot;).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>    </span><span style="color:#b48ead;">for</span><span> stream in server.</span><span style="color:#96b5b4;">incoming</span><span>() {
+</span><span>        thread::spawn (</span><span style="color:#b48ead;">move </span><span>|| {
+</span><span>            </span><span style="color:#b48ead;">let mut</span><span> websocket = </span><span style="color:#96b5b4;">accept</span><span>(stream.</span><span style="color:#96b5b4;">unwrap</span><span>()).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>            websocket.</span><span style="color:#96b5b4;">send</span><span>(Message::Text(&quot;</span><span style="color:#a3be8c;">Hello from Rust!</span><span>&quot;.</span><span style="color:#96b5b4;">to_string</span><span>())).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>            </span><span style="color:#b48ead;">loop </span><span>{
+</span><span>                </span><span style="color:#b48ead;">let</span><span> msg = websocket.</span><span style="color:#96b5b4;">read</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>                </span><span style="color:#b48ead;">if let </span><span>Message::Text(</span><span style="color:#b48ead;">ref</span><span> text) = msg {
+</span><span>                    println!(&quot;</span><span style="color:#d08770;">{}</span><span>&quot;, text);
+</span><span>                    websocket.</span><span style="color:#96b5b4;">send</span><span>(msg).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>                }
+</span><span>            }
+</span><span>        });
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h1 id="クライアントサイド">クライアントサイド</h1>
+<p>参考文献に挙げたものが大変参考になりました.
+二番目の Google Chrome 用 WebExtension はシンプルな実装なのですが, jQuery を用いているので, バニラ JS で書き直しました.</p>
+<h2 id="HTML">HTML</h2>
+<pre data-lang="html" style="background-color:#2b303b;color:#c0c5ce;" class="language-html "><code class="language-html" data-lang="html"><span>&lt;!</span><span style="color:#b48ead;">DOCTYPE </span><span style="color:#d08770;">html</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">html</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">head</span><span>&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">meta </span><span style="color:#d08770;">charset</span><span>=&quot;</span><span style="color:#a3be8c;">utf-8</span><span>&quot;/&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">meta </span><span style="color:#d08770;">name</span><span>=&quot;</span><span style="color:#a3be8c;">viewport</span><span>&quot; </span><span style="color:#d08770;">content</span><span>=&quot;</span><span style="color:#a3be8c;">width=device-width, initial-scale=1</span><span>&quot;&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">title</span><span>&gt;WebSocket Chat&lt;/</span><span style="color:#bf616a;">title</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">head</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">body</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">fieldset</span><span>&gt;
+</span><span>        &lt;</span><span style="color:#bf616a;">legend</span><span>&gt;Server Setting&lt;/</span><span style="color:#bf616a;">legend</span><span>&gt;
+</span><span>        &lt;</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>            &lt;</span><span style="color:#bf616a;">label</span><span>&gt;URL:&lt;/</span><span style="color:#bf616a;">label</span><span>&gt;
+</span><span>            &lt;</span><span style="color:#bf616a;">input </span><span style="color:#d08770;">type</span><span>=&quot;</span><span style="color:#a3be8c;">text</span><span>&quot; </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">serverUrl</span><span>&quot; </span><span style="color:#d08770;">value</span><span>=&quot;</span><span style="color:#a3be8c;">ws://</span><span>&quot;/&gt;
+</span><span>            &lt;</span><span style="color:#bf616a;">button </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">connectButton</span><span>&quot;&gt;Open&lt;/</span><span style="color:#bf616a;">button</span><span>&gt;
+</span><span>            &lt;</span><span style="color:#bf616a;">button </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">disconnectButton</span><span>&quot;&gt;Close&lt;/</span><span style="color:#bf616a;">button</span><span>&gt;
+</span><span>        &lt;/</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>        &lt;</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>            Status:
+</span><span>            &lt;</span><span style="color:#bf616a;">span </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">connectionStatus</span><span>&quot;&gt;CLOSED&lt;/</span><span style="color:#bf616a;">span</span><span>&gt;
+</span><span>        &lt;/</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>    &lt;/</span><span style="color:#bf616a;">fieldset</span><span>&gt;
+</span><span>
+</span><span>    &lt;</span><span style="color:#bf616a;">fieldset </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">messageField</span><span>&quot;&gt;
+</span><span>        &lt;</span><span style="color:#bf616a;">legend</span><span>&gt;Message&lt;/</span><span style="color:#bf616a;">legend</span><span>&gt;
+</span><span>        &lt;</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>            &lt;</span><span style="color:#bf616a;">textarea </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">messageText</span><span>&quot;&gt;&lt;/</span><span style="color:#bf616a;">textarea</span><span>&gt;
+</span><span>        &lt;/</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>        &lt;</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>            &lt;</span><span style="color:#bf616a;">button </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">sendButton</span><span>&quot;&gt;Send&lt;/</span><span style="color:#bf616a;">button</span><span>&gt;
+</span><span>        &lt;/</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>    &lt;/</span><span style="color:#bf616a;">fieldset</span><span>&gt;
+</span><span>
+</span><span>    &lt;</span><span style="color:#bf616a;">div </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">chatHistory</span><span>&quot;&gt;
+</span><span>        &lt;</span><span style="color:#bf616a;">div</span><span>&gt;Chat Log &lt;</span><span style="color:#bf616a;">button </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">clearButton</span><span>&quot;&gt;Clear&lt;/</span><span style="color:#bf616a;">button</span><span>&gt;&lt;/</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>        &lt;</span><span style="color:#bf616a;">div </span><span style="color:#8fa1b3;">id</span><span>=&quot;</span><span style="color:#a3be8c;">chatLog</span><span>&quot;&gt;&lt;/</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>    &lt;/</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">div</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">script </span><span style="color:#d08770;">type</span><span>=&quot;</span><span style="color:#a3be8c;">text/javascript</span><span>&quot; </span><span style="color:#d08770;">src</span><span>=&quot;</span><span style="color:#a3be8c;">ws.js</span><span>&quot;&gt;&lt;/</span><span style="color:#bf616a;">script</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">body</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">html</span><span>&gt;
+</span></code></pre>
+<h2 id="JavaScript">JavaScript</h2>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#b48ead;">let </span><span style="color:#bf616a;">chatLog </span><span>= document.</span><span style="color:#96b5b4;">getElementById</span><span>(&quot;</span><span style="color:#a3be8c;">chatLog</span><span>&quot;);
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">connectionStatus </span><span>= document.</span><span style="color:#96b5b4;">getElementById</span><span>(&quot;</span><span style="color:#a3be8c;">connectionStatus</span><span>&quot;);
+</span><span>
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">ws</span><span>;
+</span><span>
+</span><span style="color:#65737e;">// メッセージをチャット欄に表示する処理
+</span><span style="color:#b48ead;">let </span><span style="color:#8fa1b3;">addMessage </span><span>= </span><span style="color:#b48ead;">function </span><span>(</span><span style="color:#bf616a;">text</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">message </span><span>= document.</span><span style="color:#96b5b4;">createElement</span><span>(&#39;</span><span style="color:#a3be8c;">div</span><span>&#39;);
+</span><span>    </span><span style="color:#bf616a;">message</span><span>.</span><span style="color:#bf616a;">textContent </span><span>= </span><span style="color:#bf616a;">text</span><span>;
+</span><span>    </span><span style="color:#bf616a;">chatLog</span><span>.</span><span style="color:#96b5b4;">prepend</span><span>(</span><span style="color:#bf616a;">message</span><span>);
+</span><span>};
+</span><span>
+</span><span>
+</span><span style="color:#65737e;">// `Open` ボタンを押すと WebSocket 通信を開始する.
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">connectButton </span><span>= document.</span><span style="color:#96b5b4;">getElementById</span><span>(&quot;</span><span style="color:#a3be8c;">connectButton</span><span>&quot;);
+</span><span style="color:#bf616a;">connectButton</span><span>.</span><span style="color:#96b5b4;">addEventListener</span><span>(&quot;</span><span style="color:#a3be8c;">click</span><span>&quot;, () </span><span style="color:#b48ead;">=&gt; </span><span>{
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">serverUrl </span><span>= document.</span><span style="color:#96b5b4;">getElementById</span><span>(&quot;</span><span style="color:#a3be8c;">serverUrl</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">url </span><span>= </span><span style="color:#bf616a;">serverUrl</span><span>.value;
+</span><span>    </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(&quot;</span><span style="color:#a3be8c;">WebSocket通信を開始します:</span><span>&quot;, </span><span style="color:#bf616a;">url</span><span>);
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">ws </span><span>= new WebSocket(</span><span style="color:#bf616a;">url</span><span>);
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">ws</span><span>.</span><span style="color:#8fa1b3;">onopen </span><span>= </span><span style="color:#b48ead;">function </span><span>() {
+</span><span>        </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(&quot;</span><span style="color:#a3be8c;">WebSocket通信に成功しました.</span><span>&quot;);
+</span><span>        </span><span style="color:#bf616a;">connectionStatus</span><span>.</span><span style="color:#bf616a;">textContent </span><span>= &quot;</span><span style="color:#a3be8c;">OPENED</span><span>&quot;;
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">ws</span><span>.</span><span style="color:#8fa1b3;">onclose </span><span>= </span><span style="color:#b48ead;">function </span><span>() {
+</span><span>        </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(&#39;</span><span style="color:#a3be8c;">WebSocket通信を終了しました:</span><span>&#39;, </span><span style="color:#bf616a;">serverUrl</span><span>.value);
+</span><span>        </span><span style="color:#bf616a;">connectionStatus</span><span>.</span><span style="color:#bf616a;">textContent </span><span>= &quot;</span><span style="color:#a3be8c;">CLOSED</span><span>&quot;;
+</span><span>        </span><span style="color:#bf616a;">ws </span><span>= </span><span style="color:#d08770;">null</span><span>;
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">ws</span><span>.</span><span style="color:#8fa1b3;">onerror </span><span>= </span><span style="color:#b48ead;">function </span><span>(</span><span style="color:#bf616a;">error</span><span>) {
+</span><span>        </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(</span><span style="color:#bf616a;">error</span><span>);
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">ws</span><span>.</span><span style="color:#8fa1b3;">onmessage </span><span>= </span><span style="color:#b48ead;">function </span><span>(</span><span style="color:#bf616a;">e</span><span>) {
+</span><span>        </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">data </span><span>= </span><span style="color:#bf616a;">e</span><span>.data;
+</span><span>        </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(&quot;</span><span style="color:#a3be8c;">受信メッセージ:</span><span>&quot;, </span><span style="color:#bf616a;">data</span><span>);
+</span><span>        </span><span style="color:#8fa1b3;">addMessage</span><span>(</span><span style="color:#bf616a;">data</span><span>);
+</span><span>    };
+</span><span>});
+</span><span>
+</span><span>
+</span><span style="color:#65737e;">// メッセージ送信ボタンを押した時の処理
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">sendButton </span><span>= document.</span><span style="color:#96b5b4;">getElementById</span><span>(&quot;</span><span style="color:#a3be8c;">sendButton</span><span>&quot;);
+</span><span style="color:#bf616a;">sendButton</span><span>.</span><span style="color:#96b5b4;">addEventListener</span><span>(&quot;</span><span style="color:#a3be8c;">click</span><span>&quot;, () </span><span style="color:#b48ead;">=&gt; </span><span>{
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(</span><span style="color:#bf616a;">ws</span><span>) {
+</span><span>        </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">messageText </span><span>= document.</span><span style="color:#96b5b4;">getElementById</span><span>(&quot;</span><span style="color:#a3be8c;">messageText</span><span>&quot;);
+</span><span>        </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">text </span><span>= </span><span style="color:#bf616a;">messageText</span><span>.value;
+</span><span>        </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(&quot;</span><span style="color:#a3be8c;">送信メッセージ:</span><span>&quot;, </span><span style="color:#bf616a;">text</span><span>);
+</span><span>        </span><span style="color:#bf616a;">ws</span><span>.</span><span style="color:#96b5b4;">send</span><span>(</span><span style="color:#bf616a;">text</span><span>);
+</span><span>    }
+</span><span>});
+</span><span>
+</span><span>
+</span><span style="color:#65737e;">// 接続終了ボタンを推した時の処理
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">disconnectButton </span><span>= document.</span><span style="color:#96b5b4;">getElementById</span><span>(&quot;</span><span style="color:#a3be8c;">disconnectButton</span><span>&quot;);
+</span><span style="color:#bf616a;">disconnectButton</span><span>.</span><span style="color:#96b5b4;">addEventListener</span><span>(&quot;</span><span style="color:#a3be8c;">click</span><span>&quot;, () </span><span style="color:#b48ead;">=&gt; </span><span>{
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(</span><span style="color:#bf616a;">ws</span><span>) {
+</span><span>        </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(&quot;</span><span style="color:#a3be8c;">WebSocket通信を終了します.</span><span>&quot;);
+</span><span>        </span><span style="color:#bf616a;">ws</span><span>.</span><span style="color:#96b5b4;">close</span><span>();
+</span><span>    } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>        </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(&quot;</span><span style="color:#a3be8c;">WebSocket通信は開始されていません.</span><span>&quot;);
+</span><span>    }
+</span><span>});
+</span><span>
+</span><span>
+</span><span style="color:#65737e;">// クリアボタンを押した時の処理
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">clearButton </span><span>= document.</span><span style="color:#96b5b4;">getElementById</span><span>(&quot;</span><span style="color:#a3be8c;">clearButton</span><span>&quot;);
+</span><span style="color:#bf616a;">clearButton</span><span>.</span><span style="color:#96b5b4;">addEventListener</span><span>(&quot;</span><span style="color:#a3be8c;">click</span><span>&quot;, () </span><span style="color:#b48ead;">=&gt; </span><span>{
+</span><span>    </span><span style="color:#bf616a;">chatLog</span><span>.</span><span style="color:#bf616a;">innerHTML </span><span>= &quot;&quot;;
+</span><span>});
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://press.monaca.io/atsushi/435">WebSocketでチャットアプリを作ろう①　~WebSocketサーバの立て方~ – モナカプレス</a></li>
+<li><a href="https://github.com/hakobera/Simple-WebSocket-Client">GitHub - hakobera/Simple-WebSocket-Client</a></li>
+<li><a href="https://crates.io/crates/tungstenite">tungstenite - crates.io: Rust Package Registry</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

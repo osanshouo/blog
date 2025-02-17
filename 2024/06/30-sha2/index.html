@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] SHA-512の実装 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] SHA-512の実装</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-06-30">2024-06-30</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p><a href="https://osanshouo.github.io/blog/2024/06/28-sha1/">28日</a> の続きで SHA-2 から SHA-512 を実装しました.
+<code>padding</code> において入力データのクローンが発生していたのを, そうしなくていいように改善しました.
+なお, もとの <a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">仕様</a> 
+は入力データのサイズが 2<sup>128</sup> bit 未満であることを許していますが,
+<code>usize</code> が 64 bit (ないし 32 bit) であるため, 2<sup>64</sup> bit (ないし 2<sup>32</sup> bit) 未満であるものとしています.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">rotr</span><span>&lt;</span><span style="color:#b48ead;">const</span><span> N: </span><span style="color:#b48ead;">u64</span><span>&gt;(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u64</span><span>) -&gt; </span><span style="color:#b48ead;">u64 </span><span>{
+</span><span>    (x &gt;&gt; N) | (x &lt;&lt; (</span><span style="color:#b48ead;">u64</span><span>::</span><span style="color:#d08770;">BITS </span><span>as </span><span style="color:#b48ead;">u64 </span><span>- N))
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">shr</span><span>&lt;</span><span style="color:#b48ead;">const</span><span> N: </span><span style="color:#b48ead;">u64</span><span>&gt;(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u64</span><span>) -&gt; </span><span style="color:#b48ead;">u64 </span><span>{ x &gt;&gt; N }
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">ch</span><span>(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u64</span><span>, </span><span style="color:#bf616a;">y</span><span>: </span><span style="color:#b48ead;">u64</span><span>, </span><span style="color:#bf616a;">z</span><span>: </span><span style="color:#b48ead;">u64</span><span>) -&gt; </span><span style="color:#b48ead;">u64 </span><span>{ (x &amp; y)^((!x) &amp; z ) }
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">maj</span><span>(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u64</span><span>, </span><span style="color:#bf616a;">y</span><span>: </span><span style="color:#b48ead;">u64</span><span>, </span><span style="color:#bf616a;">z</span><span>: </span><span style="color:#b48ead;">u64</span><span>) -&gt; </span><span style="color:#b48ead;">u64 </span><span>{ (x &amp; y)^(x &amp; z)^(y &amp; z) }
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">sigma0</span><span>(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u64</span><span>) -&gt; </span><span style="color:#b48ead;">u64 </span><span>{ rotr::&lt;28&gt;(x) ^ rotr::&lt;34&gt;(x) ^ rotr::&lt;39&gt;(x) }
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">sigma1</span><span>(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u64</span><span>) -&gt; </span><span style="color:#b48ead;">u64 </span><span>{ rotr::&lt;14&gt;(x) ^ rotr::&lt;18&gt;(x) ^ rotr::&lt;41&gt;(x) }
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">s0</span><span>(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u64</span><span>) -&gt; </span><span style="color:#b48ead;">u64 </span><span>{ rotr::&lt; 1&gt;(x) ^ rotr::&lt; 8&gt;(x) ^ shr::&lt;7&gt;(x) }
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">s1</span><span>(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u64</span><span>) -&gt; </span><span style="color:#b48ead;">u64 </span><span>{ rotr::&lt;19&gt;(x) ^ rotr::&lt;61&gt;(x) ^ shr::&lt;6&gt;(x) }
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">sum</span><span>(</span><span style="color:#bf616a;">x</span><span>: &amp;[</span><span style="color:#b48ead;">u64</span><span>]) -&gt; </span><span style="color:#b48ead;">u64 </span><span>{
+</span><span>    x.</span><span style="color:#96b5b4;">iter</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">fold</span><span>(</span><span style="color:#d08770;">0</span><span>, |</span><span style="color:#bf616a;">acc</span><span>, </span><span style="color:#bf616a;">x</span><span>| </span><span style="color:#b48ead;">u64</span><span>::wrapping_add(acc, *x))
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">const</span><span> K: [</span><span style="color:#b48ead;">u64</span><span>; </span><span style="color:#d08770;">80</span><span>] = [ 
+</span><span>    </span><span style="color:#d08770;">0x428a2f98d728ae22</span><span>, </span><span style="color:#d08770;">0x7137449123ef65cd</span><span>, </span><span style="color:#d08770;">0xb5c0fbcfec4d3b2f</span><span>, </span><span style="color:#d08770;">0xe9b5dba58189dbbc</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x3956c25bf348b538</span><span>, </span><span style="color:#d08770;">0x59f111f1b605d019</span><span>, </span><span style="color:#d08770;">0x923f82a4af194f9b</span><span>, </span><span style="color:#d08770;">0xab1c5ed5da6d8118</span><span>,
+</span><span>    </span><span style="color:#d08770;">0xd807aa98a3030242</span><span>, </span><span style="color:#d08770;">0x12835b0145706fbe</span><span>, </span><span style="color:#d08770;">0x243185be4ee4b28c</span><span>, </span><span style="color:#d08770;">0x550c7dc3d5ffb4e2</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x72be5d74f27b896f</span><span>, </span><span style="color:#d08770;">0x80deb1fe3b1696b1</span><span>, </span><span style="color:#d08770;">0x9bdc06a725c71235</span><span>, </span><span style="color:#d08770;">0xc19bf174cf692694</span><span>,
+</span><span>    </span><span style="color:#d08770;">0xe49b69c19ef14ad2</span><span>, </span><span style="color:#d08770;">0xefbe4786384f25e3</span><span>, </span><span style="color:#d08770;">0x0fc19dc68b8cd5b5</span><span>, </span><span style="color:#d08770;">0x240ca1cc77ac9c65</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x2de92c6f592b0275</span><span>, </span><span style="color:#d08770;">0x4a7484aa6ea6e483</span><span>, </span><span style="color:#d08770;">0x5cb0a9dcbd41fbd4</span><span>, </span><span style="color:#d08770;">0x76f988da831153b5</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x983e5152ee66dfab</span><span>, </span><span style="color:#d08770;">0xa831c66d2db43210</span><span>, </span><span style="color:#d08770;">0xb00327c898fb213f</span><span>, </span><span style="color:#d08770;">0xbf597fc7beef0ee4</span><span>,
+</span><span>    </span><span style="color:#d08770;">0xc6e00bf33da88fc2</span><span>, </span><span style="color:#d08770;">0xd5a79147930aa725</span><span>, </span><span style="color:#d08770;">0x06ca6351e003826f</span><span>, </span><span style="color:#d08770;">0x142929670a0e6e70</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x27b70a8546d22ffc</span><span>, </span><span style="color:#d08770;">0x2e1b21385c26c926</span><span>, </span><span style="color:#d08770;">0x4d2c6dfc5ac42aed</span><span>, </span><span style="color:#d08770;">0x53380d139d95b3df</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x650a73548baf63de</span><span>, </span><span style="color:#d08770;">0x766a0abb3c77b2a8</span><span>, </span><span style="color:#d08770;">0x81c2c92e47edaee6</span><span>, </span><span style="color:#d08770;">0x92722c851482353b</span><span>,
+</span><span>    </span><span style="color:#d08770;">0xa2bfe8a14cf10364</span><span>, </span><span style="color:#d08770;">0xa81a664bbc423001</span><span>, </span><span style="color:#d08770;">0xc24b8b70d0f89791</span><span>, </span><span style="color:#d08770;">0xc76c51a30654be30</span><span>,
+</span><span>    </span><span style="color:#d08770;">0xd192e819d6ef5218</span><span>, </span><span style="color:#d08770;">0xd69906245565a910</span><span>, </span><span style="color:#d08770;">0xf40e35855771202a</span><span>, </span><span style="color:#d08770;">0x106aa07032bbd1b8</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x19a4c116b8d2d0c8</span><span>, </span><span style="color:#d08770;">0x1e376c085141ab53</span><span>, </span><span style="color:#d08770;">0x2748774cdf8eeb99</span><span>, </span><span style="color:#d08770;">0x34b0bcb5e19b48a8</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x391c0cb3c5c95a63</span><span>, </span><span style="color:#d08770;">0x4ed8aa4ae3418acb</span><span>, </span><span style="color:#d08770;">0x5b9cca4f7763e373</span><span>, </span><span style="color:#d08770;">0x682e6ff3d6b2b8a3</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x748f82ee5defb2fc</span><span>, </span><span style="color:#d08770;">0x78a5636f43172f60</span><span>, </span><span style="color:#d08770;">0x84c87814a1f0ab72</span><span>, </span><span style="color:#d08770;">0x8cc702081a6439ec</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x90befffa23631e28</span><span>, </span><span style="color:#d08770;">0xa4506cebde82bde9</span><span>, </span><span style="color:#d08770;">0xbef9a3f7b2c67915</span><span>, </span><span style="color:#d08770;">0xc67178f2e372532b</span><span>,
+</span><span>    </span><span style="color:#d08770;">0xca273eceea26619c</span><span>, </span><span style="color:#d08770;">0xd186b8c721c0c207</span><span>, </span><span style="color:#d08770;">0xeada7dd6cde0eb1e</span><span>, </span><span style="color:#d08770;">0xf57d4f7fee6ed178</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x06f067aa72176fba</span><span>, </span><span style="color:#d08770;">0x0a637dc5a2c898a6</span><span>, </span><span style="color:#d08770;">0x113f9804bef90dae</span><span>, </span><span style="color:#d08770;">0x1b710b35131c471b</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x28db77f523047d84</span><span>, </span><span style="color:#d08770;">0x32caab7b40c72493</span><span>, </span><span style="color:#d08770;">0x3c9ebe0a15c9bebc</span><span>, </span><span style="color:#d08770;">0x431d67c49c100d4c</span><span>,
+</span><span>    </span><span style="color:#d08770;">0x4cc5d4becb3e42b6</span><span>, </span><span style="color:#d08770;">0x597f299cfc657e2a</span><span>, </span><span style="color:#d08770;">0x5fcb6fab3ad6faec</span><span>, </span><span style="color:#d08770;">0x6c44198c4a475817</span><span>,
+</span><span>];
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">padding</span><span>(</span><span style="color:#bf616a;">message</span><span>: &amp;[</span><span style="color:#b48ead;">u8</span><span>]) -&gt; Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> l_in_byte = message.</span><span style="color:#96b5b4;">len</span><span>();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> k = (</span><span style="color:#d08770;">239 </span><span>- (l_in_byte &amp; </span><span style="color:#d08770;">127</span><span>)) &amp; </span><span style="color:#d08770;">127</span><span>;
+</span><span>    
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> pad: Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt; = Vec::with_capacity(</span><span style="color:#d08770;">1</span><span>+k+</span><span style="color:#d08770;">8</span><span>+</span><span style="color:#d08770;">8</span><span>);
+</span><span>    pad.</span><span style="color:#96b5b4;">push</span><span>(</span><span style="color:#d08770;">128</span><span>);
+</span><span>    </span><span style="color:#b48ead;">for </span><span>_ in </span><span style="color:#d08770;">0</span><span>..(k+</span><span style="color:#d08770;">8</span><span>) { pad.</span><span style="color:#96b5b4;">push</span><span>(</span><span style="color:#d08770;">0</span><span>); }
+</span><span>    pad.</span><span style="color:#96b5b4;">extend</span><span>(
+</span><span>        ((l_in_byte as </span><span style="color:#b48ead;">u64</span><span>) &lt;&lt; </span><span style="color:#d08770;">3</span><span>).</span><span style="color:#96b5b4;">to_be_bytes</span><span>()
+</span><span>    );
+</span><span>
+</span><span>    pad
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">set_message_schedule</span><span>(</span><span style="color:#bf616a;">msg</span><span>: &amp;[</span><span style="color:#b48ead;">u8</span><span>], </span><span style="color:#bf616a;">w</span><span>: &amp;</span><span style="color:#b48ead;">mut</span><span> [</span><span style="color:#b48ead;">u64</span><span>]) {
+</span><span>    </span><span style="color:#b48ead;">for</span><span> t in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">16 </span><span>{
+</span><span>        w[t] = </span><span style="color:#b48ead;">u64</span><span>::from_be_bytes(msg[</span><span style="color:#d08770;">8</span><span>*t..</span><span style="color:#d08770;">8</span><span>*(t+</span><span style="color:#d08770;">1</span><span>)].</span><span style="color:#96b5b4;">try_into</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>());
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">for</span><span> t in </span><span style="color:#d08770;">16</span><span>..</span><span style="color:#d08770;">80 </span><span>{
+</span><span>        w[t] = </span><span style="color:#96b5b4;">sum</span><span>(&amp;[</span><span style="color:#96b5b4;">s1</span><span>(w[t-</span><span style="color:#d08770;">2</span><span>]), w[t-</span><span style="color:#d08770;">7</span><span>], </span><span style="color:#96b5b4;">s0</span><span>(w[t-</span><span style="color:#d08770;">15</span><span>]), w[t-</span><span style="color:#d08770;">16</span><span>]]);
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">sha512_core</span><span>(</span><span style="color:#bf616a;">msg</span><span>: &amp;[</span><span style="color:#b48ead;">u8</span><span>], </span><span style="color:#bf616a;">w</span><span>: &amp;</span><span style="color:#b48ead;">mut</span><span> [</span><span style="color:#b48ead;">u64</span><span>], </span><span style="color:#bf616a;">hash</span><span>: &amp;</span><span style="color:#b48ead;">mut</span><span> [</span><span style="color:#b48ead;">u64</span><span>; 8]) {
+</span><span>    </span><span style="color:#96b5b4;">set_message_schedule</span><span>(&amp;msg, w);
+</span><span>    </span><span style="color:#b48ead;">let </span><span>[</span><span style="color:#b48ead;">mut</span><span> a, </span><span style="color:#b48ead;">mut</span><span> b, </span><span style="color:#b48ead;">mut</span><span> c, </span><span style="color:#b48ead;">mut</span><span> d, </span><span style="color:#b48ead;">mut</span><span> e, </span><span style="color:#b48ead;">mut</span><span> f, </span><span style="color:#b48ead;">mut</span><span> g, </span><span style="color:#b48ead;">mut</span><span> h] = hash;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> t in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">80 </span><span>{
+</span><span>        </span><span style="color:#b48ead;">let</span><span> tmp1 = </span><span style="color:#96b5b4;">sum</span><span>(&amp;[ h, </span><span style="color:#96b5b4;">sigma1</span><span>(e), </span><span style="color:#96b5b4;">ch</span><span>(e, f, g), K[t], w[t] ]);
+</span><span>        </span><span style="color:#b48ead;">let</span><span> tmp2 = </span><span style="color:#96b5b4;">sum</span><span>(&amp;[ </span><span style="color:#96b5b4;">sigma0</span><span>(a), </span><span style="color:#96b5b4;">maj</span><span>(a, b, c) ]);
+</span><span>        h = g;
+</span><span>        g = f;
+</span><span>        f = e;
+</span><span>        e = d.</span><span style="color:#96b5b4;">wrapping_add</span><span>(tmp1);
+</span><span>        d = c;
+</span><span>        c = b;
+</span><span>        b = a;
+</span><span>        a = tmp1.</span><span style="color:#96b5b4;">wrapping_add</span><span>(tmp2);
+</span><span>    }
+</span><span>
+</span><span>    hash[</span><span style="color:#d08770;">0</span><span>] = hash[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(a);
+</span><span>    hash[</span><span style="color:#d08770;">1</span><span>] = hash[</span><span style="color:#d08770;">1</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(b);
+</span><span>    hash[</span><span style="color:#d08770;">2</span><span>] = hash[</span><span style="color:#d08770;">2</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(c);
+</span><span>    hash[</span><span style="color:#d08770;">3</span><span>] = hash[</span><span style="color:#d08770;">3</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(d);
+</span><span>    hash[</span><span style="color:#d08770;">4</span><span>] = hash[</span><span style="color:#d08770;">4</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(e);
+</span><span>    hash[</span><span style="color:#d08770;">5</span><span>] = hash[</span><span style="color:#d08770;">5</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(f);
+</span><span>    hash[</span><span style="color:#d08770;">6</span><span>] = hash[</span><span style="color:#d08770;">6</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(g);
+</span><span>    hash[</span><span style="color:#d08770;">7</span><span>] = hash[</span><span style="color:#d08770;">7</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(h);
+</span><span>}
+</span><span>
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">sha512</span><span>(</span><span style="color:#bf616a;">message</span><span>: &amp;[</span><span style="color:#b48ead;">u8</span><span>]) -&gt; [</span><span style="color:#b48ead;">u8</span><span>; </span><span style="color:#d08770;">64</span><span>] {
+</span><span>    </span><span style="color:#65737e;">// padding を生成
+</span><span>    </span><span style="color:#b48ead;">let</span><span> pad = </span><span style="color:#96b5b4;">padding</span><span>(message);
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// ハッシュの初期化
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> hash: [</span><span style="color:#b48ead;">u64</span><span>; </span><span style="color:#d08770;">8</span><span>] = [
+</span><span>        </span><span style="color:#d08770;">0x6a09e667f3bcc908</span><span>, </span><span style="color:#d08770;">0xbb67ae8584caa73b</span><span>, </span><span style="color:#d08770;">0x3c6ef372fe94f82b</span><span>, </span><span style="color:#d08770;">0xa54ff53a5f1d36f1</span><span>,
+</span><span>        </span><span style="color:#d08770;">0x510e527fade682d1</span><span>, </span><span style="color:#d08770;">0x9b05688c2b3e6c1f</span><span>, </span><span style="color:#d08770;">0x1f83d9abfb41bd6b</span><span>, </span><span style="color:#d08770;">0x5be0cd19137e2179</span><span>,
+</span><span>    ];
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> w: Vec&lt;</span><span style="color:#b48ead;">u64</span><span>&gt; = vec![ </span><span style="color:#d08770;">0</span><span>; </span><span style="color:#d08770;">80 </span><span>];
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// メインループ (本文)
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> message = message.</span><span style="color:#96b5b4;">chunks_exact</span><span>(</span><span style="color:#d08770;">128</span><span>);
+</span><span>    </span><span style="color:#b48ead;">while let </span><span>Some(msg) = message.</span><span style="color:#96b5b4;">next</span><span>() {
+</span><span>        </span><span style="color:#96b5b4;">sha512_core</span><span>(&amp;msg, &amp;</span><span style="color:#b48ead;">mut</span><span> w, &amp;</span><span style="color:#b48ead;">mut</span><span> hash);
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// メインループ (本文の余り+余白)
+</span><span>    </span><span style="color:#b48ead;">for</span><span> msg in {
+</span><span>        </span><span style="color:#b48ead;">let mut</span><span> rem = Vec::with_capacity(</span><span style="color:#d08770;">1024</span><span>);
+</span><span>        rem.</span><span style="color:#96b5b4;">extend</span><span>(message.</span><span style="color:#96b5b4;">remainder</span><span>());
+</span><span>        rem.</span><span style="color:#96b5b4;">extend</span><span>(pad);
+</span><span>        rem
+</span><span>    }.</span><span style="color:#96b5b4;">chunks</span><span>(</span><span style="color:#d08770;">128</span><span>) {
+</span><span>        </span><span style="color:#96b5b4;">sha512_core</span><span>(&amp;msg, &amp;</span><span style="color:#b48ead;">mut</span><span> w, &amp;</span><span style="color:#b48ead;">mut</span><span> hash);
+</span><span>    }
+</span><span>    
+</span><span>    </span><span style="color:#65737e;">// `[u64; 8]` を `[u8; 64]` へ変換
+</span><span>    hash.</span><span style="color:#96b5b4;">iter</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">fold</span><span>(vec![], |</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">v</span><span>, </span><span style="color:#bf616a;">h</span><span>| {
+</span><span>            v.</span><span style="color:#96b5b4;">extend</span><span>(h.</span><span style="color:#96b5b4;">to_be_bytes</span><span>()); v
+</span><span>        })
+</span><span>        .</span><span style="color:#96b5b4;">try_into</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>}
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

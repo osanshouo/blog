@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Debian11へアップデート - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Debian11へアップデート</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2023-01-03">2023-01-03</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2023/01/03-debian-bullseye/#環境">環境</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2023/01/03-debian-bullseye/#アップデート">アップデート</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2023/01/03-debian-bullseye/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>Debian 10 (Buster) では glibc のバージョンが足りずに動かなかったのでアップデートした記録です.</p>
+<h1 id="環境">環境</h1>
+<ul>
+<li>Windows 11 22H2</li>
+<li>Debian 10 -&gt; 11 on WSL2 </li>
+</ul>
+<h1 id="アップデート">アップデート</h1>
+<p>まずはアップデートを当てて現バージョンの最新環境にしておきます.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo apt update
+</span><span style="color:#bf616a;">$</span><span> sudo apt upgrade
+</span></code></pre>
+<p>続いて <code>/etc/apt/source.list</code> を次のように書き換えます.
+<code>buster/updates</code> の部分が <code>bullseye-security</code> にまるっと変わっているのに注意です.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>deb http://deb.debian.org/debian bullseye main
+</span><span>deb http://deb.debian.org/debian bullseye-updates main
+</span><span>deb http://security.debian.org/debian-security/ bullseye-security main
+</span><span>deb http://ftp.debian.org/debian bullseye-backports main
+</span></code></pre>
+<p>最後にアップデートを当てて終わりです. 
+2回ほど yes/no を聞かれましたが, 何も問題なくヌルっとできます.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo apt update
+</span><span style="color:#bf616a;">$</span><span> sudo apt full-upgrade
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://www.debian.org/releases/stable/i386/release-notes/ch-upgrading.ja.html">第4章 Debian 10 (buster) からのアップグレード</a></li>
+<li><a href="https://www.yukkuriikouze.com/2021/08/17/4446/">debian 10 から11にアップグレードしてみた | ゆっくり遅報</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

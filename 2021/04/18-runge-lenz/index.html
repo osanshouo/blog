@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[SymPy] Laplace-Runge-LenzベクトルのPoisson括弧 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[SymPy] Laplace-Runge-LenzベクトルのPoisson括弧</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/物理学">物理学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/天体力学">天体力学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/解析力学">解析力学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/SymPy">SymPy</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-04-18">2021-04-18</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>Kepler 問題の Hamiltonian は次式により与えられます.
+$$H = \frac{ \boldsymbol{p}^2 }{ 2 m } - \frac{ k }{ | \boldsymbol{r} | }$$
+この系には Hamiltonian $H$, 角運動量 $\boldsymbol{L} = \boldsymbol{x} \times \boldsymbol{p}$ に加えて,
+<a href="https://ja.wikipedia.org/wiki/%E3%83%AB%E3%83%B3%E3%82%B2%EF%BC%9D%E3%83%AC%E3%83%B3%E3%83%84%E3%83%99%E3%82%AF%E3%83%88%E3%83%AB">Laplace-Runge-Lenz ベクトル</a>
+として知られる運動の積分
+$$\boldsymbol{A} = \boldsymbol{p} \times \boldsymbol{L} - m k \frac{ \boldsymbol{x} }{ | \boldsymbol{x} }$$
+が存在します. 角運動量および Laplace-Runge-Lenz ベクトルの Poisson 括弧は
+$$[ L_i, L_j ] = \epsilon_{i j k} L_k$$
+$$[ L_i, A_j ] = \epsilon_{i j k} A_k$$
+$$[ A_i, A_j ] = - 2 m H \epsilon_{i j k} L_k$$
+を満足し, $\mathfrak{so}(4)$ (あるいは $\mathfrak{so} ( 3, 1 )$) との対応関係が見て取れます.
+この Poisson 括弧を手計算でチェックすることはすこし面倒なのですが, SymPy を使えば数秒で終わります.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>sympy </span><span style="color:#b48ead;">import </span><span>symbols, sqrt, simplify
+</span><span style="color:#b48ead;">from </span><span>sympy.combinatorics.permutations </span><span style="color:#b48ead;">import </span><span>Permutation
+</span><span>
+</span><span>x, y, z, u, v, w, m, k = </span><span style="color:#bf616a;">symbols</span><span>(&quot;</span><span style="color:#a3be8c;">x, y, z, u, v, w, m, k</span><span>&quot;)
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">pb</span><span>(</span><span style="color:#bf616a;">f</span><span>, </span><span style="color:#bf616a;">g</span><span>):
+</span><span>    X = f.</span><span style="color:#bf616a;">diff</span><span>(x) * g.</span><span style="color:#bf616a;">diff</span><span>(u) - f.</span><span style="color:#bf616a;">diff</span><span>(u) * g.</span><span style="color:#bf616a;">diff</span><span>(x)
+</span><span>    Y = f.</span><span style="color:#bf616a;">diff</span><span>(y) * g.</span><span style="color:#bf616a;">diff</span><span>(v) - f.</span><span style="color:#bf616a;">diff</span><span>(v) * g.</span><span style="color:#bf616a;">diff</span><span>(y)
+</span><span>    Z = f.</span><span style="color:#bf616a;">diff</span><span>(z) * g.</span><span style="color:#bf616a;">diff</span><span>(w) - f.</span><span style="color:#bf616a;">diff</span><span>(w) * g.</span><span style="color:#bf616a;">diff</span><span>(z)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>X + Y + Z
+</span><span>
+</span><span>X = [ x, y, z ]
+</span><span>P = [ u, v, w ]
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">dot</span><span>(</span><span style="color:#bf616a;">a</span><span>, </span><span style="color:#bf616a;">b</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span>a[</span><span style="color:#d08770;">0</span><span>]*b[</span><span style="color:#d08770;">0</span><span>] + a[</span><span style="color:#d08770;">1</span><span>]*b[</span><span style="color:#d08770;">1</span><span>] + a[</span><span style="color:#d08770;">2</span><span>]*b[</span><span style="color:#d08770;">2</span><span>]
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">cross</span><span>(</span><span style="color:#bf616a;">a</span><span>, </span><span style="color:#bf616a;">b</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span>[
+</span><span>        a[</span><span style="color:#d08770;">1</span><span>]*b[</span><span style="color:#d08770;">2</span><span>] - a[</span><span style="color:#d08770;">2</span><span>]*b[</span><span style="color:#d08770;">1</span><span>],
+</span><span>        a[</span><span style="color:#d08770;">2</span><span>]*b[</span><span style="color:#d08770;">0</span><span>] - a[</span><span style="color:#d08770;">0</span><span>]*b[</span><span style="color:#d08770;">2</span><span>],
+</span><span>        a[</span><span style="color:#d08770;">0</span><span>]*b[</span><span style="color:#d08770;">1</span><span>] - a[</span><span style="color:#d08770;">1</span><span>]*b[</span><span style="color:#d08770;">0</span><span>],
+</span><span>    ]
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">epsilon</span><span>(</span><span style="color:#bf616a;">i</span><span>, </span><span style="color:#bf616a;">j</span><span>, </span><span style="color:#bf616a;">k</span><span>):
+</span><span>    </span><span style="color:#b48ead;">if </span><span>{i, j, k} != {</span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">2</span><span>}:
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">0
+</span><span>    </span><span style="color:#b48ead;">elif </span><span style="color:#bf616a;">Permutation</span><span>([i, j, k]).is_even:
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">1
+</span><span>    </span><span style="color:#b48ead;">else</span><span>:
+</span><span>        </span><span style="color:#b48ead;">return </span><span>-</span><span style="color:#d08770;">1
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">hodge</span><span>(</span><span style="color:#bf616a;">i</span><span>, </span><span style="color:#bf616a;">j</span><span>, </span><span style="color:#bf616a;">a</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#96b5b4;">sum</span><span>(</span><span style="color:#bf616a;">list</span><span>(</span><span style="color:#bf616a;">epsilon</span><span>(i,j,k)*a[k] </span><span style="color:#b48ead;">for </span><span>k </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">3</span><span>)))
+</span><span>
+</span><span>r = </span><span style="color:#bf616a;">sqrt</span><span>(x*x + y*y + z*z)
+</span><span>L = </span><span style="color:#bf616a;">cross</span><span>(X, P)
+</span><span>
+</span><span>A = </span><span style="color:#bf616a;">cross</span><span>(P, L)
+</span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">3</span><span>):
+</span><span>    A[i] = A[i] - m*k*X[i]/r
+</span><span>
+</span><span>H = </span><span style="color:#bf616a;">dot</span><span>(P,P)/(</span><span style="color:#d08770;">2</span><span>*m) - k/r
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">3</span><span>):
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify</span><span>(</span><span style="color:#bf616a;">pb</span><span>(H, A[i])) == </span><span style="color:#d08770;">0
+</span><span>    
+</span><span>    </span><span style="color:#b48ead;">for </span><span>j </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">3</span><span>):
+</span><span>        rhs = -</span><span style="color:#d08770;">2</span><span>*m*H*</span><span style="color:#bf616a;">hodge</span><span>(i, j, L)
+</span><span>        </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify</span><span>(</span><span style="color:#bf616a;">pb</span><span>(A[i], A[j]) - rhs) == </span><span style="color:#d08770;">0
+</span><span>
+</span><span>        rhs = </span><span style="color:#bf616a;">hodge</span><span>(i, j, A)
+</span><span>        </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify</span><span>(</span><span style="color:#bf616a;">pb</span><span>(L[i], A[j]) - rhs) == </span><span style="color:#d08770;">0
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

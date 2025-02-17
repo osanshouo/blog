@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[TeX] λの上にバーをつける - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[TeX] λの上にバーをつける</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/TeX">TeX</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-07-11">2024-07-11</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p><a href="https://ja.wikipedia.org/wiki/%E3%83%87%E3%82%A3%E3%83%A9%E3%83%83%E3%82%AF%E5%AE%9A%E6%95%B0">換算 Planck 定数</a> $\hbar$ のように, 
+文字自体にバー (ストローク) をつける表記法が採用されることがあります.
+$\hbar$ は LaTeX コマンド <code>\hbar</code> として収録されているので良いのですが, 
+天文学で用いられる $ƛ$, 熱力学で用いられる不完全微分 $đ$ などは通常のコマンド <code>\bar{}</code> では実現できません.</p>
+<p>要件として, 通常の LaTeX だけでなく, MathJax やできれば pandoc でも扱えるものが好ましいです.</p>
+<h1 id="TeX_コマンドでがんばる">TeX コマンドでがんばる</h1>
+<p>参考文献に載っているコマンドをいろいろと試してみましたが, MathJax でもうまくいったものはふたつだけです.
+ただしいずれも pandoc では MathML に変換できません.</p>
+<p>まず一番上の文献に載っている</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span>{</span><span style="color:#96b5b4;">\lambda \kern</span><span> -0.5em</span><span style="color:#96b5b4;">\raise</span><span> 0.5ex </span><span style="color:#96b5b4;">\hbox</span><span>{--}}
+</span></code></pre>
+<p>です. 実際に使ってみたものがこちら:
+$${\lambda \kern -0.5em\raise 0.5ex \hbox{--}} = \frac{ \lambda }{ 2 \pi }$$
+多少修正して</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span>{</span><span style="color:#96b5b4;">\lambda \kern</span><span> -0.8em</span><span style="color:#96b5b4;">\raise</span><span> 0.5ex -}
+</span></code></pre>
+<p>としても類似の結果になります.
+$${\lambda \kern -0.8em\raise 0.5ex -} = \frac{ \lambda }{ 2 \pi }$$</p>
+<p>もう一つが Wikipedia の <a href="https://en.wikipedia.org/wiki/Inexact_differential">Inexact differential</a> に載っていた</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span style="color:#96b5b4;">\rlap</span><span>{</span><span style="color:#96b5b4;">\textrm</span><span>{d}}{</span><span style="color:#96b5b4;">\bar</span><span>{</span><span style="color:#96b5b4;">\phantom</span><span>{w}}}
+</span><span style="color:#96b5b4;">\rlap</span><span>{{</span><span style="color:#96b5b4;">\lambda</span><span>}}{</span><span style="color:#96b5b4;">\bar</span><span>{</span><span style="color:#96b5b4;">\phantom</span><span>{w}}}
+</span></code></pre>
+<p>です. ただ d の方は斜体にしてしまうとストロークの位置がずれてしまいます.
+$$\rlap{\textrm{d}}{\bar{\phantom{w}}}$$
+$$\rlap{{\lambda}}{\bar{\phantom{w}}}$$</p>
+<h1 id="専用の_Unicode_符号を使う">専用の Unicode 符号を使う</h1>
+<p>これらのバー記号は Unicode では <a href="https://ja.wikipedia.org/wiki/%E3%82%B9%E3%83%88%E3%83%AD%E3%83%BC%E3%82%AF%E7%AC%A6%E5%8F%B7">ストローク符号</a>
+と呼ばれているもので, 専用の Unicode 符号が与えられています 
+(<a href="https://ja.wikipedia.org/wiki/%E3%83%A9%E3%83%86%E3%83%B3%E6%96%87%E5%AD%97%E6%8B%A1%E5%BC%B5A">ラテン文字拡張A</a>,
+<a href="https://ja.wikipedia.org/wiki/%E3%83%A9%E3%83%86%E3%83%B3%E6%96%87%E5%AD%97%E6%8B%A1%E5%BC%B5B">ラテン文字拡張B</a>).
+なのでこれらに含まれている文字ならば, それを直接入力してしまえば Unicode が表示できるすべての環境で使用することはできます.
+ただし適切なフォントがあるかどうかは別問題で, LaTeX デフォルトの Computer Modern (やその派生フォント) には収録されておらず,
+フォント面では期待した見た目にならない可能性があります.</p>
+<p>コピペ用:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>đ
+</span></code></pre>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>ƛ
+</span></code></pre>
+<p>ちなみにどちらも単独記事になっています.</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/D_with_stroke">D with stroke</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Barred_lambda">Barred lambda</a></li>
+</ul>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://yoshiyuki-kitne.hatenadiary.org/entry/20070305/p1">ラムダバー（\lambdabar）の作り方 - 天文学的研究メモ</a></li>
+<li><a href="https://web.archive.org/web/20090101221347/http://www.proton.jp/latex/tips.html">【Proton.jp】 LaTeXのTips集</a></li>
+<li><a href="https://tex.stackexchange.com/questions/96479/how-can-i-type-lambda-bar">symbols - How can I type &quot;lambda-bar&quot;? - TeX - LaTeX Stack Exchange</a></li>
+<li><a href="https://tex.stackexchange.com/questions/203508/d-with-a-little-line-through-the-top-of-it">math mode - d with a little line through the top of it - TeX - LaTeX Stack Exchange</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

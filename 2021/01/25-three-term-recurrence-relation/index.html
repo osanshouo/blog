@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+三項間漸化式の漸近的振る舞い - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">三項間漸化式の漸近的振る舞い</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数学">数学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数値解析">数値解析</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-01-25">2021-01-25</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/25-three-term-recurrence-relation/#定義">定義</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/25-three-term-recurrence-relation/#定数係数三項間漸化式">定数係数三項間漸化式</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/25-three-term-recurrence-relation/#一般の_TTRR_の漸近的振る舞い">一般の TTRR の漸近的振る舞い</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/01/25-three-term-recurrence-relation/#Poincaré-Perron_の定理">Poincaré-Perron の定理</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/01/25-three-term-recurrence-relation/#Perron-Kreuser_の定理">Perron-Kreuser の定理</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/25-three-term-recurrence-relation/#minimal_solution">minimal solution</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/25-three-term-recurrence-relation/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p><strong>三項間漸化式</strong> (three-term recurrence relation, TTRR) は直交多項式や特殊関数の理論において重要な役割を果たします.
+そこで本記事では三項間漸化式の基本的な振る舞いについて述べます.</p>
+<p>複素係数の漸化式について議論しますが, 当然, 実係数でも構いません.
+また応用上の動機から三項間漸化式に限定しますが, $k$ 項間漸化式へと拡張できます (Lantsman を参照してください).</p>
+<h1 id="定義">定義</h1>
+<p>次の三項間漸化式を満足する数列 $y = ( y_k )$ ($k \in \mathbb{N}$) について考える.
+$$y_{n+1} + b_n y_n + a_n y_{n-1} = c_n \ \ (n = 1, 2, 3, \cdots)$$
+ただし $a_n \neq 0$ ($\forall n$) とする. 
+$a_n = -1$ ($\forall n$) が成り立つとき, この漸化式は <strong>対称</strong> (symmetric) であるといい,
+また $c_n = 0$ ($\forall n$) であるとき <strong>斉次</strong> (homogeneous), そうでないとき <strong>非斉次</strong> (inhomogeneous) であるという.
+本記事では斉次漸化式に議論を限定し, 以下漸化式とは斉次三項間漸化式のことを指すものとする.</p>
+<p>三項間漸化式を満足する数列は最初の2項 $y_0$ および $y_1$ によって一意に特定される:.
+特に, 所与の斉次三項間漸化式を満足する数列の全体は2次元 $\mathbb{C}$-ベクトル空間<sup class="footnote-reference"><a href="#3">1</a></sup>をなす.
+この線型構造に関してふたつの数列 $f$, $g$ が一次独立であるための必要十分条件は, <strong>Casorati 行列式</strong>
+$$D ( n, n+1 ) = f_n g_{n+1} - f_{n+1} g_n$$
+がゼロでないことである. 実際, 漸化式の表式からただちに $n \geq 1$ のとき
+$$D ( n, n+1 ) = - a_{n+1} D ( n-1, n )$$
+が成立することが導かれるため, 任意の $D ( n, n+1 )$ がゼロであるかは 
+$D ( 0, 1 )$ がゼロであるかと同値である.
+そして $D ( 0, 1 )$ がゼロであるかは $( p_0, p_1 )$ と $( q_0, q_1 )$ が線型従属であるかと同値である.</p>
+<h1 id="定数係数三項間漸化式">定数係数三項間漸化式</h1>
+<p>係数 $b_n$, $a_n$ が $n$ によらない定数である場合, TTRR は解析的に解くことができる.
+等比数列解 $y_n \propto \lambda^n$ について考えると, $\lambda$ は <strong>特性多項式</strong> (characteristic polynomial)
+$$\lambda^2 + b \lambda + a = 0$$
+を満足する. よってそれが重根ではない2つの解 $\lambda_1$, $\lambda_2$ を持つのであれば,
+${\lambda_1}^n$ と ${\lambda_2}^n$ が TTRR のふたつの独立な解を与える.
+一方, 特性多項式が重根を持つとき (すなわち $b^2 - 4 a = 0$ であるのならば), その重根 $\lambda$ からふたつの独立解が $\lambda^n$, $n \lambda^n$ と定まる.</p>
+<h1 id="一般の_TTRR_の漸近的振る舞い">一般の TTRR の漸近的振る舞い</h1>
+<p>定数係数の TTRR の線型独立解は (特性多項式が重根を持つ場合を除いて) 等比数列である.
+実用上重要な $b_n$, $a_n$ が $n$ に依存する場合 (特に $n$ の有理関数である場合) には, 一般解が求まることは期待できない.
+しかし以下に述べる定理によると, その $n \to \infty$ での漸近的な振る舞いは定数係数の場合と非常によく似ており,
+等比級数的になる.</p>
+<h2 id="Poincaré-Perron_の定理">Poincaré-Perron の定理</h2>
+<p>Poincaré-Perron の定理は以下のように述べられる (前半を Poincaré の定理, 後半を Perron の定理と呼ぶ):</p>
+<ul>
+<li>数列 $y_n$ に関する斉次三項間漸化式 $y_{n+1} + b_n y_n + a_n y_{n-1} = 0$ について, 極限
+$$\lim_{n \to \infty} a_n = a, \ \ \lim_{n \to \infty} b_n = b$$
+が存在すると仮定する. この極限値に対応する特性多項式 $\lambda^2 + b \lambda + a$ の2つの根 $\lambda_1$, $\lambda_2$ が 
+$|\lambda_1 | \neq | \lambda_2 |$ を満たすならば,
+漸化式の任意の非自明解<sup class="footnote-reference"><a href="#1">2</a></sup> $y$ について, ある $\lambda_j$ が存在し
+$$\lim_{n \to \infty} \frac{ y_{n+1} }{ y_n } = \lambda_j$$
+が成立する. 一方 $| \lambda_1 | = | \lambda_2 |$ であるならば, 任意の非自明解 $y_n$ は
+$$\limsup_{n \to \infty} \left| y_n \right|^\frac{1}{n} = \left| \lambda_1 \right|$$
+を満足する.</li>
+<li>上の状況で $a_n$ が有限個を除いてゼロではないと仮定する. 
+$| \lambda_1 | \neq | \lambda_2 |$ であるならば, TTRR にはふたつの線型独立解 $f$, $g$ が存在し
+$$\lim_{n \to \infty} \frac{ f_{n+1} }{ f_n } = \lambda_1 , \ \ \lim_{n \to \infty} \frac{ g_{n+1} }{ g_n } = \lambda_2$$
+を満たす.</li>
+</ul>
+<p>証明は Lantsman の pp. 380-392 を見よ.</p>
+<h2 id="Perron-Kreuser_の定理">Perron-Kreuser の定理</h2>
+<p>係数 $b_n$, $a_n$ が $n$ のべき乗へと漸近する場合に Poincaré-Perron の定理を一般化したものが Perron-Kreuser の定理である:</p>
+<ul>
+<li>数列 $y_n$ に関する斉次三項間漸化式 $y_{n+1} + b_n y_n + a_n y_{n-1} = 0$ について, 係数 $b_n$, $a_n$ が $n \to \infty$ で漸近形
+$$a_n \sim a n^\alpha , \ \ b_n \sim b n^\beta \ \ (n \to \infty)$$
+($a \neq 0$, $b \neq 0$) を持つと仮定する. </li>
+</ul>
+<ol>
+<li>$\beta &gt; \alpha / 2$ である場合, TTRR にはふたつの線型独立解 $f$, $g$ が存在し次を満たす:
+$$\frac{ f_{n+1} }{ f_n } \sim - \frac{ a }{ b } n^{\alpha - \beta} , \ \ \frac{ g_{n+1} }{ g_n } \sim - b n^\beta .$$</li>
+<li>$\beta = \alpha / 2$ である場合, 特性多項式 $\lambda^2 + b \lambda + a$ の2つの根 $\lambda_1$, $\lambda_2$ が 
+$|\lambda_1 | \neq | \lambda_2 |$ を満たすならば, ふたつの線型独立解 $f$, $g$ が存在し次を満たす:
+$$\frac{ f_{n+1} }{ f_n } \sim \lambda_1 n^\beta , \ \ \frac{ g_{n+1} }{ g_n } \sim \lambda_2 n^\beta .$$
+一方 $| \lambda_1 | = | \lambda_2 |$ であるならば任意の非自明解 $y_n$ は次を満たす:
+$$\limsup_{n \to \infty} \left[ \frac{ | y_n | }{ ( n! )^\beta } \right]^\frac{1}{n} = \left| \lambda_1 \right| .$$</li>
+<li>$\beta &lt; \alpha / 2$ である場合, 任意の非自明解 $y_n$ は次を満たす:
+$$\limsup_{n \to \infty} \left[ \frac{ | y_n | }{ ( n! )^{\alpha / 2} } \right]^\frac{1}{n} = \sqrt{ \left| \lambda_1 \right| } .$$</li>
+</ol>
+<p>証明は Gil, Segura &amp; Temme, pp. 93-94 を見よ. 
+なおケース 2, 3  は ${\hat{y}}_n = y_n / ( n! )^{\alpha / 2}$ とおき, 
+数列 ${\hat{y}}_n$ に Poincaré-Perron の定理を適用することでただちに得られる.
+ケース 1 は ${\hat{y}}_n = y_n / ( n! )^\beta$ に Poincaré-Perron の定理を適用することで得られるが, 多少の議論が必要である. </p>
+<h1 id="minimal_solution">minimal solution</h1>
+<p>所与の TTRR を満足する数列 $f$ がその <strong>minimal solution</strong> であるとは, $f$ とは線型独立な解 $g$ が存在し
+$$\lim_{n \to \infty} \frac{ f_n }{ g_n } = 0$$
+を満足することをいう. またこのとき $g$ を <strong>dominant solution</strong> と呼ぶ.
+Poincaré-Perron の定理が適用できる場合, $| \lambda_1 | &lt; | \lambda_2 |$ であるならば, 
+$\lambda_1$ に対応する解 $f_n$ が minimal solution, もう一方の $g_n$ が dominant solution である.
+Perron-Kreuser の定理が適用できる場合, 場合 1 および場合 2 の $| \lambda_1 | &lt; | \lambda_2 |$ 
+の状況では同様に $f_n$ が minimal solution である.
+なおこれ以外の状況 ($| \lambda_1 | = | \lambda_2 |$ である場合など) では, 
+TTRR に minimal solution が存在するかどうかはこれらの定理からは判定できない.</p>
+<p>minimal solution を数値的に計算しようとすると, 
+誤差項が dominant solution であるため $n \gg 1$ で誤差項が成長してしまうため, 数値的に安定ではない.
+この問題を回避するには, 漸化式を逆向きに使い大きな $N$ に対応する項 $f_N$ から遡ってくることにより $f_n$ を求めればよい.
+これを <strong>Miller のアルゴリズム</strong> と呼ぶ.
+逆向き漸化式では minimal solution が dominant に, dominant solution が minimal になるため, これは数値的に安定なスキームである.
+詳しくは Gil, Segura &amp; Temme, pp. 105-110 を見よ.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li>Amparo Gil, Javier Segura &amp; Nico M. Temme, <em>Numerical Methods for Special Functions</em>, Society for Industrial and Applied Mathematics (2007) doi:<a href="https://doi.org/10.1137%2F1.9780898717822">10.1137/1.9780898717822</a></li>
+<li>M. H. Lantsman, <em>Asymptotics of Linear Differential Equations</em>, Springer (2001) doi:<a href="https://doi.org/10.1007/978-94-015-9797-5">10.1007/978-94-015-9797-5</a></li>
+</ul>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">1</sup>
+<p>実数係数漸化式で初期値も実に選ぶ場合には実ベクトル空間.</p>
+</div>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">2</sup>
+<p>自明解とは, 有限項を除いて $y_n = 0$ であるような解のこと.</p>
+</div>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

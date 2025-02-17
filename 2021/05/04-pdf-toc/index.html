@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+PDFに目次を追加する - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">PDFに目次を追加する</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/PDF">PDF</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-05-04">2021-05-04</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/04-pdf-toc/#PDF_の目次">PDF の目次</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/04-pdf-toc/#目次データの準備">目次データの準備</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/04-pdf-toc/#PDF_に目次を追加">PDF に目次を追加</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/04-pdf-toc/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>EdgeHTML 版の Microsoft Edge は PDF ビューワーとしてとても優れていたのですが,
+Chromium ベースに移行した際に大部分の機能が欠落してかなり不便になっていました 
+(<a href="https://support.microsoft.com/ja-jp/microsoft-edge/%E6%96%B0%E3%81%97%E3%81%84-microsoft-edge-%E3%81%A7%E7%8F%BE%E5%9C%A8%E5%88%A9%E7%94%A8%E3%81%A7%E3%81%8D%E3%81%AA%E3%81%84%E6%A9%9F%E8%83%BD-4307f116-8184-0c59-dcb4-3c55e00f70bf">参考</a>).
+しかし徐々に改善されていて, 最近だと目次を表示する機能が復活しました.
+それで手持ちの PDF 書籍に目次を追加すれば読みやすくなると思ったので, 既存の PDF に目次を追加する方法をまとめます.
+基本的に <a href="https://ja.wikipedia.org/wiki/PDFtk">PDFtk</a> でできます.</p>
+<h1 id="PDF_の目次">PDF の目次</h1>
+<p>PDF の目次機能とはブックマークのことです. しおりと呼ばれることもあります.
+この仕様は ISO 32000 で定められています (必須機能ではないのですが).</p>
+<p>ひとつのブックマークはタイトル, レベル, ページ数の3個の情報を持ちます.
+Rust 風に定義するとこんな感じです.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">struct </span><span>Bookmark {
+</span><span>    </span><span style="color:#bf616a;">title</span><span>: String,
+</span><span>    </span><span style="color:#bf616a;">level</span><span>: </span><span style="color:#b48ead;">u32</span><span>,
+</span><span>    </span><span style="color:#bf616a;">page_number</span><span>: </span><span style="color:#b48ead;">u32</span><span>,
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">type </span><span>BookmarkInfo = Vec&lt;Bookmark&gt;;
+</span></code></pre>
+<p>タイトルとページ数は良いでしょう. ブックマークのレベルとは何かというと, 
+書籍でいうと章レベル見出しがレベル1, 節レベル見出しがレベル2, 小節レベル見出しがレベル3, ..., という感じです.
+LaTeX や Word などで自作した PDF ならばブックマークのリンク先をページ中の任意の要素に指定することができるのですが,
+目次を後付けする場合, (Acrobat などのソフトウェアを用いない限り) ページ単位での指定しかできません.</p>
+<p>PDFtk を用いて既存の PDF から目次データを抽出するコマンドがこちら.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> pdftk &lt;INPUT-FILE&gt; dump_data_utf8 &gt; metadata.txt
+</span></code></pre>
+<p>とするとメタデータ一覧が取得でき, その中にブックマークの情報も含まれます.
+このメタデータ一覧はかなり長いので, テキストファイルに出力するようにします.</p>
+<h1 id="目次データの準備">目次データの準備</h1>
+<p>さて, PDF に目次データを追加するには, あらかじめ目次データをテキストファイルとして準備しておくのがよいでしょう.
+二つ目の参考文献では PDFtk の規定のフォーマット (<a href="https://www.pdflabs.com/blog/export-and-import-pdf-bookmarks/">こちら</a>より引用)</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>BookmarkBegin
+</span><span>BookmarkTitle: PDF Reference (Version 1.5)
+</span><span>BookmarkLevel: 1
+</span><span>BookmarkPageNumber: 1
+</span><span>BookmarkBegin
+</span><span>BookmarkTitle: Contents
+</span><span>BookmarkLevel: 2
+</span><span>BookmarkPageNumber: 3
+</span></code></pre>
+<p>でそれを用意していますが, これでは入力がいささか面倒という問題があります.
+目次情報はだいたいどこかからコピペしてくることができるはずで, 
+加工が必要にしてもあまり面倒なことはしたくありません.</p>
+<p><a href="https://github.com/SiddharthPant/booky">SiddharthPant/booky</a> というスクリプトは JSON 風の独自フォーマットを定義しており,
+Python スクリプトで PDFtk 可読な形に変換しています.
+それでも良いとは思いますが, 独自フォーマットというのはいただけません.
+ここは YAML で同じことをしましょう.</p>
+<pre data-lang="yaml" style="background-color:#2b303b;color:#c0c5ce;" class="language-yaml "><code class="language-yaml" data-lang="yaml"><span>- </span><span style="color:#a3be8c;">PDF Reference (Version 1.5) 1
+</span><span>- 
+</span><span>  - </span><span style="color:#a3be8c;">Contents 3
+</span></code></pre>
+<p>ページ番号についてはフィールドを分けるのが正統だと思いますが, 入力が面倒なので, 
+上記スクリプトを参考にスペース区切りで書くことにしてしまいます. </p>
+<h1 id="PDF_に目次を追加">PDF に目次を追加</h1>
+<p>目次のない PDF ファイル <code>INPUT.pdf</code> に上記 PDFtk 形式のテキストファイル <code>toc.txt</code> に基づいて目次を追加するコマンドは</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">pdftk</span><span> INPUT.pdf update_info_utf8 bookmarks.txt output OUTPUT.pdf
+</span></code></pre>
+<p>です. <code>OUTPUT.pdf</code> が目次情報が追加された出力 PDF ですが, 入力ファイルと同じ名前にはするべきではなかったはずです.</p>
+<p>上記 YAML ファイルから PDFtk 形式に変換し, このコマンドを実行する Rust コードはこちら.</p>
+<p><a href="https://github.com/osanshouo/pdftoc-rs">https://github.com/osanshouo/pdftoc-rs</a></p>
+<p>すぐに書けると思ったら案外苦労しました. Python ならもっとさくっと書けたのではと思いますが,
+ただ Python で書いていたら見落としていたようなエラーハンドリングをちゃんとすべて指摘してくれるのがありがたいですね.
+特にファイル I/O があるので破壊的操作をするツールですし.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://www.antenna.co.jp/pdf/reference/pdf-shiori.html">PDFのしおりってなに？ どうやって作るの？</a> - アンテナハウス</li>
+<li><a href="https://www.kaoriya.net/blog/2017/01/03/">自炊したPDF加工についてのメモ — KaoriYa</a></li>
+<li><a href="https://www.pdflabs.com/blog/export-and-import-pdf-bookmarks/">How to Export and Import PDF Bookmarks</a> - PDF Labs</li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

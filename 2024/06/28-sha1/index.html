@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] SHA-1 の実装 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] SHA-1 の実装</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-06-28">2024-06-28</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>NIST による SHA-1 のドキュメント (FIPS 180-4) を読みながら Rust で実装したのでメモ.
+なお SHA-1 は既に破られており, セキュリティの観点からは使うべきではありません.</p>
+<ul>
+<li><a href="https://csrc.nist.gov/files/pubs/fips/180-4/upd1/final/docs/fips180-4-draft-aug2014.pdf">FIPS 180-4, Secure Hash Standard (SHS)</a></li>
+</ul>
+<p>コードの読みやすさや実行速度という点からはたぶんもっと最適化できると思いますが,
+素直にドキュメントに書かれていることを Rust で書き起こしただけなので, そのあたりはあまり配慮していません.</p>
+<p><code>wrapping_add</code> が大量に出てくるのがちょっと厄介なんですが, 
+<a href="https://doc.rust-lang.org/std/num/struct.Wrapping.html"><code>std::num::Wrapping</code></a> で包めば改善できそうです.
+あるいは <a href="https://crates.io/crates/wrapping_arithmetic">wrapping_arithmetic</a> というクレートも便利そうです.</p>
+<p>またあちこちでエンディアンに注意する必要があります.
+SHA-1 の規定によると, すべての <code>u32</code> はバイト列として扱う際にはビッグエンディアンである必要があります.
+このあたりで不整合を起こさないよう, <code>sha1</code> 関数の戻り値は <code>[u8; 20]</code> としてあります.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">rotl</span><span>&lt;</span><span style="color:#b48ead;">const</span><span> N: </span><span style="color:#b48ead;">u32</span><span>&gt;(</span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u32</span><span>) -&gt; </span><span style="color:#b48ead;">u32 </span><span>{
+</span><span>    (x &lt;&lt; N) | (x &gt;&gt; (</span><span style="color:#b48ead;">u32</span><span>::</span><span style="color:#d08770;">BITS </span><span>- N))
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">f</span><span>(</span><span style="color:#bf616a;">t</span><span>: </span><span style="color:#b48ead;">usize</span><span>, </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">u32</span><span>, </span><span style="color:#bf616a;">y</span><span>: </span><span style="color:#b48ead;">u32</span><span>, </span><span style="color:#bf616a;">z</span><span>: </span><span style="color:#b48ead;">u32</span><span>) -&gt; </span><span style="color:#b48ead;">u32 </span><span>{
+</span><span>    </span><span style="color:#b48ead;">if</span><span> t &lt; </span><span style="color:#d08770;">20 </span><span>{
+</span><span>        (x &amp; y)^((!x) &amp; z)
+</span><span>    } </span><span style="color:#b48ead;">else if</span><span> t &lt; </span><span style="color:#d08770;">40 </span><span>{
+</span><span>        x ^ y ^ z
+</span><span>    } </span><span style="color:#b48ead;">else if</span><span> t &lt; </span><span style="color:#d08770;">60 </span><span>{
+</span><span>        (x &amp; y)^(x &amp; z)^(y &amp; z)
+</span><span>    } </span><span style="color:#b48ead;">else if</span><span> t &lt; </span><span style="color:#d08770;">80 </span><span>{
+</span><span>        x ^ y ^ z
+</span><span>    } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>        unreachable!()
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">const</span><span> K: [</span><span style="color:#b48ead;">u32</span><span>; </span><span style="color:#d08770;">4</span><span>] = [ </span><span style="color:#d08770;">0x5a827999</span><span>, </span><span style="color:#d08770;">0x6ed9eba1</span><span>, </span><span style="color:#d08770;">0x8f1bbcdc</span><span>, </span><span style="color:#d08770;">0xca62c1d6 </span><span>];
+</span><span>
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">padding</span><span>(</span><span style="color:#bf616a;">message</span><span>: &amp;[</span><span style="color:#b48ead;">u8</span><span>]) -&gt; Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> l_in_byte = message.</span><span style="color:#96b5b4;">len</span><span>();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> k = (</span><span style="color:#d08770;">119 </span><span>- (l_in_byte &amp; </span><span style="color:#d08770;">63</span><span>)) &amp; </span><span style="color:#d08770;">63</span><span>;
+</span><span>    
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> message: Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt; = message.</span><span style="color:#96b5b4;">to_owned</span><span>();
+</span><span>    message.</span><span style="color:#96b5b4;">push</span><span>(</span><span style="color:#d08770;">128</span><span>);
+</span><span>    </span><span style="color:#b48ead;">for </span><span>_ in </span><span style="color:#d08770;">0</span><span>..k { message.</span><span style="color:#96b5b4;">push</span><span>(</span><span style="color:#d08770;">0</span><span>); }
+</span><span>    message.</span><span style="color:#96b5b4;">extend</span><span>(
+</span><span>        (l_in_byte &lt;&lt; </span><span style="color:#d08770;">3</span><span>).</span><span style="color:#96b5b4;">to_be_bytes</span><span>()
+</span><span>    );
+</span><span>    
+</span><span>    message
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">set_message_schedule</span><span>(</span><span style="color:#bf616a;">msg</span><span>: &amp;[</span><span style="color:#b48ead;">u8</span><span>], </span><span style="color:#bf616a;">w</span><span>: &amp;</span><span style="color:#b48ead;">mut</span><span> [</span><span style="color:#b48ead;">u32</span><span>]) {
+</span><span>    </span><span style="color:#b48ead;">for</span><span> t in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">16 </span><span>{
+</span><span>        w[t] = </span><span style="color:#b48ead;">u32</span><span>::from_be_bytes(msg[</span><span style="color:#d08770;">4</span><span>*t..</span><span style="color:#d08770;">4</span><span>*(t+</span><span style="color:#d08770;">1</span><span>)].</span><span style="color:#96b5b4;">try_into</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>());
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">for</span><span> t in </span><span style="color:#d08770;">16</span><span>..</span><span style="color:#d08770;">80 </span><span>{
+</span><span>        w[t] = rotl::&lt;1&gt;(w[t-</span><span style="color:#d08770;">3</span><span>] ^ w[t-</span><span style="color:#d08770;">8</span><span>] ^ w[t-</span><span style="color:#d08770;">14</span><span>] ^ w[t-</span><span style="color:#d08770;">16</span><span>]);
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">sha1</span><span>(</span><span style="color:#bf616a;">message</span><span>: &amp;[</span><span style="color:#b48ead;">u8</span><span>]) -&gt; [</span><span style="color:#b48ead;">u8</span><span>; </span><span style="color:#d08770;">20</span><span>] {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> message = </span><span style="color:#96b5b4;">padding</span><span>(message);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> hash: [</span><span style="color:#b48ead;">u32</span><span>; </span><span style="color:#d08770;">5</span><span>] = [
+</span><span>        </span><span style="color:#d08770;">0x67452301</span><span>, </span><span style="color:#d08770;">0xefcdab89</span><span>, </span><span style="color:#d08770;">0x98badcfe</span><span>, </span><span style="color:#d08770;">0x10325476</span><span>, </span><span style="color:#d08770;">0xc3d2e1f0</span><span>,
+</span><span>    ];
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> w: Vec&lt;</span><span style="color:#b48ead;">u32</span><span>&gt; = vec![ </span><span style="color:#d08770;">0</span><span>; </span><span style="color:#d08770;">80 </span><span>];
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> msg in message.</span><span style="color:#96b5b4;">chunks</span><span>(</span><span style="color:#d08770;">64</span><span>) {
+</span><span>        </span><span style="color:#96b5b4;">set_message_schedule</span><span>(msg, &amp;</span><span style="color:#b48ead;">mut</span><span> w);
+</span><span>        </span><span style="color:#b48ead;">let </span><span>[</span><span style="color:#b48ead;">mut</span><span> a, </span><span style="color:#b48ead;">mut</span><span> b, </span><span style="color:#b48ead;">mut</span><span> c, </span><span style="color:#b48ead;">mut</span><span> d, </span><span style="color:#b48ead;">mut</span><span> e] = hash;
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">for</span><span> t in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">80 </span><span>{
+</span><span>            </span><span style="color:#b48ead;">let</span><span> tmp = [ rotl::&lt;5&gt;(a), </span><span style="color:#96b5b4;">f</span><span>(t, b, c, d), e, K[t/</span><span style="color:#d08770;">20</span><span>], w[t] ]
+</span><span>                .</span><span style="color:#96b5b4;">iter</span><span>()
+</span><span>                .</span><span style="color:#96b5b4;">fold</span><span>(</span><span style="color:#d08770;">0</span><span>, |</span><span style="color:#bf616a;">acc</span><span>, </span><span style="color:#bf616a;">x</span><span>| </span><span style="color:#b48ead;">u32</span><span>::wrapping_add(acc, *x));
+</span><span>            e = d;
+</span><span>            d = c;
+</span><span>            c = rotl::&lt;30&gt;(b);
+</span><span>            b = a;
+</span><span>            a = tmp;
+</span><span>        }
+</span><span>
+</span><span>        hash = [ 
+</span><span>            hash[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(a), 
+</span><span>            hash[</span><span style="color:#d08770;">1</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(b), 
+</span><span>            hash[</span><span style="color:#d08770;">2</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(c), 
+</span><span>            hash[</span><span style="color:#d08770;">3</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(d), 
+</span><span>            hash[</span><span style="color:#d08770;">4</span><span>].</span><span style="color:#96b5b4;">wrapping_add</span><span>(e), 
+</span><span>        ];
+</span><span>    }
+</span><span>    
+</span><span>    </span><span style="color:#65737e;">// `[u32; 5]` を `[u8; 20]` へ変換
+</span><span>    hash.</span><span style="color:#96b5b4;">iter</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">fold</span><span>(vec![], |</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">v</span><span>, </span><span style="color:#bf616a;">h</span><span>| {
+</span><span>            v.</span><span style="color:#96b5b4;">extend</span><span>(h.</span><span style="color:#96b5b4;">to_be_bytes</span><span>()); v
+</span><span>        })
+</span><span>        .</span><span style="color:#96b5b4;">try_into</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>}
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

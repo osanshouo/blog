@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+WSL2でPython環境構築 (2021年3月版) - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">WSL2でPython環境構築 (2021年3月版)</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Python">Python</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-03-20">2021-03-20</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/03/20-python-build/#はじめに">はじめに</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/03/20-python-build/#Linux_環境構築">Linux 環境構築</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/20-python-build/#WSL2_の導入">WSL2 の導入</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/20-python-build/#Linux_環境構築-1">Linux 環境構築</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/03/20-python-build/#Python_のインストール">Python のインストール</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/03/20-python-build/#パッケージのインストール">パッケージのインストール</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/20-python-build/#Intel-MKL_のインストール">Intel-MKL のインストール</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/20-python-build/#NumPy_と_SciPy">NumPy と SciPy</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/20-python-build/#その他のパッケージ">その他のパッケージ</a></li>
+            
+          </ul>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>Win10 ノートを初期化して環境構築し直したので, 環境構築メモです.</p>
+<h1 id="はじめに">はじめに</h1>
+<p>Win10 で Python を扱う場合, Win10 側で実行するか, WSL を利用して Linux 環境で実行するかという選択肢があります.
+多くのライブラリは Linux 向けに作成されているので, WSL を利用するのがおすすめです.</p>
+<p>そうすると, 次に WSL1 と WSL2 という選択肢があります. 
+WSL2 のメリットは主にファイル I/O が爆速であることと, docker が使えることでしょうか. 
+逆にデメリットとしてメモリ食い虫であること, Win10 側のタスクマネージャーの情報量が減ることがあります.
+メモリがカツカツなのでなければ WSL2 のほうが良いと思いますが, どちらでも構いません.</p>
+<h1 id="Linux_環境構築">Linux 環境構築</h1>
+<h2 id="WSL2_の導入">WSL2 の導入</h2>
+<p>公式の <a href="https://docs.microsoft.com/ja-jp/windows/wsl/install-win10">Windows 10 用 Windows Subsystem for Linux のインストール ガイド</a> に従ってください.
+私は Debian (10.8) をインストールしました.</p>
+<h2 id="Linux_環境構築-1">Linux 環境構築</h2>
+<p>必要なパッケージをインストールしておきます. </p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo apt update
+</span><span style="color:#bf616a;">$</span><span> sudo apt install build-essential gfortran wget
+</span><span style="color:#bf616a;">$</span><span> sudo apt install sudo apt install libreadline-dev libncursesw5-dev libssl-dev libsqlite3-dev libgdbm-dev libbz2-dev liblzma-dev zlib1g-dev uuid-dev libffi-dev libdb-dev tk-dev
+</span></code></pre>
+<h1 id="Python_のインストール">Python のインストール</h1>
+<p>Python は実行速度が遅いのでなるべく高速化するために自前ビルドします.
+個人開発では仮想環境を利用する必要に迫られたことはないので venv 等いろいろありますが気にしなくてよいと思います.
+本当に必要になったら docker を使えばよいでしょう.</p>
+<p><a href="https://www.python.org/downloads/source/">Python 公式</a> から最新 stable のソースコードをダウンロードし解凍します.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> wget https://www.python.org/ftp/python/3.9.2/Python-3.9.2.tar.xz
+</span><span style="color:#bf616a;">$</span><span> tar xf Python-3.9.2.tar.xz
+</span><span style="color:#bf616a;">$</span><span> cd Python-3.9.2
+</span></code></pre>
+<p>そして適当にオプションを設定したらビルドします. 
+実行速度向上のために LTO や PGO を有効化します.
+<code>make</code> の引数の <code>-j4</code> は 4 スレッド並列でコンパイルするという指示です. CPU に合わせて適当に増減してください.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> ./configure</span><span style="color:#bf616a;"> --prefix</span><span>=$</span><span style="color:#bf616a;">HOME</span><span>/.local</span><span style="color:#bf616a;"> --with-ensurepip --enable-optimizations --with-lto
+</span><span style="color:#bf616a;">$</span><span> make</span><span style="color:#bf616a;"> -j4
+</span><span style="color:#bf616a;">$</span><span> make altinstall
+</span></code></pre>
+<p>これでインストール完了です. </p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> python3.9
+</span><span>&gt;&gt;&gt; print(&quot;</span><span style="color:#a3be8c;">Hello, world!</span><span>&quot;)
+</span><span style="color:#bf616a;">Hello,</span><span> world!
+</span><span>&gt;&gt;&gt;
+</span></code></pre>
+<p>実行できない場合, <code>~/.local/bin</code> にパスが通っていることを確認してください.必要に応じて symlink を設定すると便利でしょう.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cd </span><span style="color:#bf616a;">~</span><span>/.local/bin
+</span><span style="color:#bf616a;">$</span><span> ln</span><span style="color:#bf616a;"> -s</span><span> python3.9 python3
+</span><span style="color:#bf616a;">$</span><span> ln</span><span style="color:#bf616a;"> -s</span><span> pip3.9 pip3
+</span></code></pre>
+<h1 id="パッケージのインストール">パッケージのインストール</h1>
+<p>パッケージは pip で管理します. pip を最新バージョンに更新しておきます.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> pip3 install</span><span style="color:#bf616a;"> --upgrade</span><span> pip
+</span></code></pre>
+<h2 id="Intel-MKL_のインストール">Intel-MKL のインストール</h2>
+<p>NumPy や SciPy を pip でインストールすると標準では openblas を使用しますが, Intel-MKL を使用したほうが高速です.
+いつの間にか Intel oneAPI Math Kernel Library に改称していた等, 以前環境構築したときとは要領が変わっていて戸惑いました.</p>
+<p><a href="https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/onemkl.html">Intel</a> からリンクを探してきて任意の場所にダウンロードします
+(オフライン版でもオンライン版でも構いません).
+シェルスクリプトになっているので <code>sudo</code> 付きで実行すると対話式のインストールが始まります.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo sh l_onemkl_p_2021.1.1.52_offline.sh
+</span></code></pre>
+<p>この際に最初は <code>Error opening terminal: xterm-256color</code> というエラーが出て困惑しましたが, その場合</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> export TERM=xterm-color
+</span></code></pre>
+<p>としてください (<a href="https://blog.bgbgbg.net/archives/4227">参考文献</a>). 成功すると <code>/opt/intel</code> 配下にいろいろとファイルが配置されるはずです.</p>
+<p>その後, <code>~/.profile</code> 等を編集し必要な環境変数を設定します (このパスも変更されているので注意してください).</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b48ead;">export </span><span style="color:#bf616a;">MKLROOT</span><span>=</span><span style="color:#a3be8c;">/opt/intel/oneapi/mkl/latest
+</span><span style="color:#b48ead;">export </span><span style="color:#bf616a;">LD_LIBRARY_PATH</span><span>=$</span><span style="color:#bf616a;">MKLROOT</span><span style="color:#a3be8c;">/lib/intel64:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin/:</span><span>$</span><span style="color:#bf616a;">LD_LIBRARY_PATH
+</span><span style="color:#b48ead;">export </span><span style="color:#bf616a;">LIBRARY_PATH</span><span>=$</span><span style="color:#bf616a;">MKLROOT</span><span style="color:#a3be8c;">/lib/intel64:</span><span>$</span><span style="color:#bf616a;">LIBRARY_PATH
+</span><span style="color:#b48ead;">export </span><span style="color:#bf616a;">PKG_CONFIG_PATH</span><span>=$</span><span style="color:#bf616a;">MKLROOT</span><span style="color:#a3be8c;">/tools/pkgconfig:</span><span>$</span><span style="color:#bf616a;">PKG_CONFIG_PATH
+</span></code></pre>
+<h2 id="NumPy_と_SciPy">NumPy と SciPy</h2>
+<p><code>~/.numpy-site.cfg</code> というファイルを作成し, 次を書き込みます.</p>
+<pre data-lang="cfg" style="background-color:#2b303b;color:#c0c5ce;" class="language-cfg "><code class="language-cfg" data-lang="cfg"><span style="color:#b48ead;">[mkl]
+</span><span style="color:#bf616a;">library_dirs </span><span>= /opt/intel/oneapi/mkl/latest/lib/intel64/
+</span><span style="color:#bf616a;">include_dirs </span><span>= /opt/intel/oneapi/mkl/latest/</span><span style="color:#b48ead;">include
+</span><span style="color:#bf616a;">mkl_libs </span><span>= mkl_rt
+</span><span style="color:#bf616a;">lapack_libs </span><span>=
+</span></code></pre>
+<p>そうしたら, NumPy と SciPy もソースからビルドします. <code>gfortran</code> が必要なのでインストールし忘れに注意してください.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> pip3 install</span><span style="color:#bf616a;"> --no-binary</span><span> :all: numpy
+</span><span style="color:#bf616a;">$</span><span> pip3 install</span><span style="color:#bf616a;"> --no-binary</span><span> :all: scipy
+</span></code></pre>
+<h2 id="その他のパッケージ">その他のパッケージ</h2>
+<p>その他のパッケージはソースビルドしなくてよいでしょう. 必要なものをインストールしてください.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> pip3 install matplotlib sympy
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

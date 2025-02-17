@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Option&lt;&amp;String&gt;とOption&lt;&amp;str&gt; - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Option&lt;&amp;String&gt;とOption&lt;&amp;str&gt;</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-05-05">2021-05-05</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p><a href="../04-pdf-toc/">昨日の Rust コード</a>の中で, <code>&amp;Option&lt;String&gt;</code> を <code>Option&lt;&amp;str&gt;</code> と比較したいシチュエーションがありました.
+コマンドライン引数のパースの際に「引数がない, または引数が <code>--version</code> である」にマッチしたかったのです.
+最初に書いたコードはこんな感じでした.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> args: Vec&lt;_&gt; = std::env::args().</span><span style="color:#96b5b4;">collect</span><span>();
+</span><span style="color:#b48ead;">let</span><span> arg: Option&lt;&amp;String&gt; = args.</span><span style="color:#96b5b4;">get</span><span>(</span><span style="color:#d08770;">1</span><span>);
+</span><span>
+</span><span style="color:#b48ead;">match</span><span> arg {
+</span><span>    Some(&quot;</span><span style="color:#a3be8c;">--version</span><span>&quot;) | None =&gt; {
+</span><span>        </span><span style="color:#65737e;">/* 省略 */
+</span><span>    },
+</span><span>    </span><span style="color:#65737e;">/* 以下省略 */
+</span><span>}
+</span></code></pre>
+<p>しかしこれはコンパイルが通りません. <code>arg</code> は <code>Option&lt;&amp;String&gt;</code> であるのに対して, 
+マッチの一つ目 <code>Some(&quot;--version&quot;)</code> は <code>Option&lt;&amp;str&gt;</code> であり, 型が合っていません.
+これを見て, <code>&amp;String</code> は <code>Deref&lt;Target=str&gt;</code> ですから, <code>as_deref</code> を使えば良いだろうと次のように書き換えました.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> args: Vec&lt;_&gt; = std::env::args().</span><span style="color:#96b5b4;">collect</span><span>();
+</span><span style="color:#b48ead;">let</span><span> arg: Option&lt;&amp;String&gt; = args.</span><span style="color:#96b5b4;">get</span><span>(</span><span style="color:#d08770;">1</span><span>);
+</span><span>
+</span><span style="color:#b48ead;">match</span><span> arg.</span><span style="color:#96b5b4;">as_deref</span><span>() {
+</span><span>    Some(&quot;</span><span style="color:#a3be8c;">--version</span><span>&quot;) | None =&gt; {
+</span><span>        </span><span style="color:#65737e;">/* 省略 */
+</span><span>    },
+</span><span>    </span><span style="color:#65737e;">/* 以下省略 */
+</span><span>}
+</span></code></pre>
+<p>しかしやはり型が合わないという理由でコンパイルエラーでした. はて？</p>
+<p><code>as_deref</code> のドキュメントには次のコード例が掲載されています 
+(<a href="https://doc.rust-lang.org/nightly/std/option/enum.Option.html#method.as_deref">doc</a> より引用).</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> x: Option&lt;String&gt; = Some(&quot;</span><span style="color:#a3be8c;">hey</span><span>&quot;.</span><span style="color:#96b5b4;">to_owned</span><span>());
+</span><span>assert_eq!(x.</span><span style="color:#96b5b4;">as_deref</span><span>(), Some(&quot;</span><span style="color:#a3be8c;">hey</span><span>&quot;));
+</span></code></pre>
+<p>一瞬同じでは？ と思いますが, よく説明を読むとこのメソッドは <code>Option&lt;T&gt;</code> または <code>&amp;Option&lt;T&gt;</code> を 
+<code>Option&lt;&amp;T::Target&gt;</code> に変換する, と書かれています.
+今したいことは <code>Option&lt;&amp;T&gt;</code> を <code>Option&lt;&amp;T::Target&gt;</code> に変換することであり, 微妙に違います.
+つまり <code>as_deref</code> は使えません.</p>
+<p><code>&amp;String</code> を明示的に <code>&amp;str</code> に変換する場合, <code>String::as_str</code> メソッドが使われます.
+従って今の状況では <code>as_deref</code> ではなくこのメソッドで map すれば解決します.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> args: Vec&lt;_&gt; = std::env::args().</span><span style="color:#96b5b4;">collect</span><span>();
+</span><span style="color:#b48ead;">let</span><span> arg: Option&lt;&amp;String&gt; = args.</span><span style="color:#96b5b4;">get</span><span>(</span><span style="color:#d08770;">1</span><span>);
+</span><span>
+</span><span style="color:#b48ead;">match</span><span> arg.</span><span style="color:#96b5b4;">map</span><span>(String::as_str) {
+</span><span>    Some(&quot;</span><span style="color:#a3be8c;">--version</span><span>&quot;) | None =&gt; {
+</span><span>        </span><span style="color:#65737e;">/* 省略 */
+</span><span>    },
+</span><span>    </span><span style="color:#65737e;">/* 以下省略 */
+</span><span>}
+</span></code></pre>
+<p>あるいは汎用的に <code>Deref</code> を呼ぶのでも構いません.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::ops::Deref;
+</span><span>
+</span><span style="color:#b48ead;">let</span><span> args: Vec&lt;_&gt; = std::env::args().</span><span style="color:#96b5b4;">collect</span><span>();
+</span><span style="color:#b48ead;">let</span><span> arg: Option&lt;&amp;String&gt; = args.</span><span style="color:#96b5b4;">get</span><span>(</span><span style="color:#d08770;">1</span><span>);
+</span><span>
+</span><span style="color:#b48ead;">match</span><span> arg.</span><span style="color:#96b5b4;">map</span><span>(Deref::deref) {
+</span><span>    Some(&quot;</span><span style="color:#a3be8c;">--version</span><span>&quot;) | None =&gt; {
+</span><span>        </span><span style="color:#65737e;">/* 省略 */
+</span><span>    },
+</span><span>    </span><span style="color:#65737e;">/* 以下省略 */
+</span><span>}
+</span></code></pre>
+<p>あるいは今の場合, <code>arg: Option&lt;&amp;String&gt;</code> が所有権を持っていないことが問題で,
+所有権を持っていれば <code>as_deref</code> できます. つまり最初に引数のリスト <code>args</code> を確保するのではなく</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> arg = std::env::args().</span><span style="color:#96b5b4;">nth</span><span>(</span><span style="color:#d08770;">1</span><span>);
+</span><span>
+</span><span style="color:#b48ead;">match</span><span> arg.</span><span style="color:#96b5b4;">as_deref</span><span>() {
+</span><span>    Some(&quot;</span><span style="color:#a3be8c;">--version</span><span>&quot;) | None =&gt; {
+</span><span>        </span><span style="color:#65737e;">/* 省略 */
+</span><span>    },
+</span><span>    </span><span style="color:#65737e;">/* 以下省略 */
+</span><span>}
+</span></code></pre>
+<p>とする手もあります.</p>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

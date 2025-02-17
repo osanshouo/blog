@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+matplotlibでWebM動画を作成 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">matplotlibでWebM動画を作成</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Python">Python</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/matplotlib">matplotlib</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/動画">動画</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-06-04">2021-06-04</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>matplotlib で作成したアニメーションは mp4 で保存することが多いですが, 直接 WebM 形式で出力することもできます.
+ただし, その場合コーデックを明示的に指定する必要があります.
+現時点では av1 のエンコード速度は個人ユースでは実用に耐えないレベルで遅いので<sup class="footnote-reference"><a href="#1">1</a></sup>, おそらく vp9 が唯一の選択肢でしょう.
+私の体感では, 解像度 1200x1200, 30 fps (<code>interval=33</code>) のアニメーションを vp9 で出力するならば, 
+ビットレート 2178 kb/s もあればデフォルトの mp4 と遜色のないクオリティのアニメーションが作れると思います.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">import </span><span>matplotlib.pyplot </span><span style="color:#b48ead;">as </span><span>plt
+</span><span style="color:#b48ead;">from </span><span>matplotlib.animation </span><span style="color:#b48ead;">import </span><span>FuncAnimation
+</span><span>
+</span><span>fig = plt.</span><span style="color:#bf616a;">figure</span><span>( </span><span style="color:#bf616a;">figsize</span><span>=(</span><span style="color:#d08770;">12</span><span>, </span><span style="color:#d08770;">12</span><span>) )
+</span><span>ax = fig.</span><span style="color:#bf616a;">add_subplot</span><span>(</span><span style="color:#d08770;">111</span><span>)
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">update</span><span>(</span><span style="color:#bf616a;">angle</span><span>):
+</span><span>    ax.</span><span style="color:#bf616a;">cla</span><span>()
+</span><span>    </span><span style="color:#65737e;"># 実装は省略 #
+</span><span>    
+</span><span>anim = </span><span style="color:#bf616a;">FuncAnimation</span><span>(fig, update, </span><span style="color:#bf616a;">frames</span><span>=</span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">128</span><span>), </span><span style="color:#bf616a;">interval</span><span>=</span><span style="color:#d08770;">33</span><span>)
+</span><span>anim.</span><span style="color:#bf616a;">save</span><span>(&quot;</span><span style="color:#a3be8c;">anim.webm</span><span>&quot;, </span><span style="color:#bf616a;">writer</span><span>=&quot;</span><span style="color:#a3be8c;">ffmpeg</span><span>&quot;, </span><span style="color:#bf616a;">codec</span><span>=&#39;</span><span style="color:#a3be8c;">libvpx-vp9</span><span>&#39;, </span><span style="color:#bf616a;">bitrate</span><span>=</span><span style="color:#d08770;">1024</span><span>*</span><span style="color:#d08770;">3</span><span>)
+</span><span style="color:#65737e;">#plt.show()
+</span><span>plt.</span><span style="color:#bf616a;">close</span><span>()
+</span></code></pre>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>rav1e と libaom の速度比較は一年以上前の記事が多く, 最新の動向が気になるところです.</p>
+</div>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

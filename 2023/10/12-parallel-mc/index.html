@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] モンテカルロ法の並列化 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] モンテカルロ法の並列化</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数値解析">数値解析</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2023-10-12">2023-10-12</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>Edge に実装されたチャット AI くんとお喋りしてみたら, モンテカルロ法の並列化くらい簡単にできるよね？ と言われたので, 
+RTA 的なノリでさっと書いてみました.</p>
+<h1 id="Cargo.toml"><code>Cargo.toml</code></h1>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span>[dependencies]
+</span><span style="color:#bf616a;">rand </span><span>= &quot;</span><span style="color:#a3be8c;">0.8</span><span>&quot;
+</span><span style="color:#bf616a;">rand_xoshiro </span><span>= &quot;</span><span style="color:#a3be8c;">0.6</span><span>&quot;
+</span></code></pre>
+<h1 id="main.rs"><code>main.rs</code></h1>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#65737e;">//! 並列計算の練習としての, モンテカルロ法による円周率の算出.
+</span><span>
+</span><span style="color:#b48ead;">use </span><span>std::thread;
+</span><span style="color:#b48ead;">use </span><span>rand::{Rng, SeedableRng};
+</span><span>
+</span><span style="color:#b48ead;">const</span><span> N: </span><span style="color:#b48ead;">usize </span><span>= </span><span style="color:#d08770;">1024 </span><span>* </span><span style="color:#d08770;">1024 </span><span>* </span><span style="color:#d08770;">1024</span><span>;
+</span><span style="color:#b48ead;">const </span><span style="color:#d08770;">THREADS</span><span>: </span><span style="color:#b48ead;">usize </span><span>= </span><span style="color:#d08770;">4</span><span>;
+</span><span>
+</span><span style="color:#65737e;">/// モンテカルロ法で円周率を求めるルーチンのコア部分.
+</span><span style="color:#65737e;">/// 
+</span><span style="color:#65737e;">/// [0, 1) 区間から一様にふたつの実数 `x`, `y` を生成し, 点 `(x, y)` が
+</span><span style="color:#65737e;">/// 単位円の中に存在するならば (つまり </span><span style="color:#bf616a;">$x</span><span style="color:#65737e;">^2 + y^2$ が 1 以下ならば) 合格.
+</span><span style="color:#65737e;">/// この処理を `N` 個の点について行い, 合格した点 `(x, y)` の数を出力する.
+</span><span style="color:#65737e;">/// 
+</span><span style="color:#65737e;">/// 入力として PRNG を受け取る.
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">montecarlo</span><span>&lt;T: Rng&gt;(</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">rng</span><span>: T) -&gt; </span><span style="color:#b48ead;">usize </span><span>{
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> count: </span><span style="color:#b48ead;">usize </span><span>= </span><span style="color:#d08770;">0</span><span>;
+</span><span>    </span><span style="color:#b48ead;">let </span><span>(</span><span style="color:#b48ead;">mut</span><span> x, </span><span style="color:#b48ead;">mut</span><span> y): (</span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#b48ead;">f64</span><span>);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for </span><span>_ in </span><span style="color:#d08770;">0</span><span>..N {
+</span><span>        x = rng.</span><span style="color:#96b5b4;">gen</span><span>();
+</span><span>        y = rng.</span><span style="color:#96b5b4;">gen</span><span>();
+</span><span>    
+</span><span>        </span><span style="color:#b48ead;">if</span><span> x*x + y*y &lt;= </span><span style="color:#d08770;">1. </span><span>{
+</span><span>            count += </span><span style="color:#d08770;">1</span><span>;
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">count = </span><span style="color:#d08770;">{}</span><span>&quot;, count);
+</span><span>
+</span><span>    count
+</span><span>}
+</span><span>
+</span><span>
+</span><span style="color:#65737e;">/// メイン関数. `THREADS` 個のスレッドを生成し, 各スレッドで関数 `montecarlo` を
+</span><span style="color:#65737e;">/// 実行し, その結果を集計して円周率を算出する.
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    </span><span style="color:#65737e;">// PRNG として XOSHIRO を採用し, ここでシード値を与えて初期化
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> rng = rand_xoshiro::Xoshiro256StarStar::seed_from_u64(</span><span style="color:#d08770;">123</span><span>);
+</span><span>    </span><span style="color:#65737e;">// 集計用のカウンター
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> count: </span><span style="color:#b48ead;">usize </span><span>= </span><span style="color:#d08770;">0</span><span>;
+</span><span>
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// スレッドを操作するハンドルの集合
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> handles = Vec::new();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for </span><span>_ in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">THREADS </span><span>{
+</span><span>        </span><span style="color:#65737e;">// 各スレッド用に PRNG を
+</span><span>        rng.</span><span style="color:#96b5b4;">jump</span><span>();
+</span><span>        </span><span style="color:#b48ead;">let</span><span> rng = rng.</span><span style="color:#96b5b4;">clone</span><span>();
+</span><span>        
+</span><span>        </span><span style="color:#b48ead;">let</span><span> handle = thread::spawn(|| {
+</span><span>            </span><span style="color:#96b5b4;">montecarlo</span><span>(rng)
+</span><span>        });
+</span><span>        handles.</span><span style="color:#96b5b4;">push</span><span>(handle);
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> handle in handles.</span><span style="color:#96b5b4;">into_iter</span><span>() {
+</span><span>        count += handle.</span><span style="color:#96b5b4;">join</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>    }
+</span><span>    
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">pi = </span><span style="color:#d08770;">{}</span><span>&quot;, </span><span style="color:#d08770;">4. </span><span>* count as </span><span style="color:#b48ead;">f64</span><span>/(N * </span><span style="color:#d08770;">THREADS</span><span>) as </span><span style="color:#b48ead;">f64</span><span>);
+</span><span>}
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>
