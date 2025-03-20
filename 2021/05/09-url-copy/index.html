@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+URLをコピーするブックマークレット - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">URLをコピーするブックマークレット</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/JavaScript">JavaScript</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-05-09">2021-05-09</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>マークダウン形式で表示しているページのタイトルと URL をコピーするブックマークレット.</p>
+<ul>
+<li><a href="https://zenn.dev/iwaku/articles/cfeda1c48f48991f4cf9">Markdownメモに便利なブックマークレット</a></li>
+</ul>
+<p>Wikipedia 形式で表示しているページのタイトルと URL をコピーするブックマークレット.</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span>javascript:(</span><span style="color:#b48ead;">function</span><span>(){</span><span style="color:#b48ead;">const </span><span style="color:#bf616a;">e</span><span>=document.</span><span style="color:#96b5b4;">createElement</span><span>(&#39;</span><span style="color:#a3be8c;">input</span><span>&#39;);</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">date </span><span>= new Date();</span><span style="color:#bf616a;">e</span><span>.value=`</span><span style="color:#a3be8c;">{{Cite web |url=${</span><span style="color:#bf616a;">location</span><span style="color:#a3be8c;">.href} |title=${document.title} |accessdate=${</span><span style="color:#bf616a;">date</span><span style="color:#a3be8c;">.</span><span style="color:#96b5b4;">getFullYear</span><span style="color:#a3be8c;">()}-${(</span><span style="color:#bf616a;">date</span><span style="color:#a3be8c;">.</span><span style="color:#96b5b4;">getMonth</span><span style="color:#a3be8c;">()</span><span>+</span><span style="color:#d08770;">1</span><span style="color:#a3be8c;">).</span><span style="color:#96b5b4;">toString</span><span style="color:#a3be8c;">().</span><span style="color:#8fa1b3;">padStart</span><span style="color:#a3be8c;">(</span><span style="color:#d08770;">2</span><span style="color:#a3be8c;">,</span><span>&#39;</span><span style="color:#a3be8c;">0</span><span>&#39;</span><span style="color:#a3be8c;">)}-${(</span><span style="color:#bf616a;">date</span><span style="color:#a3be8c;">.</span><span style="color:#96b5b4;">getDate</span><span style="color:#a3be8c;">()).</span><span style="color:#96b5b4;">toString</span><span style="color:#a3be8c;">().</span><span style="color:#8fa1b3;">padStart</span><span style="color:#a3be8c;">(</span><span style="color:#d08770;">2</span><span style="color:#a3be8c;">,</span><span>&#39;</span><span style="color:#a3be8c;">0</span><span>&#39;</span><span style="color:#a3be8c;">)}}}</span><span>`;document.</span><span style="color:#96b5b4;">querySelector</span><span>(&#39;</span><span style="color:#a3be8c;">body</span><span>&#39;).</span><span style="color:#96b5b4;">append</span><span>(</span><span style="color:#bf616a;">e</span><span>);</span><span style="color:#bf616a;">e</span><span>.</span><span style="color:#96b5b4;">select</span><span>();document.</span><span style="color:#96b5b4;">execCommand</span><span>(&#39;</span><span style="color:#a3be8c;">copy</span><span>&#39;);</span><span style="color:#bf616a;">e</span><span>.</span><span style="color:#96b5b4;">remove</span><span>();})();
+</span></code></pre>
+<p>いずれも Firefox 88.0.1 (Win10) で動作確認済み.</p>
+<h1 id="メモ">メモ</h1>
+<ul>
+<li>いつからか Firefox ではアドレスバーから直接 JavaScript を実行する機能はデフォルトでは無効に変更されている模様 (ブックマークレットの動作には影響しない). 開発はウェブ開発ツールで行うのが簡単.</li>
+<li>ファビコンを設定する過去のハックはすべて動作しなくなっている模様 (<a href="https://superuser.com/questions/56823/how-can-i-add-a-favicon-to-a-bookmarklet-in-firefox">参考文献</a>).</li>
+</ul>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://qiita.com/kanaxx/items/63debe502aacd73c3cb8">Bookmarkletを作ろう(準備編） - Qiita</a></li>
+<li><a href="https://www.tohoho-web.com/js/date.htm">日付（Date） - とほほのWWW入門</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

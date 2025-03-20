@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Euler法, Heun法, Runge-Kutta法の比較 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Euler法, Heun法, Runge-Kutta法の比較</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Python">Python</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数学">数学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数値解析">数値解析</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-02-03">2021-02-03</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/02/03-odeint/#コメント">コメント</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/02/03-odeint/#Rust">Rust</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/02/03-odeint/#Cargo.toml">Cargo.toml</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/02/03-odeint/#src/solver.rs">src&#x2F;solver.rs</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/02/03-odeint/#src/lib.rs">src&#x2F;lib.rs</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/02/03-odeint/#Python">Python</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/02/03-odeint/#plot.py">plot.py</a></li>
+            
+          </ul>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>Euler 法, Heun 法, 古典的 Runge-Kutta 法について誤差の収束性のプロットを作成したので, コードを残しておきます.</p>
+<h1 id="コメント">コメント</h1>
+<p>例によって主な計算は Rust で実装し, それを PyO3 により Python から呼び出して可視化しています.
+Rust 側は汎用のライブラリとして Python 側から ODE をコールバック関数として渡そうとしたのですが,
+PyO3 が (現時点ではまだ) クロージャに陽に対応しておらず (<a href="https://pyo3.rs/master/function.html#closures">doc</a>), 
+<code>PyAny</code> を触るのはさすがに時間がかかりすぎるので諦めました.
+なので解くべき微分方程式は <code>src/lib.rs</code> にハードコードしてあります.</p>
+<p>そしていつのまにか PyO3 が version 0.13 になっていました.</p>
+<h1 id="Rust">Rust</h1>
+<h2 id="Cargo.toml">Cargo.toml</h2>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span>[lib]
+</span><span style="color:#bf616a;">name </span><span>= &quot;</span><span style="color:#a3be8c;">odeint</span><span>&quot;
+</span><span style="color:#bf616a;">crate-type </span><span>= [&quot;</span><span style="color:#a3be8c;">cdylib</span><span>&quot;]
+</span><span>
+</span><span>[dependencies]
+</span><span style="color:#bf616a;">pyo3 </span><span>= { </span><span style="color:#bf616a;">version </span><span>= &quot;</span><span style="color:#a3be8c;">0.13</span><span>&quot;, </span><span style="color:#bf616a;">features </span><span>= [&quot;</span><span style="color:#a3be8c;">extension-module</span><span>&quot;] }
+</span></code></pre>
+<h2 id="src/solver.rs">src/solver.rs</h2>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">euler</span><span>&lt;F&gt;(</span><span style="color:#bf616a;">f</span><span>: &amp;F, </span><span style="color:#bf616a;">t</span><span>: </span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#bf616a;">h</span><span>: </span><span style="color:#b48ead;">f64</span><span>) -&gt; </span><span style="color:#b48ead;">f64
+</span><span style="color:#b48ead;">where 
+</span><span>    F: Fn(</span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#b48ead;">f64</span><span>) -&gt; </span><span style="color:#b48ead;">f64</span><span>, 
+</span><span>{
+</span><span>    x + h*</span><span style="color:#96b5b4;">f</span><span>(t, x)
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">heun</span><span>&lt;F&gt;(</span><span style="color:#bf616a;">f</span><span>: &amp;F, </span><span style="color:#bf616a;">t</span><span>: </span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#bf616a;">h</span><span>: </span><span style="color:#b48ead;">f64</span><span>) -&gt; </span><span style="color:#b48ead;">f64
+</span><span style="color:#b48ead;">where 
+</span><span>    F: Fn(</span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#b48ead;">f64</span><span>) -&gt; </span><span style="color:#b48ead;">f64</span><span>, 
+</span><span>{
+</span><span>    </span><span style="color:#b48ead;">let</span><span> k = </span><span style="color:#96b5b4;">f</span><span>(t, x);
+</span><span>
+</span><span>    x + h*( k + </span><span style="color:#96b5b4;">f</span><span>(t+h, x+h*k))*</span><span style="color:#d08770;">0.5
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">rk4</span><span>&lt;F&gt;(</span><span style="color:#bf616a;">f</span><span>: &amp;F, </span><span style="color:#bf616a;">t</span><span>: </span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#bf616a;">h</span><span>: </span><span style="color:#b48ead;">f64</span><span>) -&gt; </span><span style="color:#b48ead;">f64
+</span><span style="color:#b48ead;">where 
+</span><span>    F: Fn(</span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#b48ead;">f64</span><span>) -&gt; </span><span style="color:#b48ead;">f64</span><span>, 
+</span><span>{
+</span><span>    </span><span style="color:#b48ead;">let</span><span> k1 = </span><span style="color:#96b5b4;">f</span><span>(t, x);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> k2 = </span><span style="color:#96b5b4;">f</span><span>(t + </span><span style="color:#d08770;">0.5</span><span>*h, x + </span><span style="color:#d08770;">0.5</span><span>*h*k1);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> k3 = </span><span style="color:#96b5b4;">f</span><span>(t + </span><span style="color:#d08770;">0.5</span><span>*h, x + </span><span style="color:#d08770;">0.5</span><span>*h*k2);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> k4 = </span><span style="color:#96b5b4;">f</span><span>(t + h, x + h*k3);
+</span><span>
+</span><span>    x + h*(k1 + </span><span style="color:#d08770;">2.</span><span>*(k2 + k3) + k4)/</span><span style="color:#d08770;">6.
+</span><span>}
+</span></code></pre>
+<h2 id="src/lib.rs">src/lib.rs</h2>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">mod </span><span>solver;
+</span><span>
+</span><span style="color:#b48ead;">use </span><span>pyo3::prelude::*;
+</span><span style="color:#b48ead;">use </span><span>pyo3::wrap_pyfunction;
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">f</span><span>(_: </span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#bf616a;">x</span><span>: </span><span style="color:#b48ead;">f64</span><span>) -&gt; </span><span style="color:#b48ead;">f64 </span><span>{ x.</span><span style="color:#96b5b4;">cos</span><span>() }
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">pyfunction</span><span>]
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">solve</span><span>(</span><span style="color:#bf616a;">method</span><span>: String, </span><span style="color:#bf616a;">n</span><span>: </span><span style="color:#b48ead;">usize</span><span>) -&gt; PyResult&lt;</span><span style="color:#b48ead;">f64</span><span>&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> method = </span><span style="color:#b48ead;">match</span><span> method.</span><span style="color:#96b5b4;">as_str</span><span>() {
+</span><span>        &quot;</span><span style="color:#a3be8c;">euler</span><span>&quot; =&gt; solver::euler,
+</span><span>        &quot;</span><span style="color:#a3be8c;">heun</span><span>&quot; =&gt; solver::heun,
+</span><span>        &quot;</span><span style="color:#a3be8c;">rk4</span><span>&quot; =&gt; solver::rk4,
+</span><span>        _ =&gt; unimplemented!(),
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> h = </span><span style="color:#d08770;">1. </span><span>/ n as </span><span style="color:#b48ead;">f64</span><span>;
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> t = </span><span style="color:#d08770;">0.</span><span>;
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> x = </span><span style="color:#d08770;">0.</span><span>;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for </span><span>_ in </span><span style="color:#d08770;">0</span><span>..n {
+</span><span>        x = </span><span style="color:#96b5b4;">method</span><span>(&amp;f, t, x, h);
+</span><span>        t += h;
+</span><span>    }
+</span><span>
+</span><span>    Ok(x)
+</span><span>}
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">pymodule</span><span>]
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">odeint</span><span>(</span><span style="color:#bf616a;">_py</span><span>: Python, </span><span style="color:#bf616a;">m</span><span>: &amp;PyModule) -&gt; PyResult&lt;()&gt; {
+</span><span>    m.</span><span style="color:#96b5b4;">add_wrapped</span><span>(wrap_pyfunction!( solve ))?;
+</span><span>
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<h1 id="Python">Python</h1>
+<h2 id="plot.py">plot.py</h2>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">import </span><span>numpy </span><span style="color:#b48ead;">as </span><span>np
+</span><span style="color:#b48ead;">import </span><span>matplotlib.pyplot </span><span style="color:#b48ead;">as </span><span>plt
+</span><span>plt.rcParams[&quot;</span><span style="color:#a3be8c;">font.family</span><span>&quot;] = &quot;</span><span style="color:#a3be8c;">Source Han Serif JP</span><span>&quot;
+</span><span>plt.rcParams[&quot;</span><span style="color:#a3be8c;">mathtext.fontset</span><span>&quot;] = &quot;</span><span style="color:#a3be8c;">cm</span><span>&quot;
+</span><span>plt.rcParams[&quot;</span><span style="color:#a3be8c;">font.size</span><span>&quot;] = </span><span style="color:#d08770;">16
+</span><span>
+</span><span style="color:#b48ead;">import </span><span>odeint
+</span><span>
+</span><span>Ns = np.</span><span style="color:#bf616a;">array</span><span>([ </span><span style="color:#d08770;">3</span><span>, </span><span style="color:#d08770;">10</span><span>, </span><span style="color:#d08770;">30</span><span>, </span><span style="color:#d08770;">100</span><span>, </span><span style="color:#d08770;">301</span><span>, </span><span style="color:#d08770;">1_000</span><span>, ], </span><span style="color:#bf616a;">dtype</span><span>=int)
+</span><span>
+</span><span>exact = np.</span><span style="color:#bf616a;">arcsin</span><span>(np.</span><span style="color:#bf616a;">tanh</span><span>(</span><span style="color:#d08770;">1.</span><span>))
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">error</span><span>(</span><span style="color:#bf616a;">method</span><span>):
+</span><span>    err = []
+</span><span>    </span><span style="color:#b48ead;">for </span><span>N </span><span style="color:#b48ead;">in </span><span>Ns:
+</span><span>        x = odeint.</span><span style="color:#bf616a;">solve</span><span>(method, N)
+</span><span>        err.</span><span style="color:#bf616a;">append</span><span>(x)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>np.</span><span style="color:#bf616a;">fabs</span><span>(np.</span><span style="color:#bf616a;">array</span><span>(err) / exact - </span><span style="color:#d08770;">1.</span><span>)
+</span><span>
+</span><span>
+</span><span>fig = plt.</span><span style="color:#bf616a;">figure</span><span>()
+</span><span>plt.</span><span style="color:#bf616a;">subplots_adjust</span><span>(</span><span style="color:#bf616a;">left</span><span>=</span><span style="color:#d08770;">0.15</span><span>, </span><span style="color:#bf616a;">right</span><span>=</span><span style="color:#d08770;">0.9</span><span>, </span><span style="color:#bf616a;">bottom</span><span>=</span><span style="color:#d08770;">0.14</span><span>, </span><span style="color:#bf616a;">top</span><span>=</span><span style="color:#d08770;">0.92</span><span>)
+</span><span>ax = fig.</span><span style="color:#bf616a;">add_subplot</span><span>(</span><span style="color:#d08770;">111</span><span>)
+</span><span>
+</span><span>ax.</span><span style="color:#bf616a;">plot</span><span>( </span><span style="color:#d08770;">1.</span><span>/Ns, </span><span style="color:#bf616a;">error</span><span>(&quot;</span><span style="color:#a3be8c;">euler</span><span>&quot;), &quot;</span><span style="color:#a3be8c;">^-</span><span>&quot;, </span><span style="color:#bf616a;">label</span><span>=&quot;</span><span style="color:#a3be8c;">Euler</span><span>&quot;)
+</span><span>ax.</span><span style="color:#bf616a;">plot</span><span>( </span><span style="color:#d08770;">1.</span><span>/Ns, </span><span style="color:#bf616a;">error</span><span>(&quot;</span><span style="color:#a3be8c;">heun</span><span>&quot;), &quot;</span><span style="color:#a3be8c;">d-</span><span>&quot;, </span><span style="color:#bf616a;">label</span><span>=&quot;</span><span style="color:#a3be8c;">Heun</span><span>&quot;)
+</span><span>ax.</span><span style="color:#bf616a;">plot</span><span>( </span><span style="color:#d08770;">1.</span><span>/Ns, </span><span style="color:#bf616a;">error</span><span>(&quot;</span><span style="color:#a3be8c;">rk4</span><span>&quot;), &quot;</span><span style="color:#a3be8c;">o-</span><span>&quot;, </span><span style="color:#bf616a;">label</span><span>=&quot;</span><span style="color:#a3be8c;">RK4</span><span>&quot;)
+</span><span>ax.</span><span style="color:#bf616a;">set_xscale</span><span>(&quot;</span><span style="color:#a3be8c;">log</span><span>&quot;)
+</span><span>ax.</span><span style="color:#bf616a;">set_yscale</span><span>(&quot;</span><span style="color:#a3be8c;">log</span><span>&quot;)
+</span><span>ax.</span><span style="color:#bf616a;">set_ylim</span><span>([</span><span style="color:#d08770;">1e-13</span><span>, </span><span style="color:#d08770;">1e-1</span><span>])
+</span><span>ax.</span><span style="color:#bf616a;">grid</span><span>()
+</span><span>ax.</span><span style="color:#bf616a;">grid</span><span>(</span><span style="color:#bf616a;">which</span><span>=&quot;</span><span style="color:#a3be8c;">minor</span><span>&quot;, </span><span style="color:#bf616a;">alpha</span><span>=</span><span style="color:#d08770;">0.3</span><span>)
+</span><span>ax.</span><span style="color:#bf616a;">legend</span><span>()
+</span><span>
+</span><span>ax.</span><span style="color:#bf616a;">set_xlabel</span><span>(</span><span style="color:#b48ead;">r</span><span>&quot;</span><span style="color:#a3be8c;">刻み幅</span><span>&quot;,  </span><span style="color:#bf616a;">fontsize</span><span>=</span><span style="color:#d08770;">18</span><span>)
+</span><span>ax.</span><span style="color:#bf616a;">set_ylabel</span><span>(</span><span style="color:#b48ead;">r</span><span>&quot;</span><span style="color:#a3be8c;">相対誤差</span><span>&quot;, </span><span style="color:#bf616a;">fontsize</span><span>=</span><span style="color:#d08770;">18</span><span>)
+</span><span>
+</span><span>plt.</span><span style="color:#bf616a;">savefig</span><span>(&quot;</span><span style="color:#a3be8c;">odesolver-comparison.svg</span><span>&quot;)
+</span><span>plt.</span><span style="color:#bf616a;">show</span><span>()
+</span><span>plt.</span><span style="color:#bf616a;">close</span><span>()
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Poisson括弧の符号について - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Poisson括弧の符号について</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/物理学">物理学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/解析力学">解析力学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/シンプレクティック幾何学">シンプレクティック幾何学</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-02-09">2021-02-09</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/02/09-poisson-bracket/#Poisson_括弧">Poisson 括弧</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/02/09-poisson-bracket/#シンプレクティック形式">シンプレクティック形式</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/02/09-poisson-bracket/#Hamilton_ベクトル">Hamilton ベクトル</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/02/09-poisson-bracket/#Poisson_括弧_(2)">Poisson 括弧 (2)</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/02/09-poisson-bracket/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>Landau &amp; Lifshitz が逆符号で定義しているのもあり Poisson 括弧の符号についていつも混乱するので,
+いつでも見直せるように丁寧にまとめておきます.</p>
+<h1 id="Poisson_括弧">Poisson 括弧</h1>
+<p>$n$ 自由度の Hamilton 系について, その正準座標を $( p_i, q_i )$ とします.
+任意の物理量 $f ( p, q )$, $g ( p, q )$ について, その Poisson 括弧を
+$$\left\{ f, g \right\} = \sum_{i = 1}^n \left( \frac{ \partial f }{ \partial q_i } \frac{ \partial f }{ \partial p_i } - \frac{ \partial f }{ \partial p_i } \frac{ \partial g }{ \partial q_i } \right)$$
+により定義します. このように定義すると, Poisson 括弧は
+$$\{ q_i, p_j \} = \delta_{i j}$$
+を満足し, 量子力学における正準交換関係 $[ q_i, p_j ] = i \hbar \delta_{i j}$ と符号を含めて対応します.</p>
+<p>この定義では, 任意の物理量 $f$ の時間発展を記述する Liouville 方程式は
+$$\frac{ d f }{ d t } = \left\{ f, H \right\} + \frac{ \partial f }{ \partial t }$$
+となり, やはり Heisenberg 方程式
+$$i \hbar \frac{ d f }{ d t } = \left[ f, H \right]$$
+と対応します.</p>
+<p>主要な古典力学の教科書その他について, Poisson 括弧の符号についてまとめておきます.
++1が上記定義と一致するもの, -1が反対符号です (他の列については下を参照).</p>
+<table><thead><tr><th style="text-align: center">author</th><th style="text-align: center">PB</th><th style="text-align: center">$\omega$</th><th style="text-align: center">♭</th></tr></thead><tbody>
+<tr><td style="text-align: center">Landau &amp; Lifshitz</td><td style="text-align: center">-1</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: center">Arnold</td><td style="text-align: center">-1</td><td style="text-align: center">$dp \wedge dq$</td><td style="text-align: center">2nd</td></tr>
+<tr><td style="text-align: center">山本 &amp; 中村</td><td style="text-align: center">+1</td><td style="text-align: center">$dp \wedge dq$</td><td style="text-align: center">2nd</td></tr>
+<tr><td style="text-align: center">本記事</td><td style="text-align: center">+1</td><td style="text-align: center">$dp \wedge dq$</td><td style="text-align: center">1st</td></tr>
+<tr><td style="text-align: center">深谷</td><td style="text-align: center">+1</td><td style="text-align: center">$dp \wedge dq$</td><td style="text-align: center">1st</td></tr>
+<tr><td style="text-align: center">Goldstein</td><td style="text-align: center">+1</td><td style="text-align: center">$dq \wedge dp$</td><td style="text-align: center">1st</td></tr>
+<tr><td style="text-align: center">Abraham &amp; Marsden</td><td style="text-align: center">+1</td><td style="text-align: center">$dq \wedge dp$</td><td style="text-align: center">1st</td></tr>
+<tr><td style="text-align: center">大貫 &amp; 吉田</td><td style="text-align: center">+1</td><td style="text-align: center">$dq \wedge dp$</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: center">enwp, jawp</td><td style="text-align: center">+1</td><td style="text-align: center">$dq \wedge dp$</td><td style="text-align: center">1st</td></tr>
+</tbody></table>
+<p>この表を見るに, ソ連では反対符号が普及していたようです.
+それ以外の部分は... 見事にバラバラです. Goldstein 方式が比較的優勢でしょうか.</p>
+<h1 id="シンプレクティック形式">シンプレクティック形式</h1>
+<p>$2 n$ 次元多様体 $M$ 上の非退化な閉 2-形式 $\omega$ が与えられたとき, 
+組 $( M, \omega )$ をシンプレクティック多様体と呼ぶのでした.
+Darboux 座標 $( p, q )$ では $\omega$ を
+$$\omega = \sum_{i = 1}^n dp^i \wedge dq^i = \sum_i \left( dp^i \otimes dq^i - dq^i \otimes dp^i \right)$$
+と表示することができます. 
+この定義は Arnold および深谷に従うものですが, $p$ と $q$ を逆に表示する場合もあり, 
+Goldstein および Abraham &amp; Marsden や enwp はこちらの流儀です.</p>
+<p>さて, $M$ 上のベクトル場 $X$ が与えられたとき,
+シンプレクティック形式 $\omega$ は
+$$X^\flat \left( \cdot \right) = \omega \left( X, \cdot \right)$$
+により余ベクトル場 $X^\flat$ を定めます. 逆に, 余ベクトル場 $\alpha$ は
+$$\alpha \left( \cdot \right) = \omega \left( \alpha^\sharp, \cdot \right)$$
+によりベクトル場 $\alpha^\sharp$ を定めます. 
+明らかにこのふたつの写像 $\flat$, $\sharp$ は逆写像の関係にあります (音楽同型).
+なお $X^\flat$ のことを $\omega^\flat ( X )$ または $i_X \omega$ とも書きます.
+この定義は深谷, Abraham &amp; Marsden (および enwp, jawp) と一致します.
+ただし Arnold および山本&amp;中村は第2引数との縮約として定義しているため, 符号が逆です.</p>
+<p>具体的に Darboux 座標 $( p, q )$ を取るとき, ベクトル場 $X$ を座標基底で展開すると
+$$X = \sum_{i = 1}^n \left( X^{p, i} \frac{ \partial }{ \partial p^i } + X^{q, i} \frac{ \partial }{ \partial q^i } \right)$$
+と書けます. このとき $X^\flat$ は
+$$X^\flat = \sum_{i = 1}^n \left( X^{p, i} dq^i - X^{q, i} dp^i \right)$$
+により与えられます. また, 余ベクトル場 
+$$\alpha = \sum_{i = 1}^n \left( \alpha_{p, i} dp^i + \alpha_{q, i} dq^i \right)$$
+の $\sharp$ 写像の像は
+$$\alpha^\sharp = \sum_{i = 1}^n \left( \alpha_{q, i} \frac{ \partial }{ \partial p^i } - \alpha_{p, i} \frac{ \partial }{ \partial q^i } \right)$$
+です.</p>
+<h1 id="Hamilton_ベクトル">Hamilton ベクトル</h1>
+<p>$M$ 上の関数 $f: M \to \mathbb{R}$ について, 付随する Hamilton ベクトル $X_f$ を
+$$X_f = - d f^\sharp$$
+により定義します. 深谷の定義ではマイナスがありませんが, その定義では正準方程式に一致しません.
+Arnold および山本&amp;中村の定義では, 音楽同型の定義が逆符号である結果, やはりこの定義からマイナス符号が除かれています.
+Goldstein, Abraham &amp; Marsden および enwp では, $\omega$ の符号がこことは逆であるため, やはりマイナス符号は現れません.</p>
+<p>前節の結果から Darboux 座標 $( p, q )$ ではこれは
+$$X_f = \sum_{i = 1}^n \left( - \frac{ \partial f }{ \partial q^i } \frac{ \partial }{ \partial p^i } + \frac{ \partial f }{ \partial p^i } \frac{ \partial }{ \partial q^i } \right)$$
+を意味します. 従って Hamilton の正準方程式は Hamilton ベクトル場の積分曲線のことであると言い換えることができます.
+(というよりも, そうなるように $X_f$ を定義します. 従って $X_f$ の座標表示は深谷を除いてすべて一致します.)</p>
+<h1 id="Poisson_括弧_(2)">Poisson 括弧 (2)</h1>
+<p>以上の定義のもとでは, $f$ と $g$ の Poisson 括弧は
+$$\{ f, g \} = - \omega ( X_f, X_g )$$
+と表せます. 山本&amp;中村と式の上では一致します.
+深谷では Hamilton ベクトルの定義が逆ですからマイナスはつきません.
+Arnold では Poisson 括弧の定義が逆ですからマイナスはつきません.
+Goldstein や Abraham &amp; Marsden, enwp では $\omega$ の符号が逆ですからマイナスはつきません.</p>
+<p>以下の表式は Poisson 括弧の符号が +1 ならば一致します (深谷を除く).
+$$\{ f, g \} = df ( X_g ) = X_g ( f )$$
+$$X_{\{f, g\}} = - [ X_f, X_g ]$$</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li>L. Landau &amp; E. M. Lifshitz, &quot;Mechanics&quot;, Pergamon, 1969</li>
+<li>V. I. Arnold, &quot;Mathematical Methods of Classical Mechanics&quot;, Springer, 1989</li>
+<li>H. Goldstein, C. Poole &amp; J. Safko, &quot;Classical Mechanics&quot;, Pearson, 2001</li>
+<li>Ralph Abraham &amp; Jerrold E. Marsden, &quot;Foundations of Mechanics&quot;, Benjamin-Cummings, 2008</li>
+<li>山本義隆, 中村孔一, 「解析力学」, 朝倉書店, 1998</li>
+<li>深谷賢治, 「解析力学と微分形式」 岩波書店, 2004</li>
+<li>大貫義郎, 吉田春夫, 「力学」, 岩波書店, 1994</li>
+<li><a href="https://en.wikipedia.org/wiki/Poisson_bracket">https://en.wikipedia.org/wiki/Poisson_bracket</a></li>
+<li><a href="https://ja.wikipedia.org/wiki/%E3%83%9D%E3%82%A2%E3%82%BD%E3%83%B3%E6%8B%AC%E5%BC%A7">https://ja.wikipedia.org/wiki/ポアソン括弧</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

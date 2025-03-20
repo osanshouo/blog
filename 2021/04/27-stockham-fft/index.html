@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] Stockham型FFT - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] Stockham型FFT</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数値解析">数値解析</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-04-27">2021-04-27</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/27-stockham-fft/#離散_Fourier_変換">離散 Fourier 変換</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/27-stockham-fft/#直接計算">直接計算</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/27-stockham-fft/#Stockham_型_FFT">Stockham 型 FFT</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/27-stockham-fft/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p><a href="https://ja.wikipedia.org/wiki/%E9%AB%98%E9%80%9F%E3%83%95%E3%83%BC%E3%83%AA%E3%82%A8%E5%A4%89%E6%8F%9B">高速 Fourier 変換</a> 
+(fast Fourier transformation, FFT) のアルゴリズムは何度勉強しても忘れるんですよね...</p>
+<h1 id="離散_Fourier_変換">離散 Fourier 変換</h1>
+<p>本記事を通じて $i$ は虚数単位を表すものとします.
+$N$ 個の複素数 $a_j$ ($j = 0, 1, \cdots, N-1$) の離散 Fourier 変換 (discrete Fourier transformation, DFT) $c_k$ ($k = 0, 1, \cdots, N-1$) は
+$$a_j = \frac{ 1 }{ N } \sum_k c_k \exp \left( \frac{ 2 \pi i j k }{ N } \right)$$
+$$c_k = \sum_k a_j \exp \left( - \frac{ 2 \pi i j k }{ N } \right)$$
+により定義されます. 以下では $\omega_N = \exp ( - 2 \pi / N )$ と略記します.
+この記法では, DFT とはベクトル $a = ( a_j )$ に行列 $[ W ]_{k j} = \omega_N^{k j}$ を作用させることに過ぎません. </p>
+<h1 id="直接計算">直接計算</h1>
+<p>DFT の定義
+$$c_k = \sum_{j = 0}^{N - 1} a_j ( \omega_N^k )^j$$
+をそのままコードに起こすとこうなると思われます.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>num_complex::Complex;
+</span><span>
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">fft</span><span>(</span><span style="color:#bf616a;">a</span><span>: &amp;[Complex&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;]) -&gt; Vec&lt;Complex&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> n = a.</span><span style="color:#96b5b4;">len</span><span>();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> omega = </span><span style="color:#b48ead;">crate</span><span>::omega(n);
+</span><span>    
+</span><span>    (</span><span style="color:#d08770;">0</span><span>..n).</span><span style="color:#96b5b4;">scan</span><span>(Complex::new(</span><span style="color:#d08770;">1.</span><span>, </span><span style="color:#d08770;">0.</span><span>), |</span><span style="color:#bf616a;">r</span><span>, </span><span style="color:#bf616a;">_k</span><span>| {
+</span><span>        </span><span style="color:#b48ead;">let </span><span>(c, _) = a.</span><span style="color:#96b5b4;">iter</span><span>()
+</span><span>            .</span><span style="color:#96b5b4;">fold</span><span>((Complex::new(</span><span style="color:#d08770;">0.</span><span>,</span><span style="color:#d08770;">0.</span><span>), Complex::new(</span><span style="color:#d08770;">1.</span><span>, </span><span style="color:#d08770;">0.</span><span>)), |(</span><span style="color:#bf616a;">acc</span><span>, </span><span style="color:#bf616a;">mode</span><span>), </span><span style="color:#bf616a;">a</span><span>| {
+</span><span>                (acc + a*mode, mode * *r)
+</span><span>            });
+</span><span>        *r *= omega;
+</span><span>        Some(c)
+</span><span>    }).</span><span style="color:#96b5b4;">collect</span><span>()
+</span><span>}
+</span></code></pre>
+<p>無論このコードは計算時間が $O ( N^2 )$ を要するため, 大きな $N$ に対してこれを用いることはできません.
+手元の環境では $N = 2 \times 1024$ を超えると秒単位で待たされるので実用には厳しいと思います.</p>
+<h1 id="Stockham_型_FFT">Stockham 型 FFT</h1>
+<p>しかし DFT は極めて性質が良いため, 計算アルゴリズムを工夫すれば $O ( N \ln N )$ で計算できます.
+そのようなアルゴリズムを総称して FFT と呼んでいます.
+ここでは Stockham 型 FFT を取り上げます.</p>
+<p>$N = 2^L$ である場合に議論を限定します.
+$\alpha_l = 2^l$, $\beta_l = 2^{L - l - 1}$ として, $N$ 個の複素数の組 $X$ を
+$$X_{l+1} [ 2 \alpha j + k ] = X_l ( \alpha j + k ) + \omega_N^{k \beta} X_l ( \alpha j + n/2 + k )$$
+$$X_{l+1} [ 2 \alpha j + k + \alpha ] = X_l ( \alpha j + k ) - \omega_N^{k \beta} X_l ( \alpha j + n/2 + k )$$
+(ただし $j$ は $0..\beta$ を, $k$ は $0..\alpha$ を走る) という漸化式に従って更新するとき,
+$X_{L-1} ( j ) = c_j$ は $X_0 ( j ) = a_j$ の DFT を与えます.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::f64::consts::</span><span style="color:#d08770;">PI</span><span>;
+</span><span style="color:#b48ead;">use </span><span>num_complex::Complex;
+</span><span>
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">fft_recur</span><span>(</span><span style="color:#bf616a;">a</span><span>: &amp;[Complex&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;]) -&gt; Vec&lt;Complex&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> n = a.</span><span style="color:#96b5b4;">len</span><span>();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> lmax = n.</span><span style="color:#96b5b4;">trailing_zeros</span><span>() as </span><span style="color:#b48ead;">usize</span><span>;
+</span><span>    assert_eq!(n, </span><span style="color:#d08770;">2</span><span style="color:#b48ead;">usize</span><span>.</span><span style="color:#96b5b4;">pow</span><span>(lmax as </span><span style="color:#b48ead;">u32</span><span>));
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> buf: Vec&lt;_&gt; = a.</span><span style="color:#96b5b4;">iter</span><span>().</span><span style="color:#96b5b4;">cloned</span><span>().</span><span style="color:#96b5b4;">collect</span><span>();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> tmp: Vec&lt;_&gt; = vec![ Complex::new(</span><span style="color:#d08770;">0.</span><span>, </span><span style="color:#d08770;">0.</span><span>); n ];
+</span><span>    
+</span><span>    </span><span style="color:#96b5b4;">stockham_recur</span><span>(n, lmax, </span><span style="color:#d08770;">0</span><span>, buf, tmp)
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">stockham_recur</span><span>(</span><span style="color:#bf616a;">n</span><span>: </span><span style="color:#b48ead;">usize</span><span>, </span><span style="color:#bf616a;">lmax</span><span>: </span><span style="color:#b48ead;">usize</span><span>, </span><span style="color:#bf616a;">l</span><span>: </span><span style="color:#b48ead;">usize</span><span>, </span><span style="color:#bf616a;">buf</span><span>: Vec&lt;Complex&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;&gt;, </span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">tmp</span><span>: Vec&lt;Complex&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;&gt;) -&gt; Vec&lt;Complex&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> alpha = </span><span style="color:#d08770;">1 </span><span>&lt;&lt; l;
+</span><span>    </span><span style="color:#b48ead;">let</span><span> beta = n &gt;&gt; l &gt;&gt; </span><span style="color:#d08770;">1</span><span>;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> omega_beta = {
+</span><span>        </span><span style="color:#b48ead;">let</span><span> phase = - </span><span style="color:#d08770;">2. </span><span>* </span><span style="color:#d08770;">PI </span><span>* (beta as </span><span style="color:#b48ead;">f64</span><span>) / (n as </span><span style="color:#b48ead;">f64</span><span>);
+</span><span>        Complex::from_polar(</span><span style="color:#d08770;">1.</span><span>, phase)
+</span><span>    };
+</span><span>    
+</span><span>    </span><span style="color:#b48ead;">for</span><span> j in </span><span style="color:#d08770;">0</span><span>..beta {
+</span><span>        </span><span style="color:#b48ead;">let mut</span><span> mode = Complex::new(</span><span style="color:#d08770;">1.</span><span>, </span><span style="color:#d08770;">0.</span><span>);
+</span><span>        
+</span><span>        </span><span style="color:#b48ead;">for</span><span> k in </span><span style="color:#d08770;">0</span><span>..alpha {
+</span><span>            </span><span style="color:#b48ead;">let</span><span> a = buf[alpha*j + k];
+</span><span>            </span><span style="color:#b48ead;">let</span><span> b = buf[alpha*j + n/</span><span style="color:#d08770;">2 </span><span>+ k] * mode;
+</span><span>            tmp[</span><span style="color:#d08770;">2</span><span>*alpha*j + k] = a + b;
+</span><span>            tmp[</span><span style="color:#d08770;">2</span><span>*alpha*j + k + alpha] = a - b;
+</span><span>
+</span><span>            mode *= omega_beta;
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">if</span><span> l+</span><span style="color:#d08770;">1 </span><span>== lmax {
+</span><span>        tmp
+</span><span>    } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>        </span><span style="color:#96b5b4;">stockham_recur</span><span>(n, lmax, l+</span><span style="color:#d08770;">1</span><span>, tmp, buf)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>漸化式を解く際に, 不要なメモリコピーを避けるため, 
+読み出し側 (<code>buf</code>) と書き込み側 (<code>tmp</code>) の役割を $l$ が進む度に入れ替えると良さそうです (手元ではこれで 25% 高速化できました).
+$N = 4 \times 1024$ では定義通りだと2.6秒, Stockham 型 FFT だと0.4秒でした.</p>
+<p>まだ最適化できるはずですが, 力尽きたのでここで一旦終わりとします.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="http://www.na.scitec.kobe-u.ac.jp/~yamamoto/lectures/parallelFFT/parallelFFT1.PDF">高速フーリエ変換とその並列化 (I)</a></li>
+<li><a href="http://wwwa.pikara.ne.jp/okojisan/stockham/stockham1.html">Stockham FFT 入門</a></li>
+<li><a href="http://with137d.hatenablog.com/entry/20111224/1324757391">Stockham アルゴリズムについて</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

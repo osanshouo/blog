@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Rust for Windowsでウィンドウを表示 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Rust for Windowsでウィンドウを表示</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Windows">Windows</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-05-22">2021-05-22</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#解説">解説</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#文字列型について">文字列型について</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#ウィンドウクラス">ウィンドウクラス</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#ウィンドウの表示">ウィンドウの表示</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#メッセージループ">メッセージループ</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#ウィンドウプロシージャ">ウィンドウプロシージャ</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#コード全体">コード全体</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#bindings/build.rs">bindings&#x2F;build.rs</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#src/main.rs">src&#x2F;main.rs</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/22-win32-window/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>Rust for Windows は進化が非常に速い上に情報源がほとんどないのが面倒なところです.
+本記事は Win10 v20H2, Rust 1.52.1, <code>windows=0.10.0</code> に基づいてウィンドウを描画してみます.
+つまり, この記事は benki さんの <a href="https://qiita.com/benki/items/c01f7da1e1a71cc91d11">Rust で Windows プログラミング - CreateWindow編 - Qiita</a> を 
+Rust for Windows 向けにアップデートしたものです.</p>
+<h1 id="解説">解説</h1>
+<h2 id="文字列型について">文字列型について</h2>
+<p>Win32 には A 版と W 版があります. A 版は ANSI, W 版は Unicode の意味です. 問答無用で W 版を使えばよいでしょう.</p>
+<p>ところが Windows では Unicode とはヌル終端つき UTF-16 のことです. しかし Rust の文字列は UTF-8 です.
+std の <code>OsStr</code> を使ってもよいですが, ヌル終端の扱いが面倒なので, 参考文献にならって自前で <code>Vec&lt;u16&gt;</code> への変換を用意しておくと便利です.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">wide_null</span><span>(</span><span style="color:#bf616a;">s</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>) -&gt; Vec&lt;</span><span style="color:#b48ead;">u16</span><span>&gt; {
+</span><span>    s.</span><span style="color:#96b5b4;">encode_utf16</span><span>().</span><span style="color:#96b5b4;">chain</span><span>(Some(</span><span style="color:#d08770;">0</span><span>)).</span><span style="color:#96b5b4;">collect</span><span>()
+</span><span>}
+</span></code></pre>
+<h2 id="ウィンドウクラス">ウィンドウクラス</h2>
+<p>ひとつのウィンドウに対してひとつの <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-wndclassw">WNDCLASSW</a> 型のインスタンスが必要です. 
+以前は初期化が面倒だったようですが, Rust for Windows では <code>Default</code> が実装されたので, これを使えば簡単です.
+ただし, 作成時に <code>lpfnWndProc</code>, <code>hInstance</code>, <code>lpszClassName</code> という三個のフィールドを次のように自分で設定しなければなりません.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let mut</span><span> class_name = </span><span style="color:#96b5b4;">wide_null</span><span>(&quot;</span><span style="color:#a3be8c;">main window class</span><span>&quot;);
+</span><span>
+</span><span style="color:#b48ead;">let mut</span><span> wc = </span><span style="color:#d08770;">WNDCLASSW</span><span>::default();
+</span><span>wc.lpfnWndProc = Some(window_proc);
+</span><span>wc.hInstance = </span><span style="color:#d08770;">HINSTANCE</span><span>(</span><span style="color:#d08770;">0</span><span>);
+</span><span>wc.lpszClassName = </span><span style="color:#d08770;">PWSTR</span><span>(class_name.</span><span style="color:#96b5b4;">as_mut_ptr</span><span>());
+</span></code></pre>
+<p>最初の <code>lpfnWndProc</code> については後で議論するのでここでは説明を飛ばします.
+二番目の <code>hInstance</code> は本来は正しく設定すべきですが, とりあえずヌルを入れておけば動くのでこれでよいでしょう 
+(そもそも <code>Default</code> で初期化するとヌルが入るのでこの行は不要なのですが, 公式がきちんと設定せよと言っているのでそれを忘れないためにもこう書いておけばよいと思います).
+三番目の <code>lpszClassName</code> は作成した <code>WNDCLASSW</code> インスタンスの内部的な識別名で, ブッキングしなさそうな文字列なら何でもよいです.</p>
+<p><code>WNDCLASSW</code> インスタンスの初期化が完了したら, このインスタンスを OS に登録して管理してもらいます.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> atom = </span><span style="color:#b48ead;">unsafe </span><span>{ RegisterClassW(&amp;wc) };
+</span><span>assert_ne!(atom, </span><span style="color:#d08770;">0</span><span>);
+</span></code></pre>
+<p>返り値 <code>atom</code> が 0 ならば処理に失敗したことを意味します. 0 でなければこれは OS 側のこのインスタンスの識別名です.</p>
+<ul>
+<li><a href="https://docs.microsoft.com/ja-jp/windows/win32/api/winuser/nf-winuser-registerclassw">RegisterClassW function (winuser.h) - Win32 apps | Microsoft Docs</a></li>
+</ul>
+<h2 id="ウィンドウの表示">ウィンドウの表示</h2>
+<p>ウィンドウを表示するには, 作成した <code>WNDCLASSW</code> インスタンスを画面に描画せよ, と OS に指示を出す必要があります.
+これは <code>CreateWindowExW</code> 関数を呼び出し, 得られた <code>HWND</code> インスタンスを <code>ShowWindow</code> 関数に渡すことによって可能です. </p>
+<p><code>CreateWindowExW</code> 関数の第三引数にはタイトルバーに表示されるアプリ名を設定します.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> hwnd = </span><span style="color:#b48ead;">unsafe </span><span>{
+</span><span>    CreateWindowExW(
+</span><span>        </span><span style="color:#d08770;">WINDOW_EX_STYLE</span><span>(</span><span style="color:#d08770;">0</span><span>),
+</span><span>        </span><span style="color:#d08770;">PWSTR</span><span>(class_name.</span><span style="color:#96b5b4;">as_mut_ptr</span><span>()),
+</span><span>        </span><span style="color:#d08770;">PWSTR</span><span>(app_title.</span><span style="color:#96b5b4;">as_mut_ptr</span><span>()),
+</span><span>        </span><span style="color:#d08770;">WS_OVERLAPPEDWINDOW</span><span>,
+</span><span>        </span><span style="color:#d08770;">CW_USEDEFAULT</span><span>,
+</span><span>        </span><span style="color:#d08770;">CW_USEDEFAULT</span><span>,
+</span><span>        </span><span style="color:#d08770;">CW_USEDEFAULT</span><span>,
+</span><span>        </span><span style="color:#d08770;">CW_USEDEFAULT</span><span>,
+</span><span>        </span><span style="color:#d08770;">HWND</span><span>(</span><span style="color:#d08770;">0</span><span>),
+</span><span>        </span><span style="color:#d08770;">HMENU</span><span>(</span><span style="color:#d08770;">0</span><span>),
+</span><span>        </span><span style="color:#d08770;">HINSTANCE</span><span>(</span><span style="color:#d08770;">0</span><span>),
+</span><span>        core::ptr::null_mut(),
+</span><span>    )
+</span><span>};
+</span><span>assert!(!hwnd.</span><span style="color:#96b5b4;">is_null</span><span>());
+</span><span>
+</span><span style="color:#b48ead;">unsafe </span><span>{ ShowWindow(hwnd, </span><span style="color:#d08770;">SHOW_WINDOW_CMD</span><span>(</span><span style="color:#d08770;">5</span><span>)) };
+</span></code></pre>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw">CreateWindowExW function (winuser.h) - Win32 apps | Microsoft Docs</a></li>
+</ul>
+<h2 id="メッセージループ">メッセージループ</h2>
+<p>GUI アプリケーションは自身に対して発生したすべてのイベント (クリック, キーボード入力, OS がスリープ状態になったことの告知, など) に対して適切に応答する必要があります.
+Win32 ではこの処理はメッセージループと呼ばれます.</p>
+<p>すべてのイベントは内部的にキューとして保持されているので, <code>GetMessageW</code> 関数を呼び出して順にメッセージを取り出し, <code>msg</code> という変数に格納します.
+そしてそのメッセージを <code>TranslateMessage</code>, <code>DispatchMessageW</code> というふたつの関数を渡します (これは定型文です).</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let mut</span><span> msg = </span><span style="color:#d08770;">MSG</span><span>::default();
+</span><span style="color:#b48ead;">while </span><span style="color:#d08770;">BOOL</span><span>(</span><span style="color:#d08770;">0</span><span>) != </span><span style="color:#b48ead;">unsafe </span><span>{ GetMessageW(&amp;</span><span style="color:#b48ead;">mut</span><span> msg, </span><span style="color:#d08770;">HWND</span><span>(</span><span style="color:#d08770;">0</span><span>), </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">0</span><span>) } {
+</span><span>    </span><span style="color:#b48ead;">unsafe </span><span>{
+</span><span>        TranslateMessage(&amp;msg); 
+</span><span>        DispatchMessageW(&amp;msg);
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>アプリケーションが終了することを表す <code>WM_QUIT</code> メッセージが現れたときのみ <code>GetMessageW</code> 関数は <code>Bool(0)</code> を返すので,
+このメッセージを受け取ったらメッセージループを抜けてアプリケーションを終了するようにします.</p>
+<h2 id="ウィンドウプロシージャ">ウィンドウプロシージャ</h2>
+<p><code>DispatchMessageW</code> は最初の方で登場した <code>window_proc</code> 関数を内部で呼び出します. 
+この関数には, 各メッセージに対してアプリケーションが何をすればよいのかを実装します.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">unsafe extern </span><span>&quot;</span><span style="color:#a3be8c;">system</span><span>&quot; </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">window_proc</span><span>(
+</span><span>    </span><span style="color:#bf616a;">hwnd</span><span>: HWND, </span><span style="color:#bf616a;">msg</span><span>: </span><span style="color:#b48ead;">u32</span><span>, </span><span style="color:#bf616a;">w_param</span><span>: WPARAM, </span><span style="color:#bf616a;">l_param</span><span>: LPARAM,
+</span><span>) -&gt; LRESULT {
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">match</span><span> msg {
+</span><span>        </span><span style="color:#d08770;">WM_DESTROY </span><span>=&gt; PostQuitMessage(</span><span style="color:#d08770;">0</span><span>),
+</span><span>        _ =&gt; </span><span style="color:#b48ead;">return</span><span> DefWindowProcW(hwnd, msg, w_param, l_param),
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#d08770;">LRESULT</span><span>(</span><span style="color:#d08770;">0</span><span>)
+</span><span>}
+</span></code></pre>
+<p><code>WM_DESTROY</code> メッセージはウィンドウを閉じる処理が走ることを表します. 普通はこのとき 
+<code>PostQuitMessage</code> 関数を呼ぶことで自分自身に <code>WM_QUIT</code> メッセージを発行し, アプリケーションを終了します.
+それ以外のメッセージはデフォルトの処理 <code>DefWindowProcW</code> を呼びます.
+なおこの部分に重い処理を実装するとアプリがフリーズしたように感じられるので, それは避けて別スレッドで処理したりするべきなのだそうです.</p>
+<p>以上でウィンドウを描画し, 任意に終了することができるようになりました.</p>
+<h1 id="コード全体">コード全体</h1>
+<h2 id="bindings/build.rs"><code>bindings/build.rs</code></h2>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    windows::build!(
+</span><span>        Windows::Win32::</span><span style="color:#d08770;">UI</span><span>::WindowsAndMessaging::{
+</span><span>            </span><span style="color:#d08770;">WNDCLASSW</span><span>, </span><span style="color:#d08770;">WNDPROC</span><span>, </span><span style="color:#d08770;">WNDCLASS_STYLES</span><span>,
+</span><span>            </span><span style="color:#d08770;">WS_OVERLAPPEDWINDOW</span><span>, </span><span style="color:#d08770;">CW_USEDEFAULT</span><span>, </span><span style="color:#d08770;">WINDOW_EX_STYLE</span><span>,
+</span><span>            </span><span style="color:#d08770;">SHOW_WINDOW_CMD</span><span>, RegisterClassW, CreateWindowExW,
+</span><span>            ShowWindow, DefWindowProcW, PostQuitMessage, 
+</span><span>            GetMessageW, </span><span style="color:#d08770;">MSG</span><span>, TranslateMessage, DispatchMessageW, </span><span style="color:#d08770;">WM_DESTROY</span><span>, </span><span style="color:#d08770;">WM_SIZE</span><span>, 
+</span><span>        },
+</span><span>        Windows::Win32::</span><span style="color:#d08770;">UI</span><span>::MenusAndResources::{</span><span style="color:#d08770;">HICON</span><span>, </span><span style="color:#d08770;">HCURSOR</span><span>, </span><span style="color:#d08770;">HMENU</span><span>},
+</span><span>        Windows::Win32::Graphics::Gdi::</span><span style="color:#d08770;">HBRUSH</span><span>,
+</span><span>        Windows::Win32::System::SystemServices::{
+</span><span>            </span><span style="color:#d08770;">PWSTR</span><span>, </span><span style="color:#d08770;">HINSTANCE</span><span>, </span><span style="color:#d08770;">LRESULT</span><span>, GetModuleHandleW,
+</span><span>        },
+</span><span>    )
+</span><span>}
+</span></code></pre>
+<h2 id="src/main.rs"><code>src/main.rs</code></h2>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#bf616a;">windows_subsystem </span><span>= &quot;</span><span style="color:#a3be8c;">windows</span><span>&quot;]
+</span><span>
+</span><span style="color:#b48ead;">use </span><span>bindings::Windows::Win32::{
+</span><span>    </span><span style="color:#d08770;">UI</span><span>::WindowsAndMessaging::*,
+</span><span>    </span><span style="color:#d08770;">UI</span><span>::MenusAndResources::*,
+</span><span>    System::SystemServices::*,
+</span><span>};
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">wide_null</span><span>(</span><span style="color:#bf616a;">s</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>) -&gt; Vec&lt;</span><span style="color:#b48ead;">u16</span><span>&gt; {
+</span><span>    s.</span><span style="color:#96b5b4;">encode_utf16</span><span>().</span><span style="color:#96b5b4;">chain</span><span>(Some(</span><span style="color:#d08770;">0</span><span>)).</span><span style="color:#96b5b4;">collect</span><span>()
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> app_title = </span><span style="color:#96b5b4;">wide_null</span><span>(&quot;</span><span style="color:#a3be8c;">Hello from Rust!</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> class_name = </span><span style="color:#96b5b4;">wide_null</span><span>(&quot;</span><span style="color:#a3be8c;">main_window_class</span><span>&quot;);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> wc = </span><span style="color:#d08770;">WNDCLASSW</span><span>::default();
+</span><span>    wc.lpfnWndProc = Some(window_proc);
+</span><span>    wc.hInstance = </span><span style="color:#d08770;">HINSTANCE</span><span>(</span><span style="color:#d08770;">0</span><span>);
+</span><span>    wc.lpszClassName = </span><span style="color:#d08770;">PWSTR</span><span>(class_name.</span><span style="color:#96b5b4;">as_mut_ptr</span><span>());
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> atom = </span><span style="color:#b48ead;">unsafe </span><span>{ RegisterClassW(&amp;wc) };
+</span><span>    assert_ne!(atom, </span><span style="color:#d08770;">0</span><span>);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> hwnd = </span><span style="color:#b48ead;">unsafe </span><span>{
+</span><span>        CreateWindowExW(
+</span><span>            </span><span style="color:#d08770;">WINDOW_EX_STYLE</span><span>(</span><span style="color:#d08770;">0</span><span>),
+</span><span>            </span><span style="color:#d08770;">PWSTR</span><span>(class_name.</span><span style="color:#96b5b4;">as_mut_ptr</span><span>()),
+</span><span>            </span><span style="color:#d08770;">PWSTR</span><span>(app_title.</span><span style="color:#96b5b4;">as_mut_ptr</span><span>()),
+</span><span>            </span><span style="color:#d08770;">WS_OVERLAPPEDWINDOW</span><span>,
+</span><span>            </span><span style="color:#d08770;">CW_USEDEFAULT</span><span>,
+</span><span>            </span><span style="color:#d08770;">CW_USEDEFAULT</span><span>,
+</span><span>            </span><span style="color:#d08770;">CW_USEDEFAULT</span><span>,
+</span><span>            </span><span style="color:#d08770;">CW_USEDEFAULT</span><span>,
+</span><span>            </span><span style="color:#d08770;">HWND</span><span>(</span><span style="color:#d08770;">0</span><span>),
+</span><span>            </span><span style="color:#d08770;">HMENU</span><span>(</span><span style="color:#d08770;">0</span><span>),
+</span><span>            </span><span style="color:#d08770;">HINSTANCE</span><span>(</span><span style="color:#d08770;">0</span><span>),
+</span><span>            core::ptr::null_mut(),
+</span><span>        )
+</span><span>    };
+</span><span>    assert!(!hwnd.</span><span style="color:#96b5b4;">is_null</span><span>());
+</span><span>    
+</span><span>    </span><span style="color:#b48ead;">unsafe </span><span>{ ShowWindow(hwnd, </span><span style="color:#d08770;">SHOW_WINDOW_CMD</span><span>(</span><span style="color:#d08770;">5</span><span>)) };
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> msg = </span><span style="color:#d08770;">MSG</span><span>::default();
+</span><span>    </span><span style="color:#b48ead;">while </span><span style="color:#d08770;">BOOL</span><span>(</span><span style="color:#d08770;">0</span><span>) != </span><span style="color:#b48ead;">unsafe </span><span>{ GetMessageW(&amp;</span><span style="color:#b48ead;">mut</span><span> msg, </span><span style="color:#d08770;">HWND</span><span>(</span><span style="color:#d08770;">0</span><span>), </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">0</span><span>) } {
+</span><span>        </span><span style="color:#b48ead;">unsafe </span><span>{
+</span><span>            TranslateMessage(&amp;msg); 
+</span><span>            DispatchMessageW(&amp;msg);
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">unsafe extern </span><span>&quot;</span><span style="color:#a3be8c;">system</span><span>&quot; </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">window_proc</span><span>(
+</span><span>    </span><span style="color:#bf616a;">hwnd</span><span>: HWND, </span><span style="color:#bf616a;">msg</span><span>: </span><span style="color:#b48ead;">u32</span><span>, </span><span style="color:#bf616a;">w_param</span><span>: WPARAM, </span><span style="color:#bf616a;">l_param</span><span>: LPARAM,
+</span><span>) -&gt; LRESULT {
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">match</span><span> msg {
+</span><span>        </span><span style="color:#d08770;">WM_DESTROY </span><span>=&gt; PostQuitMessage(</span><span style="color:#d08770;">0</span><span>),
+</span><span>        _ =&gt; </span><span style="color:#b48ead;">return</span><span> DefWindowProcW(hwnd, msg, w_param, l_param),
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#d08770;">LRESULT</span><span>(</span><span style="color:#d08770;">0</span><span>)
+</span><span>}
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/windows/win32/learnwin32/creating-a-window">Creating a Window - Win32 apps | Microsoft Docs</a></li>
+<li><a href="https://rust-tutorials.github.io/triangle-from-scratch/opening_a_window/win32.html">Win32 - Triangle From Scratch</a></li>
+<li><a href="https://qiita.com/benki/items/c01f7da1e1a71cc91d11">Rust で Windows プログラミング - CreateWindow編 - Qiita</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

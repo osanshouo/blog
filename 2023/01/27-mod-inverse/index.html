@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+剰余環Z&#x2F;mZにおける乗法の逆元について - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">剰余環Z&#x2F;mZにおける乗法の逆元について</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数学">数学</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2023-01-27">2023-01-27</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2023/01/27-mod-inverse/#逆元の存在">逆元の存在</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2023/01/27-mod-inverse/#Bézout_の補題">Bézout の補題</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2023/01/27-mod-inverse/#定理の証明">定理の証明</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2023/01/27-mod-inverse/#Euclid_の互除法">Euclid の互除法</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2023/01/27-mod-inverse/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>初等整数論が久々すぎて忘れていたので復習がてら.</p>
+<h1 id="逆元の存在">逆元の存在</h1>
+<p>本節の目標は, 次の定理を証明することである.</p>
+<ul>
+<li>$m$ を 2 以上の整数とする. 剰余類 $\mathbb{Z} / m \mathbb{Z}$ において, 
+元 $a \in \mathbb{Z} / m \mathbb{Z}$ が乗法に関する逆元を持つのは, 
+$a$ と $m$ が互いに素であるときに限る. また, 逆に $a$ と $m$ が互いに素であるとき, 
+$a$ は $\mathbb{Z} / m \mathbb{Z}$ に乗法に関する逆元を持つ.</li>
+</ul>
+<p>特に, 素数 $p$ は 2, 3, 4, ..., $p - 1$ すべてと互いに素であるから, 
+$\mathbb{Z} / p \mathbb{Z}$ は乗法に関して体をなす.</p>
+<h2 id="Bézout_の補題">Bézout の補題</h2>
+<ul>
+<li>0 でないふたつの整数 $a$, $b$ について, 
+$a x + b y$ ($x, y \in \mathbb{Z}$) という形に書ける整数の全体は, 
+$a$ と $b$ の最大公約数 $g = \mathrm{gcd} ( a, b )$ の倍数の全体と一致する.
+特に, $a x + b y$ という形に書ける正の整数のうち最も小さいものは $a$ と $b$ の最大公約数 $g$ である.</li>
+</ul>
+<p>[証明]
+$a x + b y$ という形の正の整数の全体を $S$ とする. 
+$\left|a\right| \in S$ かつ $\left|b\right| \in S$ であるため, $S$ は空ではない. 
+従って, $S$ は下に有界であるから, $S$ には最小値が存在する. それを $d = a x_0 + b y_0$ と書こう.</p>
+<p>任意の $n \in S$ について, $n$ の $d$ による除算
+$$n = q d + r$$
+を考える ($0 \leq r &lt; d$). $n$ は $S$ の元であるため $n = a x + b y$ と表示できるが, 
+これを上式と比較すると
+$$r = a x + b y - q d = a ( x - q x_0 ) + b ( y - q y_0 )$$
+となる. よって $r$ は 0 であるか $S$ の元であるかのいずれかであるが, $r &lt; d$ であること, 
+そして $d$ は $S$ の最小の元であるということから $r = 0$ でなければならない.
+すなわち $S$ のすべての元は $d$ の倍数である.</p>
+<p>さて, $\left|a\right|$ および 
+$\left|b\right|$ が $S$ の元であることから, $d$ は $a$ と $b$ の公約数である. 
+従って $d$ は $a$ と $b$ の最大公約数 $g = \mathrm{gcd} ( a, b )$ より大きいことはあり得ない: $d \leq g$. 
+一方で, $g$ は $d = a x_0 + b y_0$ の約数でもあるから, $g \leq d$ である. 
+すなわち $g = d$ でなければならない. </p>
+<p>最後に, 負の $a x + b y$ という整数は, $g$ の倍数でなければならない. 
+なぜならば, その $- 1$ 倍が $S$ の元でなければならないが, それは上で示したように $g$ の倍数だからである. □</p>
+<h2 id="定理の証明">定理の証明</h2>
+<p>$a$ と $m$ が互いに素である ($a$ と $m$ の最大公約数が 1 である) と仮定する. Bézout の補題により
+$$a x + m y = 1$$
+となる整数 $x$, $y$ が存在するが, このとき $a x \equiv 1 \ (\mathrm{mod} \, m)$ である.
+すなわち $x$ は $a$ の乗法に関する逆元である.</p>
+<p>逆に, $a \in \mathbb{Z} / m \mathbb{Z}$ が乗法に関する逆元 $b$ を持つ, すなわち
+$$a b \equiv 1 \ (\mathrm{mod}\,m)$$
+が成立するならば, $a b - 1$ は $m$ の倍数である, すなわち
+$$a b - 1 = c m$$
+となる整数 $c$ が存在する. 従って Bézout の補題により $a$ と $m$ の最大公約数は 1 である. □</p>
+<h1 id="Euclid_の互除法">Euclid の互除法</h1>
+<p>$m$ を 2 以上の整数, $a$ を $m$ と互いに素な正の整数とする. $a$ の $\mathbb{Z} / m \mathbb{Z}$ における乗法の逆元, すなわち
+$$a x \equiv 1 \ (\mathrm{mod}\,m)$$
+を満足する 整数 $x$ を具体的に求めるアルゴリズムを考える. </p>
+<p>まず, この問題は次の等式を満たす整数 $x$, $y$ を求めること, と言い換えることができる.
+$$a x + m y = 1$$
+$r_0 = m$, $r_1 = a$ とおき, $r_0$ の $r_1$ による除算
+$$r_0 = q_0 r_1 + r_2$$
+を求める. そして, $r_1$ の $r_2$ による除算
+$$r_1 = q_1 r_2 + r_3$$
+を行う. この操作を繰り返すと, 数列 $r_i$, $q_i$ が
+$$r_{i-1} = q_{i-1} r_i + r_{i+1}$$
+を満足するものとして定まる. ところが $r_0$ と $r_1$ が互いに素であったことから, 
+やがて剰余 $r_N$ が 1 になり, この操作が終了する.
+$$r_{N-2} = q_{N-2} r_{N-1} + 1$$</p>
+<p>構成から, $r_i$ は $a$ と $m$ の整数係数線型結合である. そこでそれを
+$$r_i = a x_i + m y_i$$
+と表示するとき, $a x_N + m y_N = r_N = 1$ であることから, $x_N$ が求める $a$ の逆元である. 
+$r_i$ の漸化式を $r_{i+1} = r_{i-1} - q_{i-1} r_i$ と書き直し, $x_i$ および $y_i$ に関する等式として読み直すと
+$$a x_{i+1} + m y_{i+1} = a \left( x_{i-1} - q_{i-1} x_i \right) + m \left( y_{i-1} - q_{i-1} y_i \right)$$
+を得る. すなわち, $x_i$ および $y_i$ は漸化式
+$$x_{i+1} = x_{i-1} - q_{i-1} x_i$$
+$$y_{i+1} = y_{i-1} - q_{i-1} y_i$$
+を満足する. これは初項 $x_0 = 0$, $x_1 = 1$, $y_0 = 1$, $y_1 = 0$ および上の操作によって得られた数列 $q_i$ から
+容易に計算することができ, $a$ の逆元 $x_N$ を与える.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">inv</span><span>(</span><span style="color:#bf616a;">a</span><span>: </span><span style="color:#b48ead;">i64</span><span>, </span><span style="color:#bf616a;">m</span><span>: </span><span style="color:#b48ead;">i64</span><span>) -&gt; Option&lt;</span><span style="color:#b48ead;">i64</span><span>&gt; {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> r = (m, a);
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> x = (</span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">1</span><span>);
+</span><span>    
+</span><span>    </span><span style="color:#b48ead;">while</span><span> r.</span><span style="color:#d08770;">1 </span><span>!= </span><span style="color:#d08770;">0 </span><span>{
+</span><span>        x = (x.</span><span style="color:#d08770;">1</span><span>, x.</span><span style="color:#d08770;">0 </span><span>- (r.</span><span style="color:#d08770;">0 </span><span>/ r.</span><span style="color:#d08770;">1</span><span>) * x.</span><span style="color:#d08770;">1</span><span>);
+</span><span>        r = (r.</span><span style="color:#d08770;">1</span><span>, r.</span><span style="color:#d08770;">0 </span><span>% r.</span><span style="color:#d08770;">1</span><span>);
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">if</span><span> r.</span><span style="color:#d08770;">0 </span><span>== </span><span style="color:#d08770;">1 </span><span>{ Some(x.</span><span style="color:#d08770;">0</span><span>) } </span><span style="color:#b48ead;">else </span><span>{ None }
+</span><span>}
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li>Simon Rubinstein-Salzedo, <em>Cryptography</em>, Springer, 2018, doi:<a href="https://doi.org/10.1007/978-3-319-94818-8">10.1007/978-3-319-94818-8</a></li>
+<li><a href="https://proofwiki.org/wiki/B%C3%A9zout%27s_Identity">Bézout's Identity - ProofWiki</a></li>
+<li><a href="https://tex2e.github.io/blog/crypto/invmod">剰余の乗法の逆元とRSA暗号 | 晴耕雨読</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

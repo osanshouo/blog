@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+ Wienの変位則の原論文の和訳 (1893) - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title"> Wienの変位則の原論文の和訳 (1893)</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/物理学">物理学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/電磁気学">電磁気学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/熱力学">熱力学</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-06-25">2024-06-25</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p><a href="https://ja.wikipedia.org/wiki/%E3%83%B4%E3%82%A3%E3%83%AB%E3%83%98%E3%83%AB%E3%83%A0%E3%83%BB%E3%83%B4%E3%82%A3%E3%83%BC%E3%83%B3">Wilhelm Wien</a> 
+が黒体輻射のスペクトル密度に関する 
+<a href="https://ja.wikipedia.org/wiki/%E3%82%A6%E3%82%A3%E3%83%BC%E3%83%B3%E3%81%AE%E5%A4%89%E4%BD%8D%E5%89%87">Wien の変位則</a> を導いた1893年の論文</p>
+<ul>
+<li>W. Wien, “Eine neue Beziehung der Strahlung schwarzer Körper zum zweiten Hauptsatz der Wärmetheorie,”
+Sitzungsberichte der Preussischen Akademie der Wissenschaftene zu Berlin, 1, 55-62 (1893)</li>
+</ul>
+<p>ですが, この広いインターネットの海から原典を探し出すのがかなりの手間でした. やっと見つけたものが</p>
+<ul>
+<li><a href="https://digilib.bbaw.de/digilib/digilib.html?fn=/silo10/Bibliothek.tiff/10-sitz/1893-1/tif&amp;pn=70">https://digilib.bbaw.de/digilib/digilib.html?fn=/silo10/Bibliothek.tiff/10-sitz/1893-1/tif&amp;pn=70</a></li>
+<li><a href="https://archive.org/details/sitzungsberichte1893deut/page/54/mode/2up?view=theater">https://archive.org/details/sitzungsberichte1893deut/page/54/mode/2up?view=theater</a></li>
+</ul>
+<p>ですが, いずれも画質が良くなく読みにくいです. という訳で, 下に全文および和訳を載せておきます.
+なお Wien は1928年に亡くなっており, 当然原文の著作権保護期間は満了しています.</p>
+<h1 id="Eine_neue_Beziehung_der_Strahlung_schwarzer_Körper_zum_zweiten_Hauptsatz_der_Wärmetheorie">Eine neue Beziehung der Strahlung schwarzer Körper zum zweiten Hauptsatz der Wärmetheorie</h1>
+<p>Von Dr. Willy Wien</p>
+<p>in Charlottenburg.</p>
+<p>(Vorgelegt von Hrn. von Helmholtz.)</p>
+<p>Boltzmann<sup>Wied. Ann. Bd. 32 S. 31 und 291. 1884</sup> hat auf der Grundlage eines von Bartoli ersonnenen Processes nachgewiesen, dass aus dem zweiten Hauptsatz der Wärmetheorie das Vorhandensein eines Druckes gefolgert werden kann, welcher von der Strahlung auf eine bestrahlte Obertläche ausgeübt wird. Ein soleher Druck ist andererseits eine Folge der elektromagnetischen Theorie des Lichtes, und Boltzmann konnte aus dieser Beziehung das Stefann'sche Strahlungsgesetz für schwarze Körper ableiten.</p>
+<p>Diese Schlüsse sind noch einer Vervollständigung fähig, wenn man sich nicht auf die Betrachtung der Gesammtstrahlung beschränkt, sondern die Strahlung nach ihren Wellenlängen zerlegt denkt.</p>
+<p>Die gedachten Vorgänge, welche die Grundlage unserer Betrachtung bilden sollen, haben in derselben Weise, wie bei Boltzmann und früher bei Kirchhoff und Clausius, der Wirklichkeit so weit zu entsprechen, dass ihre thatsächliche Ausführung mit einem unbegrenzt erscheinenden Grade der Annäherung möglich sein muss.</p>
+<p>Als Voraussetzungen werden wir nöthig haben zunächst die Gültigkeit der elektromagnetischen Lichttheorie, nach welcher der von einem Lichtstrahle in seiner Richtung ausgeübte Druck gleich der Energie des Strahles ist, dann die Möglichkeit der Existenz vollkommen schwarzer und vollkommen spiegelnder Körper, welche auch so zusammengesetzt sein können, dass sie die auffallenden Lichtstrahlen vollständig zerstreut zurückwerfen, wie wir es bei der totalen Retlexion weisser Körper annähernd erfüllt finden. Ausserdem betrachten wir noch den zweiten Hauptsatz der Wärmetheorie als gültig, dass auch durch Strahlung, welche von dem Wärmevorrath fester Körper herrührt, keine Arbeit aus Wärme ohne sonstige Arbeitsleistungen, Temperaturverluste oder Zustandsänderungen gewonnen werden kann. Schliesslich setzen wir die Anwendbarkeit des Doppler'schen Princips auf Lichtstrahlen voraus.</p>
+<p>Die von einem schwarzen Körper herrührende in einem geschlossenen Raume mit spiegelnden Wänden befindliche Strahlung wird alle möglichen Richtungen haben. Man erhält dann nach Boltzmann den diesen Verhältnissen am besten entsprechenden Mittelwerth durch die Annahme, dass in einem Würfel parallel jeder Seitenwand gleichviel, also ein Drittel der Gesammtstrahlung. verläuft. Eine Volumverkleinerung vermehrt die Diehtigkeit der Energie (die Energiemenge in der Volumeinheit) durch Zurückführung des Energievorraths auf einen kleinern Raum und dureh Arbeitsleistung gegen den Druck der Strahlen. Beim Zurückgehen gewinnt man die geleistete Arbeit vollständig wieder, wenn die Geschwindigkeit, mit der die Volumänderungen ausgeführt wurden, unendlich klein gegen die Lichtgeschwindigkeit bleibt, so dass die Änderung der Dichtigkeit immer über den ganzen Raum ausgeglichen ist.</p>
+<p>Es lässt sich dann ein Vorgang denken, in welchem eine Vermehrung der Dichtigkeit der Energie einerseits durch Temperaturerhöhung, andererseits durch Volumverkleinerung erzielt werden kann. Der zweite Hauptsatz zeigt nun, dass bei gleicher Diehtigkeit der (resammtenergie diese auch für jede einzelne Wellenlänge gleich sein muss. Die Wellenlängen der durch Volumverkleinerung verdichteten Strahlung sind nur dem Doppler'schen Princip entsprechend verändert. Diese Änderung lässt sich berechnen. Es ist also auch die durch Temperaturerhöhung bedingte Änderung bekannt.</p>
+<p>§1. Beschreibung der Vorgänge.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>      D
+</span><span>  ┌────────┐
+</span><span>  │   3    │
+</span><span>  ├C──＼───┤
+</span><span>dx│   2    │a
+</span><span> x├B──＼───┤
+</span><span>  │   1    │
+</span><span>  └────────┘
+</span><span>      A
+</span></code></pre>
+<p>Wir denken uns einen Cylinder, in dem zwei Stempel <em>B</em> und <em>C</em> verschiebbar sind. Die Fläche des Querschnitts sei der Einheit gleich. Die Stempel sollen mit Klappen versehen sein, welche lichtdicht verschlossen werden können. Die Zwischenräume 1, 2, 3 seien vollkommen leer. <em>A</em> und <em>D</em> sind schwarze Körper von verschiedener absoluter Temperatur $\vartheta_1$, und $\vartheta_2 &gt; \vartheta_1$. Sie sind von solchen Dimensionen, dass ihr Wärmevorrath unendlich gross gegen die in Form von Strahlung in die Zwischenräume 1, 2, 3 abgegebene Energie ist. Die Innenwände des Cylinders, die Stempel und Klappen sollen die Eigenschaft haben, die gesammte auffallende Strahlung vollständig zerstreut zurückzuwerfen, so dass unter diesen keine Vorzugsrichtung mehr vorhanden ist. Wenn man zugibt, dass vollkommene Spiegel denkbar sind, wird sich gegen die Möglichkeit nichts einwenden lassen, dass auch solehe Körper, die man als vollkommen weiss zu bezeichnen hätte, mit beliebig weit getriebener Annäherung herstellbar sind. Wenn die beiden Klappen <em>C</em> und <em>B</em> geschlossen sind, so befindet sich die strahlende Energie des Raumes 2 in einem geschlossenen Raum mit isolirenden Wänden, sie bleibt also unverändert. </p>
+<p>Es sei nun am Anfange unseres Processes die Klappe <em>B</em> geöffnet, <em>C</em> geschlossen. Es strahlt dann <em>A</em> in die Räume 1 und 2, <em>D</em> in den Raum 3. Die Dichtigkeit der Energie in 3 ist grösser als in 2, weil die Temperatur von <em>D</em> höher ist als die von <em>A</em>. Es werde jetzt <em>B</em> verschlossen. Nun bewegen wir den Stempel <em>B</em> gegen <em>C</em> hin und zwar mit einer Geschwindigkeit $v$, die unendlich klein gegen die Liehtgeschwindigkeit $c$ ist. Die Energie in 2 wird dann sowohl durch Volumverkleinerung als auch durch Arbeitsleistung gegen den Druck eine grössere Dichtigkeit erhalten. Wir bewegen <em>B</em> so weit, bis die Diehtigkeit in den beiden Räumen 2 und 3 gleich gross geworden ist. Man kann dann aus dem zweiten Hauptsatz schliessen, dass die Energievertheilung im Spectrum der Strahlen in beiden Räumen ebenfalls die gleiche ist.</p>
+<p>Denn wenn diess nicht der Fall wäre, so müsste es Strahlen einer bestimmten Wellenlänge geben, welche in 3 eine grössere Energie besitzen als in 2. Wir können dann vor die Klappe von <em>C</em> eine dünne durchsichtige Lamelle legen, welche die Strahlen der betrachteten Wellenlänge vorzugsweise hindurchlässt, die anderen vorzugsweise retleetirt, und dann die Klappe öffnen. Es muss dann mehr Energie von 3 nach 2 gehen als umgekehrt und die Dichtigkeit der Energie wird in 2 grösser werden als in 3. Jetzt schliessen wir <em>C</em>, entfernen die Lamelle und lassen den Stempel <em>C</em> von dem in 2 herrschenden Überdrucke bewegt werden und Arbeit leisten bis die Diehtigkeit der Energie in beiden Räumen wieder die gleiche ist. Die hierbei gewonnene Arbeit sei $Q$. Dann wird <em>C</em> wieder geöffnet und in seine Anfangslage zurückgeführt. Diess kann ohne Arbeitsleistung geschehen, weil auf beiden Seiten jetzt der gleiche Druck herrscht. Ferner gehen wir bei geschlossenem <em>C</em> mit <em>B</em> auf die ursprüngliche Stelle zurück und gewinnen die beim Hingehen geleistete Arbeit wieder. Wenn endlich <em>B</em> wieder geöffnet wird, ist der Anfangszustand vollständig erreicht und dabei der Arbeitsbetrag $Q$ aus Wärme gewonnen, ohne dass sonst irgend eine Zustandsänderung erfolgt wäre, die als Compensation dienen könnte. Da diess den zweiten Hauptsatz verletzt, so musste die speetrale Energievertheilung in Raum 2 und 3 dieselbe sein, als die Diechtigkeit in beiden die gleiche war. Kennen wir demnach die Energievertheilung in der von <em>A</em> herrührenden Strahlung und die Veränderung, die sie in Folge der Bewegung des Stempels <em>B</em> erlitten hat, so kennen wir auch die Vertheilung in der
+Strahlung des wärmern Körpers <em>D</em>.</p>
+<p>§2. Berechnung der Veränderung der Energievertheilung nach dem Doppler'schen Princip.</p>
+<p>Es sei wieder $v$ die Geschwindigkeit des Stempels, $c$ die Liehtgeschwindigkeit. In Folge der Bewegung des Stempels <em>B</em> gegen die Strahlung werden die Wellenlängen nach dem Doppler'schen Princip verkürzt. Es wird die Schwingungsdauer $T$ eines einmal senkrecht auffallenden Strahles, der zurückgeworfen wird, der Gleichung
+$$T' = \frac{ c - 2 v }{ c } T$$
+entsprechend verändert. Da nun $T = \frac{ \lambda }{ c }$, $T' = \frac{ \lambda' }{ c }$ ist, wenn $\lambda$, $\lambda'$ die Wellenlängen bezeichnen, so wird
+$$\lambda' = \frac{ c - 2 v }{ c } \lambda .$$</p>
+<p>Bei den schräg auffallenden Strahlen kommt nur die normale Componente in Betracht. Bei gleichmässig vertheilter Riehtung der Strahlung kann wieder in einem Würfel über dem Stempel <em>B</em> die Gesammtheit der normal verlaufenden Componenten gleich dem dritten Theile der Gesammtenergie gesetzt werden. Die von dem bewegten Stempel ausgehende Strahlung wird von den ruhenden Wänden zerstreut zurückgeworfen und auf diese Weise die gestörte Gleichmässigkeit der Vertheilung sofort wieder hergestellt.</p>
+<p>Sei $\phi(\lambda)$ die ursprünglich in 2 vorhandene Dichtigkeit der Energie als Funetion der Wellenlänge, so dass $\phi d\lambda$ die Energie ist, deren Wellenlänge zwischen $\lambda$ und $\lambda + d\lambda$ liegt. Nach einmaliger Zurückwerfung vom bewegten Stempel werden die Wellenlängen der normal verlaufenden Strahlen um einen Betrag $h$ verkürzt sein. Die neue Energievertheilung sei $f_1(\lambda)$. Denken wir uns die $\phi(\lambda)$ als Ordinaten, die $\lambda$ als Abseissen aufgetragen, so werden wir die Punkte der neuen Curve $f(\lambda)$ erhalten, wenn wir für jedes $\lambda$ zwei Drittel der zugehörigen Ordinate $\phi(\lambda)$ stehen lassen, entsprechend den unverändert gebliebenen zwei Dritteln der Energie. Das letzte Drittel hat man zu ersetzen durch ein Drittel der Ordinate $\phi$, welche zu $\lambda + h$ gehört, weil ein Drittel der Energie seine Wellenlängen um $h$ verkürzt hat. Es ist also
+$$f_1(\lambda) = \frac23 \phi(\lambda) + \frac13 \phi(\lambda + h).$$
+Nun ist bei kleinem $h$
+$$\phi(\lambda + h) = \phi(\lambda) + h \phi'(\lambda),$$
+also
+$$f_1(\lambda) = \phi\left( \lambda + \frac{h}{3} \right)$$
+nach einmaliger Zurückwerfung am Stempel <em>B</em>: nach $n$ maliger wird hiernach
+$$f_n(\lambda) = \phi\left( \lambda + \frac{n h}{3} \right) = f(\lambda)$$
+wenn auch $n h$ klein gegen $\lambda$ ist.</p>
+<p>Hieraus folgt dann wieder
+$$\begin{align}
+f(\lambda) &amp;= \phi(\lambda) + \frac{n h}{3} \phi'(\lambda) \\
+&amp;= \frac23 \phi(\lambda) + \frac13 \phi(\lambda + n h).
+\end{align}$$</p>
+<p>Die Änderung in der Energievertheilung ist so, als ob die normal verlaufenden Strahlen, welche den dritten Theil der Gesammtenergie ausmachen, um den Betrag $n h$ ihre Wellenlängen verkürzt hätten. </p>
+<p>Wir haben also $n$ aufzufassen als die Zahl, welche angibt, wie oft die in dem Würfel normal zum Stempel verlaufenden Strahlen bei ihrem Hin- und Hergehen im Raum 2 von dem bewegten Stempel zurückgeworfen werden, während dieser eine bestimmte Wegstrecke durchläuft.</p>
+<p>Ist $a-x$ die Entfernung <em>B</em> von <em>C</em>, so ist. während <em>B</em> um $dx$ sich verschiebt,
+$$n = \frac{ dx }{ 2 ( a - x ) } \cdot \frac{ c }{ v } ,$$
+vorausgesetzt, dass $n$ gross gegen die Einheit ist. Es muss also $\frac{c}{v}$ gross gegen $\frac{2(a-x)}{dx}$ sein: dabei soll aber doch $dx$ klein gegen $2(a-x)$ sein.</p>
+<p>Es war nun nach einmaliger Zurückwerfun
+$$\lambda' = \frac{c - 2v }{ c } \lambda.$$</p>
+<p>Nach $n$ maliger wird
+$$\begin{align}
+\lambda_n &amp;= \left( \frac{ c - 2 v }{ c } \right)^n \lambda \\
+&amp;= \left( \frac{ c - 2 v }{ c } \right)^{\frac{dx}{2(a-x)}\cdot\frac{c}{v}} \lambda
+\end{align}$$
+Diess lässt sich schreiben
+$$\lambda_n = \left[ \left( 1 - \frac{ 2 v }{ c } \right)^c \right]^{\frac{dx}{2(a-x)} \cdot \frac{1}{v}} \lambda .$$
+Hieraus wird für lim $c = \infty$
+$$\lambda_n = (e^{-2v})^{\frac{dx}{2(a-x)} \cdot \frac{1}{v}} \lambda = e^{-\frac{dx}{a-x}} \lambda.$$
+Man sieht, dass beim Zurückgehen des Stempels die Gleichung besteht 
+$$\lambda = \left( \frac{ c + 2 v }{ c } \right)^n \lambda_n = e^{\frac{dx}{a-x}} \lambda_n$$
+Es geht also $\lambda_n$, auch auf den ursprünglichen Werth zurück. Der Vorgang ist auch hierin umkehrbar. Wir setzen nun
+$$\lambda_n = \lambda + n h ,$$
+wo $nh$ unendlich klein von der Ordnung von $dx$ ist: so wird bei Vernachlässigung kleiner Grössen zweiter Ordnung
+$$nh = - \frac{dx}{a-x} \lambda$$
+Wir hatten nun
+$$f(\lambda) = \phi\left( \lambda + \frac{nh}{3} \right) = \phi(\lambda + d\lambda).$$
+Wir haben also zu setzen
+$$d\lambda = - \frac{ dx }{ 3(a-x) } \lambda .$$
+Jeder Werth von $\lambda$ wird um diesen Betrag kleiner, wenn $x$ um $dx$ wächst.</p>
+<p>Durch Integration erhalten wir
+$$\lg \lambda = \frac13 \lg(a-x) + \lg C$$
+$$\lg C = \lg \lambda_0 - \frac13 \lg a$$
+wo $\lambda_0$, der Werth für $x = 0$ ist. Also
+$$\lambda = \sqrt[3]{ \frac{ a-x }{ a } } \cdot \lambda_0 .$$
+Ferner sei $E$ das Energiequantum im Raum 2, wenn <em>B</em> bei $x$ steht. Die Dichtigkeit der Energie ist dann
+$$\psi = \frac{ E }{ a - x } .$$
+Wächst $x$ um $dx$, so nimmt die Dichtigkeit in Folge der Volumverkleinerung und der geleisteten Arbeit zu.
+$$\begin{align}
+\frac{ d \psi }{ d x } dx &amp;= \left\{ \frac{dE}{dx} \frac{1}{a-x} + \frac{E}{(a-x)^2} \right\} dx \\
+&amp;= \left( \frac{dE}{dx} + \psi \right) \frac{ dx }{ a - x }
+\end{align}$$
+Nun ist der Druck auf den Stempel
+$$= \frac13 \psi$$
+Die geleistete Arbeit also
+$$\frac{dE}{dx} dx = \frac13 \psi dx.$$
+Diess gibt
+$$d\psi = \frac43 \frac{\psi}{a-x} dx$$
+$$\lg \psi = - \lg \left[ ( a - x )^\frac43 \right] + \lg C_1$$
+$$\lg C_1 = \lg \psi_0 + \lg ( a^\frac43 )$$
+wo $\psi_0$ der Werth für $x=0$ ist.</p>
+<p>Es wird also
+$$\psi = \sqrt[3]{\left( \frac{ a }{ a - x } \right)^4 } \cdot \psi_0$$
+und nach dem frühern für gleiche Werthe von $x$
+$$\frac{ \psi }{ \psi_0 } = \frac{ \lambda_0^4 }{ \lambda^4 } .$$
+Nach §. 1 ist nun die Vertheilung der Energie $\psi$, welche von einem Körper mit der höheren Temperatur $\vartheta$ herrührt, die gleiche. Ist $\vartheta_0$ der Werth von $\vartheta$, welcher $\psi_0$ entspricht, so ist nach Stefan und Boltzmann
+$$\frac{ \psi }{ \psi_0 } = \frac{ \vartheta^4 }{ \vartheta_0^4 } .$$
+Es folgt also
+$$\vartheta \lambda = \vartheta_0 \lambda_0 .$$</p>
+<p>Im normalen Emissionsspeetrum eines schwarzen Körpers verschiebt sieh mit veränderter Temperatur jede Wellenlänge so, dass das Produet aus Temperatur und Wellenlänge constant bleibt.</p>
+<p>Wenn die Vertheilung der Energie als Funetion der Wellenlänge für irgend eine Temperatur $\vartheta_0$ gegeben ist, so lässt sie sich jetzt für jede andere Temperatur $\vartheta$ ableiten. Denken wir uns wieder die $\lambda$ als Abseissen, die $\phi(\lambda)$ als Ordinaten aufgetragen. Der Flächeninhalt zwischen der Curve und der Abseissenaxe ist die Gesammtenergie $\psi$. Man hat nun zunächst jedes $\lambda$ so zu verändern, dass $\lambda \vartheta$ constant bleibt. Schneidet man an der Stelle des ursprünglichen $\lambda_0$ ein schmales Stück von der Breite $d\lambda_0$ und dem Inhalt $\phi_0 d\lambda_0$ aus, so wird nach der Änderung diess Stück sich an die Stelle $\lambda$ verschoben haben, aus der Breite $d\lambda_0$ ist $d\lambda = \frac{ \vartheta_0 }{ \vartheta } d\lambda_0$ geworden. Da nun das Energiequantum $\phi_0 d\lambda_0$ constant bleiben muss, so ist
+$$\phi d\lambda = \phi_0 d\lambda_0 , \ \ \phi = \phi_0 \frac{ d\lambda_0 }{ d\lambda } = \phi_0 \frac{ \vartheta }{ \vartheta_0 } .$$
+Nun verändert sich ausserdem mit der Temperatur jedes $\phi$ nach dem Stefan'schen Gesetze im Verhältniss $\frac{ \vartheta^5 }{ \vartheta_0^5 }$ es wird also die neue Ordinate sein
+$$\phi = \phi_0 \frac{ \vartheta^5 }{ \vartheta_0^5 }.$$</p>
+<p>Auf diese Weise erhält man alle Punkte der neuen Energiecurve.</p>
+<p>Es stimmt diess Ergebnis überein mit der von H. F. Weber<sup>Sitzungsber. d. Berl. Akad. 1888 S. 565.</sup> aus seinem Strahlungsgesetze abgeleiteten Verschiebung des Maximums der Energie.</p>
+<h1 id="黒体輻射と熱理論第二法則との新たな関係">黒体輻射と熱理論第二法則との新たな関係</h1>
+<p>Boltzmann は, Bartoli によって開発された過程を基礎として, 輻射がそれを照射されている面に対して圧力を及ぼしていることが熱力学第二法則から導かれることを示した. 一方でこのような圧力は光の電磁理論の帰結であり, Boltzmann はこの関係から Stefan の黒体輻射の法則を導くことができた.</p>
+<p>輻射全体を考えるのではなく, 各波長ごとに輻射を分けて考察することによって, これらの結論をさらに完璧なものにすることができる.</p>
+<p>ここでの考察の基礎となる, 本稿で解析する問題は, Boltzmann や, より初期には Kirchhoff や Clausius のものと同様に, 十分に現実に対応しており, 限りなくよい近似で実際に実行することが可能である必要がある.</p>
+<p>以下のことを前提として要求する. 
+まず, 我々の光の電磁理論は正しく, それによる光線がその進行方向に及ぼす圧力は光線のエネルギーに等しいという結論が妥当であること.
+完全黒体および完全反射体 (白色物体による全反射によってほぼ達成されているような, 
+入射光が完全に反射されるような物質によって構成されているもの) が存在すること.
+熱力学第二法則が有効であり, 固体に蓄えられた熱から発生した輻射に関しても, 
+他からの仕事や温度減少, 状態の変化なしに熱から仕事を得ることはできないこと.
+最後に, Doppler の原理が光に適用できること.</p>
+<p>反射壁で囲まれた閉じた部屋の中にある黒体からの輻射は, あらゆる可能な向きを持つことが許される.
+Boltzmann によると, この条件に最もよく対応する平均値は, 
+立方体内で各側壁と平行に走る輻射がすべて同じ量, つまり三分の一ずつであると仮定して得られるものである.
+体積を小さくすると, 小さくなった空間分に蓄えられていたエネルギー分と, 輻射圧に対して仕事をした分だけ, エネルギー密度 (単位体積あたりのエネルギーの量) は増加する.
+体積変化を元に戻すと, 体積変化のスピードが光速に比べて無限に小さく,
+密度の変化が常に空間全体で一定であるならば, なされた仕事はすべて返ってくる.</p>
+<p>このとき, エネルギー密度を増加させるような過程は,
+一方では系の温度を上昇させることによって, 他方では体積を減少させることによって実現できる.
+この状況で, 熱力学第二法則は, 両者で全エネルギー密度が等しいのであれば, 
+個々の波長についてもそうでなければならないことを示している.
+体積を減少させることによって圧縮された輻射の波長は, Doppler の原理のみによって変化する.
+この変化は計算可能である.
+故に, 温度を増加させることによる波長の変化もまた知ることができる.</p>
+<p>§1. 過程の説明</p>
+<p>ふたつのピストン <em>B</em>, <em>C</em> を動かすことのできるシリンダーを考える. 断面積は 1 に等しい.
+ピストンには閉じると光を遮断することができる弁が備わっている.
+空間 1, 2, 3 は空である. <em>A</em> と <em>D</em> はそれぞれ絶対温度 $\vartheta_1$, $\vartheta_2$ の黒体であり, $\vartheta_2 &gt; \vartheta_1$ とする. 
+これら黒体は, 空間 1, 2, 3 に輻射という形で放出されるエネルギーに比べて無限に大きな熱を蓄えているとみなせるほど大きいとする.
+シリンダーの内壁, ピストン, 弁は入射光を完全に反射する性質を持ち, 特定の方向を特別に扱うものではない.
+完全な鏡というものを想定できるのならば,
+このような完全な白色体と呼べるものを任意に高い精度で作り出すことが可能であるということに反論の余地はない.
+ふたつの弁 <em>C</em>, <em>B</em> が閉じているときには, 空間 2 の輻射エネルギーは断熱壁で囲まれた部屋のものに等しく, 変化しない.</p>
+<p>過程の最初に, 弁 <em>B</em> を開き, 弁 <em>C</em> を閉じる.
+空間 1, 2 に A から輻射を, 空間 3 に D から輻射する.
+<em>D</em> の温度は <em>A</em> よりも高いため, 空間 3 のエネルギー密度は空間 2 よりも大きい.
+ここで <em>B</em> を閉じる.
+そしてピストン <em>B</em> を <em>C</em> に向かって動かすが, その速度 $v$ は光速 $c$ に比べて無限に小さいものとする.
+空間 2 のエネルギーは体積が減ることと圧力に抗して仕事をされることによって密度が増加する.
+<em>B</em> を空間 2, 3 の密度が一致するところまで動かす.
+第二法則から, 両空間で光線のエネルギースペクトル分布もまた一致することが結論できる.</p>
+<p>そうでなかったとするならば, 特定の波長の光に関しては空間 2 よりも空間 3 の方がより多くのエネルギーを持っている必要がある.
+このとき, 透明な薄板で, 問題の波長の光は優先的に通し, それ以外の波長の光は通しにくいようなものを <em>C</em> の弁の前に置くことができる.
+そして弁を開く.
+すると空間 3 から 2 へ移動するエネルギーはその逆よりも多く,
+エネルギー密度は空間 3 より 2 の方が大きくなる.
+そこで <em>C</em> を閉じて薄板を除去し, 
+ピストン <em>C</em> を空間 2 の超過圧力によって動かし, 
+再び両空間のエネルギー密度が一致するようになるまで仕事をさせる.
+この方法で得られた仕事を $Q$ とする.
+その後, 再び <em>C</em> を開きもとの位置まで戻す.
+今度は両側で圧力が等しいため, これは仕事なしで実行できる.
+さらに, <em>C</em> を閉じたまま <em>B</em> をもとの位置に戻し, そこでなされた仕事を回収する.
+最後に <em>B</em> を開くと, 初期状態に完全に戻り, 
+熱から仕事 $Q$ を取り出しそれ以外に何ら状態変化を残さなかったことになる.
+これは第二法則を破ったことになるため, 空間 2, 3 の波長ごとのエネルギー分布は, 
+両者で密度が等しいならば一致しなければならないことになる.
+それ故に, <em>A</em> からの輻射エネルギー分布, およびピストン <em>B</em> を動かすことで被る分布の変化がわかっているのであれば, より温かい <em>D</em> からの輻射の分布もわかることになる.</p>
+<p>§2. Doppler の原理に基づくエネルギー分布の変化の計算</p>
+<p>$v$ をピストンが移動する速度, $c$ を光速とする.
+ピストン <em>B</em> が輻射に対して移動する結果, Doppler の原理によって波長が短くなることになる.
+ピストンに対して垂直に入射する光の振動周期 $T$ は, 一回反射されると方程式
+$$T' = \frac{ c - 2 v }{ c } T$$
+に従って変化する. $\lambda$, $\lambda'$ を波長とすると $T = \frac{ \lambda }{ c }$, $T' = \frac{ \lambda' }{ c }$ であるため
+$$\lambda' = \frac{ c - 2 v }{ c } \lambda$$
+が成立する.</p>
+<p>斜めに入射する光の場合, 法線成分だけが問題である. 
+輻射の方向が一様に分布しているならば, ピストン <em>B</em> の上の立方体に含まれる法線成分は, 
+全エネルギーの三分の一に等しい.
+動いているピストンから放たれる光は止まっている壁によって散乱・反射されるが, これによって一様な分布がただちに回復される.</p>
+<p>$\phi(\lambda)$ をもともと空間 2 に存在した波長の関数としてのエネルギー密度とすると,
+$\phi(\lambda)d\lambda$ が波長が $\lambda$ から $\lambda+d\lambda$ の間のエネルギーとなる.
+動くピストンによって一回反射されると, 法線方向の光の波長は $h$ だけ短くなる.
+新しいエネルギー分布が $f_1(\lambda)$ である.
+$\lambda$ を横軸, $\phi(\lambda)$ を縦軸とするグラフを考えると,
+新しい曲線 $f(\lambda)$ を, 各 $\lambda$ に対してもとの $\phi(\lambda)$ を三分の二倍した点として得ることができる. これはエネルギーの三分の二が変化せずそのままであることに対応する.
+残りの三分の一は, 波長が $h$ だけ短くなるため, $\lambda + h$ に対応する値を三分の一倍したもので置き換えることになる.
+$$f_1(\lambda) = \frac23 \phi(\lambda) + \frac13 \phi(\lambda + h).$$
+ここで $h$ が小さいとき
+$$\phi(\lambda + h) = \phi(\lambda) + h \phi'(\lambda),$$
+および
+$$f_1(\lambda) = \phi\left( \lambda + \frac{h}{3} \right)$$
+がピストン $B$ で一回反射したときに成立することになる.
+$n$ 回の反射後には, $n h$ が依然として $\lambda$ より小さければ
+$$f_n(\lambda) = \phi\left( \lambda + \frac{n h}{3} \right) = f(\lambda)$$
+である.</p>
+<p>このことは
+$$\begin{align}
+f(\lambda) &amp;= \phi(\lambda) + \frac{n h}{3} \phi'(\lambda) \\
+&amp;= \frac23 \phi(\lambda) + \frac13 \phi(\lambda + n h).
+\end{align}$$
+を導く.</p>
+<p>エネルギー分布の変化は, 全エネルギーの三分の一を占める法線方向の光だけが波長 $n h$ だけ短くなったかのように振る舞う.</p>
+<p>故に, $n$ は
+ピストンの垂直方向の光が一定の距離を走って空間 2 を往復する際に, 
+動くピストンによって反射される頻度を表す数値だと解釈される必要がある.</p>
+<p>$a-x$ を <em>B</em> と <em>C</em> の距離とすると, <em>B</em> が距離 $dx$ 動く間に, $n$ が 1 に比べて大きいと仮定すると,
+$$n = \frac{ dx }{ 2 ( a - x ) } \cdot \frac{ c }{ v }$$
+が成立する. $\frac{c}{v}$ は $\frac{2(a-x)}{dx}$ に比べて大きいが,
+$dx$ は $2(a-x)$ に比べて小さい.</p>
+<p>一回の反射の後には
+$$\lambda' = \frac{c - 2v }{ c } \lambda$$
+となる.</p>
+<p>$n$ 回繰り返すと
+$$\begin{align}
+\lambda_n &amp;= \left( \frac{ c - 2 v }{ c } \right)^n \lambda \\
+&amp;= \left( \frac{ c - 2 v }{ c } \right)^{\frac{dx}{2(a-x)}\cdot\frac{c}{v}} \lambda
+\end{align}$$
+これは
+$$\lambda_n = \left[ \left( 1 - \frac{ 2 v }{ c } \right)^c \right]^{\frac{dx}{2(a-x)} \cdot \frac{1}{v}} \lambda$$
+と書き直すことができる. 極限 $c = \infty$ では
+$$\lambda_n = (e^{-2v})^{\frac{dx}{2(a-x)} \cdot \frac{1}{v}} \lambda = e^{-\frac{dx}{a-x}} \lambda$$
+となる.
+ピストンが戻るときには
+$$\lambda = \left( \frac{ c + 2 v }{ c } \right)^n \lambda_n = e^{\frac{dx}{a-x}} \lambda_n$$
+となることがわかる.
+従って $\lambda_n$ もまたもとの値に戻る.
+この過程は逆行可能である. $n h$ を $dx$ と同程度に無限に小さな量とするとき
+$$\lambda_n = \lambda + n h$$
+となる. 二次の微小量を無視すれば
+$$nh = - \frac{dx}{a-x} \lambda .$$
+こうして
+$$f(\lambda) = \phi\left( \lambda + \frac{nh}{3} \right) = \phi(\lambda + d\lambda).$$
+が得られた. よって
+$$d\lambda = - \frac{ dx }{ 3(a-x) } \lambda .$$
+としなければならない. $x$ が $dx$ だけ増加するとき, $\lambda$ の値はすべてこの量だけ減少する.</p>
+<p>積分を行うと, $\lambda_0$ を $x=0$ での値として
+$$\lg \lambda = \frac13 \lg(a-x) + \lg C$$
+$$\lg C = \lg \lambda_0 - \frac13 \lg a$$
+を得る. よって
+$$\lambda = \sqrt[3]{ \frac{ a-x }{ a } } \cdot \lambda_0 .$$
+さらに $E$ を <em>B</em> が $x$ にあるときの空間 2 のエネルギー量とする.
+このときエネルギー密度は
+$$\psi = \frac{ E }{ a - x }$$
+である. $x$ が $dx$ だけ増加するとき, この密度は体積が減少することと仕事をされることによって増加する.
+$$\begin{align}
+\frac{ d \psi }{ d x } dx &amp;= \left\{ \frac{dE}{dx} \frac{1}{a-x} + \frac{E}{(a-x)^2} \right\} dx \\
+&amp;= \left( \frac{dE}{dx} + \psi \right) \frac{ dx }{ a - x }
+\end{align}$$
+さて, ピストンに働く圧力は
+$$= \frac13 \psi$$
+である. よってされる仕事は
+$$\frac{dE}{dx} dx = \frac13 \psi dx.$$
+このことは, $\psi_0$ を $x=0$ での値として
+$$d\psi = \frac43 \frac{\psi}{a-x} dx$$
+$$\lg \psi = - \lg \left[ ( a - x )^\frac43 \right] + \lg C_1$$
+$$\lg C_1 = \lg \psi_0 + \lg ( a^\frac43 )$$
+を与える.</p>
+<p>故に
+$$\psi = \sqrt[3]{\left( \frac{ a }{ a - x } \right)^4 } \cdot \psi_0$$
+であり, 上述のことから, $x$ の値が等しいとき
+$$\frac{ \psi }{ \psi_0 } = \frac{ \lambda_0^4 }{ \lambda^4 }$$
+となる. 
+§1 での議論から, より高い温度 $\vartheta$ の物体から生じたエネルギー分布 $\psi$ も同じものである.
+$\vartheta_0$ を $\psi_0$ に対応する $\vartheta$ の値とすると, Stefan と Boltzmann に従って
+$$\frac{ \psi }{ \psi_0 } = \frac{ \vartheta^4 }{ \vartheta_0^4 }$$
+となる. このことから
+$$\vartheta \lambda = \vartheta_0 \lambda_0$$
+が従う.</p>
+<p>通常の黒体の輻射スペクトルでは, 温度を変化させると, 
+温度と波長の積が一定値を保つように各々の波長が変化する.</p>
+<p>ある温度 $\vartheta_0$ に関してエネルギー分布が波長の関数として与えられたとすれば,
+今や任意の他の温度 $\vartheta$ に関するそれを導くことができる.
+再び $\lambda$ を横軸, $\phi(\lambda)$ を縦軸とするグラフを考えよう.
+曲線と横軸の間の面積が全エネルギー $\psi$ である.
+最初に, 各 $\lambda$ を $\lambda \vartheta$ が一定値になるように変化させなければならない.
+狭い区間 $d\lambda_0$ を切り出しもとの $\lambda_0$ に値 $\phi_0 d\lambda_0$ を割り当てるとすると, 温度が変化すると この区間は位置 $\lambda$ へと移動し, 区間の幅 $d\lambda_0$ は$d\lambda = \frac{ \vartheta_0 }{ \vartheta } d\lambda_0$ になる. 
+エネルギー量 $\phi_0 d\lambda_0$ は一定でなければならないから
+$$\phi d\lambda = \phi_0 d\lambda_0 , \ \ \phi = \phi_0 \frac{ d\lambda_0 }{ d\lambda } = \phi_0 \frac{ \vartheta }{ \vartheta_0 }$$
+となる. Stefan の法則に従って各 $\phi$ は温度とともに比 $\frac{ \vartheta^5 }{ \vartheta_0^5 }$ という形で変化するが, そのため新しい縦軸の値は
+$$\phi = \phi_0 \frac{ \vartheta^5 }{ \vartheta_0^5 }$$
+である.</p>
+<p>このようにして新しいエネルギー曲線のすべての点が得られる.</p>
+<p>この結果は H. F. Weber の輻射則から導かれたエネルギーの最大値の変化と整合する.</p>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

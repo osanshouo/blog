@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+WSLでWindows側のフォントを使う - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">WSLでWindows側のフォントを使う</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Windows">Windows</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2022-05-30">2022-05-30</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>WSL 側で Windows 側のフォントを使うための設定メモ. Win11, WSL2, Debian で動作確認.</p>
+<h1 id="手順">手順</h1>
+<p>フォントの設定ツールをインストールする.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> apt install fontconfig
+</span></code></pre>
+<p>設定ファイルを作成.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> touch /etc/fonts/local.conf
+</span></code></pre>
+<p>作成した設定ファイルに以下の内容を書き込む.</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#c0c5ce;" class="language-xml "><code class="language-xml" data-lang="xml"><span>&lt;?</span><span style="color:#bf616a;">xml </span><span style="color:#d08770;">version</span><span>=&quot;</span><span style="color:#a3be8c;">1.0</span><span>&quot;?&gt;
+</span><span>&lt;!</span><span style="color:#b48ead;">DOCTYPE </span><span style="color:#bf616a;">fontconfig </span><span style="color:#b48ead;">SYSTEM </span><span>&quot;</span><span style="color:#a3be8c;">fonts.dtd</span><span>&quot;&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">fontconfig</span><span>&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">dir</span><span>&gt;/mnt/c/Windows/Fonts&lt;/</span><span style="color:#bf616a;">dir</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">fontconfig</span><span>&gt;
+</span></code></pre>
+<p>フォントのキャッシュを更新.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> fc-cache</span><span style="color:#bf616a;"> -fv
+</span></code></pre>
+<p>フォントの一覧に Windows 側のフォントが含まれるか確認.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> fc-list | </span><span style="color:#bf616a;">less
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://ascii.jp/elem/000/004/073/4073680/">ASCII.jp：WindowsでLinux GUIアプリを動かす「WSLg」のWindows 11での状況を見る</a></li>
+<li><a href="https://sokrates7chaos.hatenablog.com/entry/2021/06/25/142323">【備忘録】 WSL から游書体を使う方法 - Sokratesさんの備忘録ないし雑記帳</a></li>
+<li><a href="https://www.freedesktop.org/software/fontconfig/fontconfig-user.html">fonts-conf</a></li>
+<li><a href="https://upgrade-windows10.blogspot.com/2020/01/wslwindows.html">[WSL] WSLでWindowsのフォントを使う時の注意点 ~ Windows10に更新した（メモ書き）</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

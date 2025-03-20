@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[SymPy] Lie変換摂動論の方程式の導出 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[SymPy] Lie変換摂動論の方程式の導出</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/物理学">物理学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/解析力学">解析力学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/SymPy">SymPy</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-08-12">2021-08-12</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>Lie 変換摂動論 (特に Hori (1966) の定式化) の基礎方程式は, Hamiltonian $H$ および Lie 変換の生成関数 $W$, 変換後の Hamiltonian $K$ に関する等式
+$$K = \exp ( L_W ) H$$
+です. $L_W$ は $W$ に関する Lie 微分 $L_W f = \{ f, W \}$ です (括弧は Poisson 括弧). ここで $H$, $W$, $K$ の摂動展開
+$$H = H_0 + \epsilon H_1 + \epsilon^2 H_2 + \cdots$$
+$$W = \epsilon W_1 + \epsilon^2 W_2 + \cdots$$
+$$K = K_0 + \epsilon K_1 + \epsilon^2 K_2 + \cdots$$
+を上式に代入し, $\epsilon$ のべきで整理することにより摂動が計算できます.</p>
+<p>ただ右辺を $\epsilon$ のべきに展開するのは, 特に高次摂動が必要なときやや面倒です.
+こういうことは SymPy でさくっと計算しましょう.
+Poisson 括弧は SymPy には実装されていないようなのですが, 
+量子力学の交換子 (<code>sympy.physics.quantum.commutator.Commutator</code>) で代用できます.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#65737e;">&#39;&#39;&#39;Lie 変換摂動論で必要な摂動展開を計算する&#39;&#39;&#39;
+</span><span>
+</span><span style="color:#b48ead;">from </span><span>sympy.physics.quantum </span><span style="color:#b48ead;">import </span><span>Commutator, Operator
+</span><span style="color:#b48ead;">from </span><span>sympy </span><span style="color:#b48ead;">import </span><span>symbols, factorial
+</span><span>
+</span><span style="color:#65737e;"># 計算する次数 #
+</span><span>Nmax = </span><span style="color:#d08770;">5
+</span><span style="color:#65737e;">################
+</span><span>
+</span><span>e = </span><span style="color:#bf616a;">symbols</span><span>(&#39;</span><span style="color:#a3be8c;">e</span><span>&#39;)
+</span><span>H = [</span><span style="color:#bf616a;">Operator</span><span>(&#39;</span><span style="color:#a3be8c;">H</span><span style="color:#d08770;">{}</span><span>&#39;.</span><span style="color:#bf616a;">format</span><span>(n)) </span><span style="color:#b48ead;">for </span><span>n </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(Nmax)]
+</span><span>K = [</span><span style="color:#bf616a;">Operator</span><span>(&#39;</span><span style="color:#a3be8c;">K</span><span style="color:#d08770;">{}</span><span>&#39;.</span><span style="color:#bf616a;">format</span><span>(n)) </span><span style="color:#b48ead;">for </span><span>n </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(Nmax)]
+</span><span>W = [</span><span style="color:#bf616a;">Operator</span><span>(&#39;</span><span style="color:#a3be8c;">W</span><span style="color:#d08770;">{}</span><span>&#39;.</span><span style="color:#bf616a;">format</span><span>(n)) </span><span style="color:#b48ead;">for </span><span>n </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(Nmax)]
+</span><span>W[</span><span style="color:#d08770;">0</span><span>] = </span><span style="color:#d08770;">0
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">LieDeriv</span><span>(</span><span style="color:#bf616a;">W</span><span>, </span><span style="color:#bf616a;">f</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">Commutator</span><span>(f, W).</span><span style="color:#bf616a;">expand</span><span>(</span><span style="color:#bf616a;">commutator</span><span>=</span><span style="color:#d08770;">True</span><span>)
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">LieMap</span><span>(</span><span style="color:#bf616a;">W</span><span>, </span><span style="color:#bf616a;">f</span><span>):
+</span><span>    s = </span><span style="color:#d08770;">0
+</span><span>    </span><span style="color:#b48ead;">for </span><span>n </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(Nmax):
+</span><span>        e = f
+</span><span>        </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n):
+</span><span>            e = </span><span style="color:#bf616a;">LieDeriv</span><span>(W, e)
+</span><span>        s = s + e.</span><span style="color:#bf616a;">expand</span><span>(</span><span style="color:#bf616a;">commutator</span><span>=</span><span style="color:#d08770;">True</span><span>) / </span><span style="color:#bf616a;">factorial</span><span>(n)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>s
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">rhs_raw</span><span>():
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">LieMap</span><span>(
+</span><span>        </span><span style="color:#96b5b4;">sum</span><span>(e**i * w </span><span style="color:#b48ead;">for </span><span>i, w </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">enumerate</span><span>(W)),
+</span><span>        </span><span style="color:#96b5b4;">sum</span><span>(e**i * w </span><span style="color:#b48ead;">for </span><span>i, w </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">enumerate</span><span>(H)),
+</span><span>    ).</span><span style="color:#bf616a;">expand</span><span>(</span><span style="color:#bf616a;">commutator</span><span>=</span><span style="color:#d08770;">True</span><span>)
+</span><span>
+</span><span>
+</span><span>rhs = </span><span style="color:#bf616a;">rhs_raw</span><span>()
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>n </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(Nmax):
+</span><span>    </span><span style="color:#96b5b4;">print</span><span>( 
+</span><span>        rhs.</span><span style="color:#bf616a;">coeff</span><span>(e, n)
+</span><span>    )
+</span></code></pre>
+<p>すくなくとも4次までは Hori (1966) に記述されているものと一致したので, おそらくこれで正しいと思います.
+ただし処理がかなり遅いので注意してください.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li>G. Hori, <em>Theory of General Perturbation with Unspecified Canonical Variable</em>, Publications of the Astronomical Society of Japan, <strong>18</strong>, 287 (1966). bibcode:<a href="https://ui.adsabs.harvard.edu/abs/1966PASJ...18..287H/abstract">1966PASJ...18..287H</a></li>
+<li>Sylvio Ferraz-Mello, <em>Canonical Perturbation Theories</em>, Springer (2007). doi:<a href="https://doi.org/10.1007/978-0-387-38905-9">10.1007/978-0-387-38905-9</a></li>
+<li><a href="https://docs.sympy.org/latest/modules/physics/quantum/commutator.html">Commutator — SymPy 1.8 documentation</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

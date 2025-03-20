@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Windows TerminalでWSL2がルートディレクトリで開始される - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Windows TerminalでWSL2がルートディレクトリで開始される</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Windows">Windows</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-12-22">2021-12-22</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>Windows Terminal + WSL2 (Debian) 環境がメインなのですが, 
+気づいたらなぜかホームディレクトリ (<code>/home/user/</code>) ではなくルートディレクトリ (<code>/</code>) で起動するようになっていました. 
+Windows Terminal の設定を見直しても確かにホームディレクトリが設定されており, すこし頭を捻りましたが, 
+パスの区切り文字が <code>/</code> では認識しないように仕様変更されていたのが原因だったようです.</p>
+<p>「設定 &gt; Debian &gt; 全般 &gt; 開始ディレクトリ」の設定が</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>//wsl$/Debian/home/user
+</span></code></pre>
+<p>では正しく認識されません. <code>/</code> の代わりに <code>\</code> を用いた</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>\\wsl$\Debian\home\user
+</span></code></pre>
+<p>だと正しくホームディレクトリで開始できます.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/windows/terminal/customize-settings/profile-general">Windows Terminal General Profile Settings | Microsoft Docs</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

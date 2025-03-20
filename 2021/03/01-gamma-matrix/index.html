@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+高次元ガンマ行列 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">高次元ガンマ行列</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/物理学">物理学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/場の量子論">場の量子論</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/SymPy">SymPy</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-03-01">2021-03-01</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#定義">定義</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#低次元">低次元</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#1次元">1次元</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#3次元">3次元</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#2次元">2次元</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#4次元">4次元</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#一般次元">一般次元</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#コード">コード</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#計算結果">計算結果</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/03/01-gamma-matrix/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>高次元ガンマ行列の具体形を計算します.</p>
+<h1 id="定義">定義</h1>
+<p>ガンマ行列 (Clifford 代数) まわりは記法が混乱していて厄介なのですが, 
+本記事では Weinberg (1.1.21), (5.4.5), (32.A.1) および Woit pp. 521, 605 に従って, 
+ガンマ行列 $\gamma_\mu$ を Minkowski 計量 $\eta_{\mu \nu} = \mathrm{diag.} ( -1, +1, +1, +1 )$ に対して
+$$\left\{ \gamma_\mu, \gamma_\nu \right\} = 2 \eta_{\mu \nu}$$
+を満足するものとして定義します. 添え字の上げ下げは Minkowski 計量で行います.
+<span class="font-size-small">
+Peskin &amp; Schroeder は Minkowski 計量の符号が逆 (mostly minus) で形式的に Clifford 代数の定義式が同じなので,
+このガンマ行列は本記事のガンマ行列を $i$ 倍したものになります.
+Srednicki (36.9) は Minkowski 計量の符号は mostly positive ですが, 上式の右辺ににマイナス符号がつくため,
+結果的に Peskin &amp; Schroeder のガンマ行列に一致します.
+</span></p>
+<p>本記事では記号の混乱を避けるため, $D$ 次元 Euclid 空間におけるガンマ行列を $\Gamma_\mu$ と表記することにします.
+つまり, $\Gamma_\mu$ は $\delta_{\mu \nu}$ を Kronecker デルタとして
+$$\left\{ \Gamma_\mu, \Gamma_\nu \right\} = 2 \delta_{\mu \nu}$$
+を満足する行列です. $\Gamma_\mu$ が得られたならば, $\gamma_\mu$ は
+$$\gamma_0 = i \Gamma_0 , \ \ \gamma_i = \Gamma_i$$
+により構成することができます. なお $\Gamma_i$ に関しては添え字の上下は区別しません.</p>
+<h1 id="低次元">低次元</h1>
+<h2 id="1次元">1次元</h2>
+<p>1次元空間ではガンマ行列は自明で, $\Gamma_0 = 1$ です. </p>
+<h2 id="3次元">3次元</h2>
+<p>2次元について見る前に3次元を先に見ます. というのも, Pauli 行列
+$$\sigma_1 = \begin{pmatrix} &amp; 1 \\\ 1 &amp; \end{pmatrix} , \ \ \sigma_2 = \begin{pmatrix} &amp; -i \\\ i &amp; \end{pmatrix} , \ \ \sigma_3 = \begin{pmatrix} 1 &amp; \\\ &amp; -1 \end{pmatrix}$$
+は良く知られた関係式
+$$\sigma_i \sigma_j = \delta_{i j} + i \epsilon_{i j k} \sigma_k$$
+を満足し, 従って $\Gamma_i = \sigma_i$ がただちに結論できるからです.</p>
+<h2 id="2次元">2次元</h2>
+<p>次に2次元の場合, すなわち行列 $\Gamma_1$, $\Gamma_2$ で
+$$\Gamma_1^2 = \Gamma_2^2 = 1 , \ \ \Gamma_1 \Gamma_2 = 0$$
+を満足するものを求めます. これは1次の正方行列では不可能です. なぜならば, 1次の正方行列 (つまり単なる複素数) の場合,
+第2式から $\Gamma_1$ と $\Gamma_2$ のどちらか一方は 0 であり, それ故に第1式を満足することはできません.
+なので2次の正方行列を用いる必要がありますが, これは Pauli 行列の任意のふたつによって達成されます.</p>
+<h2 id="4次元">4次元</h2>
+<p>4次元のガンマ行列としては Weyl 表現 (カイラル表現), Dirac 表現, Majorana 表現の3つの表現が頻繁に用いられます.</p>
+<ul>
+<li>Weyl 表現 (カイラル表現)
+$$\gamma^0 = -i \begin{pmatrix} &amp; 1 \\ 1 &amp; \end{pmatrix} , \ \ \gamma^i = -i \begin{pmatrix} &amp; \sigma_i \\ -\sigma_i &amp; \end{pmatrix}$$</li>
+<li>Dirac 表現
+$$\gamma^0 = -i \begin{pmatrix} 1 &amp; \\ &amp; -1 \end{pmatrix} , \ \ \gamma^i = -i \begin{pmatrix} &amp; \sigma_i \\ -\sigma_i &amp; \end{pmatrix}$$</li>
+<li>Majorana 表現
+$$\gamma^0 = \begin{pmatrix} &amp; -i\sigma_2 \\ -i\sigma_2 &amp; \end{pmatrix} , \ \ \gamma^1 = \begin{pmatrix} \sigma_3 &amp; \\ &amp; \sigma_3 \end{pmatrix} , \ \ \gamma^2 = \begin{pmatrix} &amp; i\sigma_2 \\ -i\sigma_2 &amp; \end{pmatrix} , \ \ \gamma^3 = \begin{pmatrix} -\sigma_3 &amp; \\ &amp; -\sigma_3 \end{pmatrix}$$</li>
+</ul>
+<h1 id="一般次元">一般次元</h1>
+<p>$D = 2 k$ 次元のとき, $2 k$ 個のガンマ行列 $\Gamma^i$ は $N = 2^k$ 次の正方行列であり, $u = 1, 2, \cdots, k$ に対して
+$$\Gamma_{ 2 u - 1 } = \underbrace{\sigma_3 \otimes \ldots \otimes \sigma_3}_{u-1} \otimes \sigma_1 \otimes \underbrace{1 \otimes \ldots \otimes 1}_{k - u}$$
+$$\Gamma_{ 2 u } = \underbrace{\sigma_3 \otimes \ldots \otimes \sigma_3}_{u-1} \otimes \sigma_2 \otimes \underbrace{1 \otimes \ldots \otimes 1}_{k - u}$$
+により与えられます. $D = 2 k + 1$ 次元のとき, これら $2 k$ 個のガンマ行列に
+$$\Gamma_{ 2 k + 1 } = \pm i^k \gamma_1 \cdots \gamma_{2 k}$$
+を付け加えることにより得られます. 導出は Weinberg (32.A.10-11) を参照してください.</p>
+<h2 id="コード">コード</h2>
+<p>この公式をもとにガンマ行列を計算し, それが正しく Clifford 関係式を満足することをチェックする Python コードはこちらです.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>sympy </span><span style="color:#b48ead;">import </span><span>Matrix, eye, I, latex
+</span><span style="color:#b48ead;">from </span><span>sympy.physics.quantum.tensorproduct </span><span style="color:#b48ead;">import </span><span>TensorProduct
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">clifford_relation</span><span>(</span><span style="color:#bf616a;">gammas</span><span>):
+</span><span>    d = </span><span style="color:#96b5b4;">len</span><span>(gammas)
+</span><span>    n = </span><span style="color:#d08770;">2</span><span>**(d//</span><span style="color:#d08770;">2</span><span>)
+</span><span>    
+</span><span>    </span><span style="color:#b48ead;">for </span><span>gamma </span><span style="color:#b48ead;">in </span><span>gammas:
+</span><span>        </span><span style="color:#b48ead;">assert </span><span>gamma**</span><span style="color:#d08770;">2 </span><span>== </span><span style="color:#bf616a;">eye</span><span>(n)
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(d):
+</span><span>        </span><span style="color:#b48ead;">for </span><span>j </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(i+</span><span style="color:#d08770;">1</span><span>, d):
+</span><span>            </span><span style="color:#b48ead;">assert </span><span>gammas[i]*gammas[j] == - gammas[j]*gammas[i] 
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">pow</span><span>(</span><span style="color:#bf616a;">mat</span><span>, </span><span style="color:#bf616a;">n</span><span>):
+</span><span>    </span><span style="color:#b48ead;">if </span><span>n == </span><span style="color:#d08770;">0</span><span>:
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">1
+</span><span>    </span><span style="color:#b48ead;">elif </span><span>n== </span><span style="color:#d08770;">1</span><span>:
+</span><span>        </span><span style="color:#b48ead;">return </span><span>mat
+</span><span>    </span><span style="color:#b48ead;">else</span><span>:
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">TensorProduct</span><span>(</span><span style="color:#96b5b4;">pow</span><span>(mat, n-</span><span style="color:#d08770;">1</span><span>), mat)
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">tricross</span><span>(</span><span style="color:#bf616a;">pre</span><span>, </span><span style="color:#bf616a;">mat</span><span>, </span><span style="color:#bf616a;">post</span><span>):
+</span><span>    </span><span style="color:#b48ead;">if </span><span>pre == </span><span style="color:#d08770;">1</span><span>:
+</span><span>        </span><span style="color:#b48ead;">if </span><span>post == </span><span style="color:#d08770;">1</span><span>:
+</span><span>            </span><span style="color:#b48ead;">return </span><span>mat
+</span><span>        </span><span style="color:#b48ead;">else</span><span>:
+</span><span>            </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">TensorProduct</span><span>(mat, post)
+</span><span>    </span><span style="color:#b48ead;">else</span><span>:
+</span><span>        </span><span style="color:#b48ead;">if </span><span>post == </span><span style="color:#d08770;">1</span><span>:
+</span><span>            </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">TensorProduct</span><span>(pre, mat)
+</span><span>        </span><span style="color:#b48ead;">else</span><span>:
+</span><span>            </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">TensorProduct</span><span>(</span><span style="color:#bf616a;">TensorProduct</span><span>(pre, mat), post)
+</span><span>
+</span><span>sigma = [
+</span><span>    </span><span style="color:#bf616a;">eye</span><span>(</span><span style="color:#d08770;">2</span><span>),
+</span><span>    </span><span style="color:#bf616a;">Matrix</span><span>([[</span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">1</span><span>], [</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">0</span><span>]]),
+</span><span>    </span><span style="color:#bf616a;">Matrix</span><span>([[</span><span style="color:#d08770;">0</span><span>, -I], [I, </span><span style="color:#d08770;">0</span><span>]]),
+</span><span>    </span><span style="color:#bf616a;">Matrix</span><span>([[</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">0</span><span>], [</span><span style="color:#d08770;">0</span><span>, -</span><span style="color:#d08770;">1</span><span>]])
+</span><span>]
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>k </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">5</span><span>):
+</span><span>    </span><span style="color:#96b5b4;">print</span><span>(&quot;</span><span style="color:#a3be8c;">D =</span><span>&quot;, </span><span style="color:#d08770;">2</span><span>*k)
+</span><span>
+</span><span>    gammas = []
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for </span><span>u </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">0</span><span>, k):
+</span><span>        pre = </span><span style="color:#96b5b4;">pow</span><span>(sigma[</span><span style="color:#d08770;">3</span><span>], u)
+</span><span>        post = </span><span style="color:#96b5b4;">pow</span><span>(sigma[</span><span style="color:#d08770;">0</span><span>], k-u-</span><span style="color:#d08770;">1</span><span>)
+</span><span>
+</span><span>        gammas.</span><span style="color:#bf616a;">append</span><span>(
+</span><span>            </span><span style="color:#bf616a;">tricross</span><span>(pre, sigma[</span><span style="color:#d08770;">1</span><span>], post)
+</span><span>        )
+</span><span>        </span><span style="color:#96b5b4;">print</span><span>(&quot;</span><span style="color:#a3be8c;">$$</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">Gamma_</span><span style="color:#96b5b4;">{{ </span><span style="color:#d08770;">{} </span><span style="color:#96b5b4;">}}</span><span style="color:#a3be8c;"> =</span><span>&quot;.</span><span style="color:#bf616a;">format</span><span>(</span><span style="color:#d08770;">2</span><span>*u+</span><span style="color:#d08770;">1</span><span>), </span><span style="color:#bf616a;">latex</span><span>(gammas[-</span><span style="color:#d08770;">1</span><span>]), &quot;</span><span style="color:#a3be8c;">$$</span><span>&quot;)
+</span><span>        gammas.</span><span style="color:#bf616a;">append</span><span>(
+</span><span>            </span><span style="color:#bf616a;">tricross</span><span>(pre, sigma[</span><span style="color:#d08770;">2</span><span>], post)
+</span><span>        )
+</span><span>        </span><span style="color:#96b5b4;">print</span><span>(&quot;</span><span style="color:#a3be8c;">$$</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">Gamma_</span><span style="color:#96b5b4;">{{ </span><span style="color:#d08770;">{} </span><span style="color:#96b5b4;">}}</span><span style="color:#a3be8c;"> =</span><span>&quot;.</span><span style="color:#bf616a;">format</span><span>(</span><span style="color:#d08770;">2</span><span>*u+</span><span style="color:#d08770;">2</span><span>), </span><span style="color:#bf616a;">latex</span><span>(gammas[-</span><span style="color:#d08770;">1</span><span>]), &quot;</span><span style="color:#a3be8c;">$$</span><span>&quot;)
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">clifford_relation</span><span>(gammas)
+</span><span>
+</span><span>
+</span><span>    </span><span style="color:#96b5b4;">print</span><span>(&quot;</span><span style="color:#a3be8c;">D =</span><span>&quot;, </span><span style="color:#d08770;">2</span><span>*k+</span><span style="color:#d08770;">1</span><span>)
+</span><span>    g = gammas[</span><span style="color:#d08770;">0</span><span>]
+</span><span>    </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">2</span><span>*k):
+</span><span>        g = g * gammas[i]
+</span><span>    
+</span><span>    gammas.</span><span style="color:#bf616a;">append</span><span>(
+</span><span>        I**k * g 
+</span><span>    )
+</span><span>    </span><span style="color:#96b5b4;">print</span><span>(&quot;</span><span style="color:#a3be8c;">$$</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">Gamma_</span><span style="color:#96b5b4;">{{ </span><span style="color:#d08770;">{} </span><span style="color:#96b5b4;">}}</span><span style="color:#a3be8c;"> =</span><span>&quot;.</span><span style="color:#bf616a;">format</span><span>(</span><span style="color:#d08770;">2</span><span>*k+</span><span style="color:#d08770;">1</span><span>), </span><span style="color:#bf616a;">latex</span><span>(gammas[-</span><span style="color:#d08770;">1</span><span>]), &quot;</span><span style="color:#a3be8c;">$$</span><span>&quot;)
+</span><span>    </span><span style="color:#bf616a;">clifford_relation</span><span>(gammas)
+</span></code></pre>
+<h2 id="計算結果">計算結果</h2>
+<p>D = 2
+$$\Gamma_{ 1 } = \left[\begin{matrix}0 &amp; 1\\1 &amp; 0\end{matrix}\right] $$
+$$\Gamma_{ 2 } = \left[\begin{matrix}0 &amp; - i\\i &amp; 0\end{matrix}\right] $$
+D = 3
+$$\Gamma_{ 3 } = \left[\begin{matrix}-1 &amp; 0\\0 &amp; 1\end{matrix}\right] $$
+D = 4
+$$\Gamma_{ 1 } = \left[\begin{matrix}0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1\\1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0\end{matrix}\right] $$
+$$\Gamma_{ 2 } = \left[\begin{matrix}0 &amp; 0 &amp; - i &amp; 0\\0 &amp; 0 &amp; 0 &amp; - i\\i &amp; 0 &amp; 0 &amp; 0\\0 &amp; i &amp; 0 &amp; 0\end{matrix}\right] $$
+$$\Gamma_{ 3 } = \left[\begin{matrix}0 &amp; 1 &amp; 0 &amp; 0\\1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; -1\\0 &amp; 0 &amp; -1 &amp; 0\end{matrix}\right] $$
+$$\Gamma_{ 4 } = \left[\begin{matrix}0 &amp; - i &amp; 0 &amp; 0\\i &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; i\\0 &amp; 0 &amp; - i &amp; 0\end{matrix}\right] $$
+D = 5
+$$\Gamma_{ 5 } = \left[\begin{matrix}1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; -1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; -1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1\end{matrix}\right] $$
+D = 6
+$$\Gamma_{ 1 } = \left[\begin{matrix}0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1\\1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\end{matrix}\right] $$
+$$\Gamma_{ 2 } = \left[\begin{matrix}0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i\\i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0\end{matrix}\right] $$
+$$\Gamma_{ 3 } = \left[\begin{matrix}0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1\\0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0\end{matrix}\right] $$
+$$\Gamma_{ 4 } = \left[\begin{matrix}0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0\\i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i\\0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0\end{matrix}\right] $$
+$$\Gamma_{ 5 } = \left[\begin{matrix}0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0\end{matrix}\right] $$
+$$\Gamma_{ 6 } = \left[\begin{matrix}0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0\end{matrix}\right] $$
+D = 7
+$$\Gamma_{ 7 } = \left[\begin{matrix}-1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1\end{matrix}\right] $$
+D = 8
+$$\Gamma_{ 1 } = \left[\begin{array}{cccccccccccccccc}0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1\\1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\end{array}\right] $$
+$$\Gamma_{ 2 } = \left[\begin{array}{cccccccccccccccc}0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i\\i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\end{array}\right] $$
+$$\Gamma_{ 3 } = \left[\begin{array}{cccccccccccccccc}0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\end{array}\right] $$
+$$\Gamma_{ 4 } = \left[\begin{array}{cccccccccccccccc}0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0\end{array}\right] $$
+$$\Gamma_{ 5 } = \left[\begin{array}{cccccccccccccccc}0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\end{array}\right] $$
+$$\Gamma_{ 6 } = \left[\begin{array}{cccccccccccccccc}0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0\end{array}\right] $$
+$$\Gamma_{ 7 } = \left[\begin{array}{cccccccccccccccc}0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0\end{array}\right] $$
+$$\Gamma_{ 8 } = \left[\begin{array}{cccccccccccccccc}0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; i\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; - i &amp; 0\end{array}\right] $$
+D = 9
+$$\Gamma_{ 9 } = \left[\begin{array}{cccccccccccccccc}1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; -1 &amp; 0\\0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1\end{array}\right] $$</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li>Weinberg, <em>The Quantum Theory of Fields</em>, Volume 1, 3, Cambridge University Press</li>
+<li>Woit, <em>Quantum Theory, Groups and Representations</em>, Springer</li>
+<li>Srednicki, <em>Quantum Field Theory</em>, Cambridge University Press</li>
+<li>Peskin &amp; Schroeder, <em>An Introduction To Quantum Field Theory</em>, CRC Press</li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

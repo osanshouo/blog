@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+平均律, Pythagoras音律, 純正律 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">平均律, Pythagoras音律, 純正律</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/音楽">音楽</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/音響">音響</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-06-20">2021-06-20</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/20-intonation/#音と振動数">音と振動数</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/20-intonation/#平均律">平均律</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/20-intonation/#倍音列">倍音列</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/20-intonation/#Pythagoras_音律">Pythagoras 音律</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/20-intonation/#純正律">純正律</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><style>
+input[type="button"] { 
+    border: solid 1px var(--tag-bg-color);
+    background: var(--bg-color); 
+    color: var(--tag-fg-color);
+}
+.num3, .num2, .num1, .num0 { text-align: right; display: block; }
+.num3 { margin-right: 3.5ch; }
+.num2 { margin-right: 2.3ch; }
+.num1 { margin-right: 1.1ch; }
+.center { text-align: center; display: block; }
+</style>
+<script>
+function sin_wave(freq) {
+    console.log(freq);
+    let audioctx = new AudioContext();
+    let osc = new OscillatorNode(audioctx);
+    osc.frequency.value = freq;
+    console.log(osc);
+    osc.connect(audioctx.destination);
+    osc.start();
+    osc.stop(5);
+}</script>
+<p>本記事では<a href="https://ja.wikipedia.org/wiki/%E9%9F%B3%E5%BE%8B">音律</a> (平均律, Pythagoras 音律, 純正律) についてまとめます.
+JavaScript の Web Audio API を用いて実際に音を鳴らして試聴できるようにしました.
+なおハ長調ではなくイ長調を採用しています.</p>
+<h1 id="音と振動数">音と振動数</h1>
+<p>本記事で扱うような微妙な振動数差を表すために <a href="https://ja.wikipedia.org/wiki/%E3%82%BB%E3%83%B3%E3%83%88_(%E9%9F%B3%E6%A5%BD)"><strong>セント</strong></a> 
+(cent) という概念を導入する.
+基準振動数 $f_0$ を任意に設定し (例えば $f_0 = 442\,\mathrm{Hz}$), 
+任意の振動数 $f$ の音についてそのセントを
+$$n ( f ) = 1200 \, \log_2 \frac{ f }{ f_0 }$$
+と定義する. 逆に $n$ セントの音の振動数 $f$ は
+$$f = f_0 2^{n / 1200}$$
+である.</p>
+<p>通常, 振動数 $f$ の音に対して振動数 $2^i f$ ($i$ は整数) の音は <strong>オクターブ</strong> (octave) の関係にあると呼ばれ, 音高としては同一視される. 
+言い換えると, ちょうど 1200 セントの差を持つ音を同一視する.</p>
+<h1 id="平均律">平均律</h1>
+<p>対数空間で等間隔に取った音高のことを <a href="https://ja.wikipedia.org/wiki/%E5%B9%B3%E5%9D%87%E5%BE%8B"><strong>平均律</strong></a> 
+(equal temperament) と呼び, 現代では標準的に用いられる.
+つまり, 平均律では 0, 100, 200, $\cdots$, 1100 セントに対応する音のみが用いられる.
+これを順に A, B, H, C, Cis, D, Dis, E, F, Fis, G, Gis と呼ぶ.</p>
+<table><thead><tr><th style="text-align: center">音名</th><th style="text-align: right">セント</th><th style="text-align: center">Hz</th><th></th></tr></thead><tbody>
+<tr><td style="text-align: center">G</td><td style="text-align: right">-200</td><td style="text-align: center">393.777</td><td><input type="button" value="再生" onclick="sin_wave(393.777);"/></td></tr>
+<tr><td style="text-align: center">Gis</td><td style="text-align: right">-100</td><td style="text-align: center">417.192</td><td><input type="button" value="再生" onclick="sin_wave(417.192);"/></td></tr>
+<tr><td style="text-align: center">A</td><td style="text-align: right">0</td><td style="text-align: center">442.000</td><td><input type="button" value="再生" onclick="sin_wave(442.000);"/></td></tr>
+<tr><td style="text-align: center">B</td><td style="text-align: right">100</td><td style="text-align: center">468.283</td><td><input type="button" value="再生" onclick="sin_wave(468.283);"/></td></tr>
+<tr><td style="text-align: center">H</td><td style="text-align: right">200</td><td style="text-align: center">496.128</td><td><input type="button" value="再生" onclick="sin_wave(496.128);"/></td></tr>
+<tr><td style="text-align: center">C</td><td style="text-align: right">300</td><td style="text-align: center">525.630</td><td><input type="button" value="再生" onclick="sin_wave(525.630);"/></td></tr>
+<tr><td style="text-align: center">Cis</td><td style="text-align: right">400</td><td style="text-align: center">556.885</td><td><input type="button" value="再生" onclick="sin_wave(556.885);"/></td></tr>
+<tr><td style="text-align: center">D</td><td style="text-align: right">500</td><td style="text-align: center">589.999</td><td><input type="button" value="再生" onclick="sin_wave(589.999);"/></td></tr>
+<tr><td style="text-align: center">Dis</td><td style="text-align: right">600</td><td style="text-align: center">625.082</td><td><input type="button" value="再生" onclick="sin_wave(625.082);"/></td></tr>
+<tr><td style="text-align: center">E</td><td style="text-align: right">700</td><td style="text-align: center">662.252</td><td><input type="button" value="再生" onclick="sin_wave(662.252);"/></td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: right">800</td><td style="text-align: center">701.631</td><td><input type="button" value="再生" onclick="sin_wave(701.631);"/></td></tr>
+<tr><td style="text-align: center">Fis</td><td style="text-align: right">900</td><td style="text-align: center">743.352</td><td><input type="button" value="再生" onclick="sin_wave(743.352);"/></td></tr>
+<tr><td style="text-align: center">G</td><td style="text-align: right">1000</td><td style="text-align: center">787.554</td><td><input type="button" value="再生" onclick="sin_wave(787.554);"/></td></tr>
+</tbody></table>
+<h1 id="倍音列">倍音列</h1>
+<p>長さ $L$ の弦の振動について考える (管楽器でも原理的には同じである). 
+一方の端点から測った座標を $x$ とするとき, 時刻 $t$ での弦の横方向の変位 $z ( t, x )$ により弦の状態は記述される.
+ただし固定端境界条件のもとでは $z ( t, 0 ) = z ( t, L ) = 0$ である.</p>
+<p>固定端境界条件のために, 変位 $z ( t, x )$ を次のように座標 $x$ について Fourier 級数展開することができる.
+$$z ( t, x ) = \sum_{n=1}^\infty Z_n ( t ) \sin k_n x , \ \ k_n = \pi \frac{ n }{ L }$$
+変位 $z ( t, x )$ は, $c_s$ を音速として波動方程式
+$$\frac{ \partial^2 z }{ \partial t^2 } - {c_s}^2 \frac{ \partial^2 z }{ \partial x^2 } = 0$$
+を満足する. これを Fourier モード $A_n$ に関する方程式として書き直すと
+$$\frac{ d^2 Z_n }{ d t^2 } = - { c_s }^2 { k_n }^2 Z_n$$
+これはただちに解けて, $A_n$ を振幅, $\alpha_n$ を初期位相として
+$$Z_n = A_n \cos ( \omega_n t + \alpha_n ) , \ \ \omega_n = c_s k_n$$
+となる. 言い換えると, 長さ $L$ の弦に生じる振動は, 次の離散的な振動数
+$$f_n = \frac{ \omega_n }{ 2 \pi } = \frac{ n c_s }{ 2 L } , \ \ n = 1 , 2, \cdots$$
+に限られる, ということになる. これを <a href="https://ja.wikipedia.org/wiki/%E5%80%8D%E9%9F%B3"><strong>倍音列</strong></a> (harmonics) と呼ぶ.
+特に最も小さな振動数を持つ (つまり最も波長が長い) $n = 1$ のモードを <strong>基音</strong> (fundamental tone) と呼ぶ.
+また, 第 $n$ モードの周波数 $f_n$ は基音の周波数 $f_n$ と
+$$f_n = n f_1$$
+という関係にあることを強調しておく. 従って, 
+ある倍音列 $\{ f_n \}_{n = 1, 2, \cdots}$ に含まれるふたつの周波数 $f_n$, $f_m$ は, 
+その比が有理数であるという顕著な特徴を持つ.
+$$\frac{ f_n }{ f_m } = \frac{ n }{ m }$$
+逆に, 有理数比を持つふたつの音程は <strong>純正音程</strong> (pure interval) と呼ばれ,
+特に単純な有理数比 ($1:2$ や $2:3$ など) をもつ音程は <strong>協和音程</strong> として知られる.</p>
+<p>基音 $f_1 = 110.5\,\mathrm{Hz}$ に対応する倍音列およびそれに最も近い平均律での音名を次の表に示す.
+また, 平均律の場合に期待される音高との差 $\Delta c$ (セント) も併せて示す.</p>
+<table><thead><tr><th>モード</th><th style="text-align: center">音名</th><th style="text-align: right">周波数</th><th style="text-align: right"><span class="center">$\Delta c$</span></th><th></th></tr></thead><tbody>
+<tr><td>$n=1$</td><td style="text-align: center">A</td><td style="text-align: right">110.5</td><td style="text-align: right"><span class="num3">  0    </span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*1 );"/></td></tr>
+<tr><td>$n=2$</td><td style="text-align: center">A</td><td style="text-align: right">220.1</td><td style="text-align: right"><span class="num3">  0    </span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*2 );"/></td></tr>
+<tr><td>$n=3$</td><td style="text-align: center">E</td><td style="text-align: right">331.5</td><td style="text-align: right"><span class="num0">+ 1.955</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*3 );"/></td></tr>
+<tr><td>$n=4$</td><td style="text-align: center">A</td><td style="text-align: right">442.0</td><td style="text-align: right"><span class="num3">  0    </span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*4 );"/></td></tr>
+<tr><td>$n=5$</td><td style="text-align: center">Cis</td><td style="text-align: right">552.5</td><td style="text-align: right"><span class="num0">-13.636</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*5 );"/></td></tr>
+<tr><td>$n=6$</td><td style="text-align: center">E</td><td style="text-align: right">663.0</td><td style="text-align: right"><span class="num0">+ 1.955</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*6 );"/></td></tr>
+<tr><td>$n=7$</td><td style="text-align: center">G</td><td style="text-align: right">773.5</td><td style="text-align: right"><span class="num0">-31.174</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*7 );"/></td></tr>
+<tr><td>$n=8$</td><td style="text-align: center">A</td><td style="text-align: right">884.0</td><td style="text-align: right"><span class="num3">  0    </span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*8 );"/></td></tr>
+<tr><td>$n=9$</td><td style="text-align: center">H</td><td style="text-align: right">994.5</td><td style="text-align: right"><span class="num0">+ 3.910</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*9 );"/></td></tr>
+<tr><td>$n=10$</td><td style="text-align: center">Cis</td><td style="text-align: right">1105.0</td><td style="text-align: right"><span class="num0">-13.686</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*10);"/></td></tr>
+<tr><td>$n=11$</td><td style="text-align: center">Dis</td><td style="text-align: right">1215.5</td><td style="text-align: right"><span class="num0">-48.682</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*11);"/></td></tr>
+<tr><td>$n=12$</td><td style="text-align: center">E</td><td style="text-align: right">1326.0</td><td style="text-align: right"><span class="num0">+ 1.955</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*12);"/></td></tr>
+<tr><td>$n=13$</td><td style="text-align: center">Fis</td><td style="text-align: right">1436.5</td><td style="text-align: right"><span class="num0">-59.472</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*13);"/></td></tr>
+<tr><td>$n=14$</td><td style="text-align: center">G</td><td style="text-align: right">1547.0</td><td style="text-align: right"><span class="num0">-31.174</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*14);"/></td></tr>
+<tr><td>$n=15$</td><td style="text-align: center">Gis</td><td style="text-align: right">1657.5</td><td style="text-align: right"><span class="num0">-11.731</span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*15);"/></td></tr>
+<tr><td>$n=16$</td><td style="text-align: center">A</td><td style="text-align: right">1768.0</td><td style="text-align: right"><span class="num3">  0    </span></td><td><input type="button" value="再生" onclick="sin_wave(110.5*16);"/></td></tr>
+</tbody></table>
+<h1 id="Pythagoras_音律">Pythagoras 音律</h1>
+<p><a href="https://ja.wikipedia.org/wiki/%E3%83%94%E3%82%BF%E3%82%B4%E3%83%A9%E3%82%B9%E9%9F%B3%E5%BE%8B">Pythagoras 音律</a>は, 
+基準音からオクターブ (純正完全八度) $1:2$ および純正完全五度 $2:3$ を積み重ねることにより得られる音階のことを言う.
+例えば基準音 A ($f_0$) に対して, その完全5度上の音 (E) の振動数は $\frac{ 3 }{ 2 } f_0$ となる.
+セントで表すとこの音は
+$$n_\mathrm{E} = 1200 ( \log_2 3 - 1 ) = 701.955$$
+に対応し, 平均律での E 音とは約 2 セントの差を生じる. 同様に E 音の完全5度上は H 音であり, 
+その振動数は $f = \left( \frac{3}{2} \right)^2 f_0$, セントは
+$$n_\mathrm{H} = 2 n_\mathrm{E} - 1200 = 203.910$$
+であり, 平均律とは約 4 セント異なる. このように, 完全五度変化する毎に平均律とは約 2 セントの相違が
+累積することが Pythagoras 音律の特徴である.</p>
+<p>Pythagoras 音律において平均律で用いられるのと同じ12音を構成しようとすると特有の原理的困難を生じる.
+まず, A から上昇していくと</p>
+<ul>
+<li>A - E - H - Fis - Cis - Gis - Dis</li>
+</ul>
+<p>となるが, 下降していくと</p>
+<ul>
+<li>A - D - G - C - F - B - Es </li>
+</ul>
+<p>となる. 平均律では Dis と Es は完全に同一の音高 (1100 セント) であるにも関わらず,
+Pythagoras 音律では 23.460 セント異なった音である 
+(<a href="https://ja.wikipedia.org/wiki/%E3%83%94%E3%82%BF%E3%82%B4%E3%83%A9%E3%82%B9%E3%82%B3%E3%83%B3%E3%83%9E">Pythagoras コンマ</a>). 
+従って, 例えば Es を採用した楽器では Es - Gis の和音は Pythagoras 音律で期待される 701.955 セント差ではなく, 678.495 セントとなる.
+これを <strong>ウルフの五度</strong> と呼ぶ.</p>
+<p><span class="center">上昇音列</span></p>
+<table><thead><tr><th style="text-align: center">音名</th><th style="text-align: right">周波数</th><th style="text-align: right"><span class="center">$\Delta c$</span></th><th></th><th></th></tr></thead><tbody>
+<tr><td style="text-align: center">A</td><td style="text-align: right">442</td><td style="text-align: right"><span class="num3">  0    </span></td><td><input type="button" value="再生" onclick="sin_wave(442.*  1/ 1 );"/></td><td></td></tr>
+<tr><td style="text-align: center">E</td><td style="text-align: right">663</td><td style="text-align: right"><span class="num0">+ 1.955</span></td><td><input type="button" value="再生" onclick="sin_wave(442.*  3/ 2 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.*  3/ 2 /2);"/></td></tr>
+<tr><td style="text-align: center">H</td><td style="text-align: right">994.5</td><td style="text-align: right"><span class="num0">+ 3.910</span></td><td><input type="button" value="再生" onclick="sin_wave(442.*  9/ 4 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.*  9/ 4 /2);"/></td></tr>
+<tr><td style="text-align: center">Fis</td><td style="text-align: right">1491.75</td><td style="text-align: right"><span class="num0">+ 5.865</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 27/ 8 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.* 27/ 8 /2);"/></td></tr>
+<tr><td style="text-align: center">Cis</td><td style="text-align: right">2237.625</td><td style="text-align: right"><span class="num0">+ 7.820</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 81/16 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.* 81/16 /4);"/></td></tr>
+<tr><td style="text-align: center">Gis</td><td style="text-align: right">3356.438</td><td style="text-align: right"><span class="num0">+ 9.775</span></td><td><input type="button" value="再生" onclick="sin_wave(442.*243/32 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.*243/32 /4);"/></td></tr>
+<tr><td style="text-align: center">Dis</td><td style="text-align: right">5034.656</td><td style="text-align: right"><span class="num0">+11.730</span></td><td><input type="button" value="再生" onclick="sin_wave(442.*729/64 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.*729/64 /8);"/></td></tr>
+</tbody></table>
+<p><span class="center">下降音列</span></p>
+<table><thead><tr><th style="text-align: center">音名</th><th style="text-align: right">周波数</th><th style="text-align: right"><span class="center">$\Delta c$</span></th><th></th><th></th></tr></thead><tbody>
+<tr><td style="text-align: center">A</td><td style="text-align: right">442</td><td style="text-align: right"><span class="num3">  0    </span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 1/  1 );"/></td><td></td></tr>
+<tr><td style="text-align: center">D</td><td style="text-align: right">294.667</td><td style="text-align: right"><span class="num0">- 1.955</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 2/  3 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.* 2/  3 *2 );"/></td></tr>
+<tr><td style="text-align: center">G</td><td style="text-align: right">196.444</td><td style="text-align: right"><span class="num0">- 3.910</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 4/  9 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.* 4/  9 *2);"/></td></tr>
+<tr><td style="text-align: center">C</td><td style="text-align: right">130.963</td><td style="text-align: right"><span class="num0">- 5.865</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 8/ 27 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.* 8/ 27 *4);"/></td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: right">87.309</td><td style="text-align: right"><span class="num0">- 7.820</span></td><td><input type="button" value="再生" onclick="sin_wave(442.*16/ 81 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.*16/ 81 *8);"/></td></tr>
+<tr><td style="text-align: center">B</td><td style="text-align: right">58.206</td><td style="text-align: right"><span class="num0">- 9.775</span></td><td><input type="button" value="再生" onclick="sin_wave(442.*32/243 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.*32/243 *8);"/></td></tr>
+<tr><td style="text-align: center">Es</td><td style="text-align: right">38.804</td><td style="text-align: right"><span class="num0">-11.730</span></td><td><input type="button" value="再生" onclick="sin_wave(442.*64/729 );"/></td><td><input type="button" value="再生" onclick="sin_wave(442.*64/729 *16);"/></td></tr>
+</tbody></table>
+<h1 id="純正律">純正律</h1>
+<p>純正完全五度 (振動数の比 2:3) に加えて, 純正長三度 (振動数の比 4:5) を用いて構成した音律が
+<a href="https://ja.wikipedia.org/wiki/%E7%B4%94%E6%AD%A3%E5%BE%8B"><strong>純正律</strong></a> (just intonation) である.</p>
+<p>古典和声の基礎となるトニカ (A-Cis-E), ドミナント (E-Gis-H), サブドミナント (D-Fis-A) がそれぞれ振動数の比 4:5:6 
+を持つように音高を定めることにより, 全音階 A, H, Cis, D, E, Fis, Gis を定めることができる.
+この場合, 全音階に含まれる完全五度のうち, H-Fis, Cis-Gis, Fis-Cis という組は純正完全五度にはならない. </p>
+<table><thead><tr><th style="text-align: center">音名</th><th style="text-align: right">周波数</th><th style="text-align: center">$f/f_0$</th><th style="text-align: right"><span class="center">$\Delta c$</span></th><th></th></tr></thead><tbody>
+<tr><td style="text-align: center">A</td><td style="text-align: right"><span class="num3">442    </span></td><td style="text-align: center">1/1</td><td style="text-align: right"><span class="num3">  0    </span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 1/  1);"/></td></tr>
+<tr><td style="text-align: center">H</td><td style="text-align: right"><span class="num1">497.25 </span></td><td style="text-align: center">9/8</td><td style="text-align: right"><span class="num0"> +3.910</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 9/  8);"/></td></tr>
+<tr><td style="text-align: center">Cis</td><td style="text-align: right"><span class="num2">552.5  </span></td><td style="text-align: center">5/4</td><td style="text-align: right"><span class="num0">-13.686</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 5/  4);"/></td></tr>
+<tr><td style="text-align: center">D</td><td style="text-align: right"><span class="num0">589.333</span></td><td style="text-align: center">4/3</td><td style="text-align: right"><span class="num0"> -1.955</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 4/  3);"/></td></tr>
+<tr><td style="text-align: center">E</td><td style="text-align: right"><span class="num3">663    </span></td><td style="text-align: center">3/2</td><td style="text-align: right"><span class="num0"> +1.955</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 3/  2);"/></td></tr>
+<tr><td style="text-align: center">Fis</td><td style="text-align: right"><span class="num0">736.667</span></td><td style="text-align: center">5/3</td><td style="text-align: right"><span class="num0">-15.641</span></td><td><input type="button" value="再生" onclick="sin_wave(442.* 5/  3);"/></td></tr>
+<tr><td style="text-align: center">Gis</td><td style="text-align: right"><span class="num1">828.75</td><td style="text-align: center"></span>15/8</td><td style="text-align: right"><span class="num0">-11.731</span></td><td><input type="button" value="再生" onclick="sin_wave(442.*15/  8);"/></td></tr>
+</tbody></table>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

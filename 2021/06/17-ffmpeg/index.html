@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+AV1全部盛りFFmpegのビルド (2021年6月版) - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">AV1全部盛りFFmpegのビルド (2021年6月版)</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/動画">動画</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-06-17">2021-06-17</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#環境">環境</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#準備">準備</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#作業場所の作成">作業場所の作成</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#依存パッケージ">依存パッケージ</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#ライブラリのビルド">ライブラリのビルド</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#FDK-AAC">FDK-AAC</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#SVT-AV1">SVT-AV1</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#dav1d">dav1d</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#rav1e">rav1e</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#FFmpeg_のビルド">FFmpeg のビルド</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#使ってみる">使ってみる</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#動作確認">動作確認</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#AV1_にエンコード">AV1 にエンコード</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/17-ffmpeg/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p><a href="https://ffmpeg.org/">FFmpeg</a> は言わずと知れた動画エンコード/デコードツールです.
+<code>sudo apt install ffmpeg</code> でインストールできるものの, バージョンが古かったり必要なライブラリが入っていなかったりするので,
+これらが問題になるならば自前ビルドが必要です.
+本記事では FFmpeg で AV1 関係のツール (libaom, SVT-AV1, dav1d, rav1e) を全部使えるようにします.</p>
+<p>基本的には公式のコンパイル手順に従うだけですが, 依存ライブラリが多いためちょっと気合いが要ります.
+ただ要するに外部ライブラリをビルドした上で FFmpeg をビルドするというだけなので, 難しくはないはずです.
+なお著作権と特許その他に関しては各自で確認をお願いします.</p>
+<h1 id="環境">環境</h1>
+<ul>
+<li>Debian 10.9 on WSL2 (Win10 20H2)</li>
+<li>FFmpeg 2021-06-16 (commit 604924a069735f3f1fd56b5dd125e68d402f15ba)</li>
+</ul>
+<h1 id="準備">準備</h1>
+<h2 id="作業場所の作成">作業場所の作成</h2>
+<p>公式はホームディレクトリに諸々を置いていますが, 日常的に見える場所に置きたくないので, 次のようにします.</p>
+<ul>
+<li>ソース: <code>~/.ffmpeg-src</code></li>
+<li>中間生成物: <code>~/.ffmpeg-build</code></li>
+<li>最終成果物: <code>~/.ffmpeg</code></li>
+</ul>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">mkdir ~</span><span>/{.ffmpeg,.ffmpeg-build,.ffmpeg-src}
+</span></code></pre>
+<h2 id="依存パッケージ">依存パッケージ</h2>
+<p>最初にビルドに必要なパッケージをインストールします.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> apt install \
+</span><span>  autoconf \
+</span><span>  automake \
+</span><span>  build-essential \
+</span><span>  cmake \
+</span><span>  git-core \
+</span><span>  libass-dev \
+</span><span>  libfreetype6-dev \
+</span><span>  libgnutls28-dev \
+</span><span>  libtool \
+</span><span>  libvorbis-dev \
+</span><span>  meson \
+</span><span>  ninja-build \
+</span><span>  pkg-config \
+</span><span>  texinfo \
+</span><span>  wget \
+</span><span>  yasm \
+</span><span>  zlib1g-dev
+</span></code></pre>
+<p><code>build-essential</code>, <code>git</code>, <code>pkg-config</code>, <code>wget</code> あたりは既にインストールされていることが多いと思います.</p>
+<h1 id="ライブラリのビルド">ライブラリのビルド</h1>
+<p>基本的なライブラリはほぼすべて apt で済みます. このあたりのものは枯れている部類なので, 最新版にこだわらなくても良いでしょう.
+唯一気になるのは libaom ですが, どうせ使わないので何でもよいです.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> apt install \
+</span><span>  nasm \
+</span><span>  libx264-dev \
+</span><span>  libx265-dev libnuma-dev \
+</span><span>  libvpx-dev \
+</span><span>  libmp3lame-dev \
+</span><span>  libopus-dev \
+</span><span>  libaom-dev 
+</span></code></pre>
+<h2 id="FDK-AAC">FDK-AAC</h2>
+<p>FDK-AAC はライセンスの問題があり, apt ソースに non-free を含めている場合のみ apt でインストールできます.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> apt install libfdk-aac-dev
+</span></code></pre>
+<p>そうでないならば自前ビルドします.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">cd </span><span style="color:#bf616a;">~</span><span>/.ffmpeg-src &amp;&amp; \
+</span><span style="color:#bf616a;">git</span><span> clone</span><span style="color:#bf616a;"> --depth</span><span> 1 https://github.com/mstorsjo/fdk-aac &amp;&amp; \
+</span><span style="color:#96b5b4;">cd</span><span> fdk-aac &amp;&amp; \
+</span><span style="color:#bf616a;">autoreconf -fiv </span><span>&amp;&amp; \
+</span><span style="color:#bf616a;">./configure --prefix</span><span>=&quot;$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg-build</span><span>&quot;</span><span style="color:#bf616a;"> --disable-shared </span><span>&amp;&amp; \
+</span><span style="color:#bf616a;">make -j4 </span><span>&amp;&amp; \
+</span><span style="color:#bf616a;">make</span><span> install
+</span></code></pre>
+<h2 id="SVT-AV1">SVT-AV1</h2>
+<p>SVT-AV1 は apt では手に入らないのでビルドが必要です.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">cd </span><span style="color:#bf616a;">~</span><span>/.ffmpeg-src &amp;&amp; \
+</span><span style="color:#bf616a;">git</span><span> clone</span><span style="color:#bf616a;"> --depth</span><span>=1 https://gitlab.com/AOMediaCodec/SVT-AV1.git &amp;&amp; \
+</span><span style="color:#96b5b4;">cd</span><span> SVT-AV1/Build &amp;&amp; \
+</span><span style="color:#bf616a;">cmake -G </span><span>&quot;</span><span style="color:#a3be8c;">Unix Makefiles</span><span>&quot; \
+</span><span style="color:#bf616a;">  -DCMAKE_INSTALL_PREFIX</span><span>=&quot;$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg-build</span><span>&quot; \
+</span><span style="color:#bf616a;">  -DCMAKE_BUILD_TYPE</span><span>=Release \
+</span><span style="color:#bf616a;">  -DBUILD_DEC</span><span>=OFF \
+</span><span style="color:#bf616a;">  -DBUILD_SHARED_LIBS</span><span>=OFF .. &amp;&amp; \
+</span><span style="color:#bf616a;">make -j4 </span><span>&amp;&amp; \
+</span><span style="color:#bf616a;">make</span><span> install
+</span></code></pre>
+<h2 id="dav1d">dav1d</h2>
+<p>dav1d は apt で手に入りますが, バージョンが古いので自前ビルドします.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">cd </span><span style="color:#bf616a;">~</span><span>/.ffmpeg-src &amp;&amp; \
+</span><span style="color:#bf616a;">git</span><span> clone</span><span style="color:#bf616a;"> --depth</span><span> 1 https://code.videolan.org/videolan/dav1d.git &amp;&amp; \
+</span><span style="color:#bf616a;">mkdir</span><span> dav1d/build &amp;&amp; \
+</span><span style="color:#96b5b4;">cd</span><span> dav1d/build &amp;&amp; \
+</span><span style="color:#bf616a;">meson</span><span> setup \
+</span><span style="color:#bf616a;">  -Denable_tools</span><span>=false \
+</span><span style="color:#bf616a;">  -Denable_tests</span><span>=false \
+</span><span style="color:#bf616a;">  --default-library</span><span>=static .. \
+</span><span style="color:#bf616a;">  --prefix </span><span>&quot;$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg-build</span><span>&quot; \
+</span><span style="color:#bf616a;">  --libdir</span><span>=&quot;$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg-build/lib</span><span>&quot; &amp;&amp; \
+</span><span style="color:#bf616a;">ninja </span><span>&amp;&amp; \
+</span><span style="color:#bf616a;">ninja</span><span> install
+</span></code></pre>
+<h2 id="rav1e">rav1e</h2>
+<p>rav1e は apt では手に入らないのでビルドします. 
+なおビルドには Rust 1.51 以降が必要ですが, Rust 一式 (rustc と cargo) のインストールは完了しているものとします.
+さらに, Rust で C-API をビルドするために <code>cargo-c</code> が必要なので, あらかじめインストールしておきます.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">cargo</span><span> install cargo-c
+</span></code></pre>
+<p>準備を終えたら rav1e をビルドします.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">cd </span><span style="color:#bf616a;">~</span><span>/.ffmpeg-src &amp;&amp; \
+</span><span style="color:#bf616a;">wget</span><span> https://github.com/xiph/rav1e/archive/refs/tags/v0.4.1.tar.gz &amp;&amp; \
+</span><span style="color:#bf616a;">tar</span><span> xf v0.4.1.tar.gz &amp;&amp; \
+</span><span style="color:#96b5b4;">cd</span><span> rav1e-0.4.1 &amp;&amp; \
+</span><span style="color:#bf616a;">cargo</span><span> cinstall</span><span style="color:#bf616a;"> --release </span><span>\
+</span><span style="color:#bf616a;">  --prefix</span><span>=$</span><span style="color:#bf616a;">HOME</span><span>/.ffmpeg-build \
+</span><span style="color:#bf616a;">  --libdir</span><span>=$</span><span style="color:#bf616a;">HOME</span><span>/.ffmpeg-build/lib \
+</span><span style="color:#bf616a;">  --includedir</span><span>=$</span><span style="color:#bf616a;">HOME</span><span>/.ffmpeg-build/include
+</span></code></pre>
+<p>ただし, どうも共有ライブラリがあると FFmpeg のビルド時にそちらにリンクしに行くようで, うまく動作しません. 
+削除しておきます.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">rm ~</span><span>/.ffmpeg-build/lib/librav1e.so*
+</span></code></pre>
+<h1 id="FFmpeg_のビルド">FFmpeg のビルド</h1>
+<p>ここまで来たらいつも通りの <code>.configure</code>, <code>make</code>, <code>make install</code> のセットで終わりです.
+なおどうも GnuTLS をつけようとすると configure の際に pkg-config で見つけられないと怒られるので, 
+<code>--enable-gnutls</code> を外し <code>--enable-openssl</code> としています.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">cd </span><span style="color:#bf616a;">~</span><span>/.ffmpeg-src &amp;&amp; \
+</span><span style="color:#bf616a;">wget</span><span> https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 &amp;&amp; \
+</span><span style="color:#bf616a;">tar</span><span> xf ffmpeg-snapshot.tar.bz2 &amp;&amp; \
+</span><span style="color:#96b5b4;">cd</span><span> ffmpeg &amp;&amp; \
+</span><span style="color:#bf616a;">PKG_CONFIG_PATH</span><span>=&quot;$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg-build/lib/pkgconfig</span><span>&quot; </span><span style="color:#bf616a;">./configure </span><span>\
+</span><span style="color:#bf616a;">  --prefix</span><span>=&quot;$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg-build</span><span>&quot; \
+</span><span style="color:#bf616a;">  --pkg-config-flags</span><span>=&quot;</span><span style="color:#a3be8c;">--static</span><span>&quot; \
+</span><span style="color:#bf616a;">  --extra-cflags</span><span>=&quot;</span><span style="color:#a3be8c;">-I</span><span>$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg-build/include</span><span>&quot; \
+</span><span style="color:#bf616a;">  --extra-ldflags</span><span>=&quot;</span><span style="color:#a3be8c;">-L</span><span>$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg-build/lib</span><span>&quot; \
+</span><span style="color:#bf616a;">  --extra-libs</span><span>=&quot;</span><span style="color:#a3be8c;">-lpthread -lm</span><span>&quot; \
+</span><span style="color:#bf616a;">  --ld</span><span>=&quot;</span><span style="color:#a3be8c;">g++</span><span>&quot; \
+</span><span style="color:#bf616a;">  --bindir</span><span>=&quot;$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg/bin</span><span>&quot; \
+</span><span style="color:#bf616a;">  --disable-ffplay </span><span>\
+</span><span style="color:#bf616a;">  --enable-gpl </span><span>\
+</span><span style="color:#bf616a;">  --enable-openssl </span><span>\
+</span><span style="color:#bf616a;">  --enable-libaom </span><span>\
+</span><span style="color:#bf616a;">  --enable-libass </span><span>\
+</span><span style="color:#bf616a;">  --enable-libfdk-aac </span><span>\
+</span><span style="color:#bf616a;">  --enable-libfreetype </span><span>\
+</span><span style="color:#bf616a;">  --enable-libmp3lame </span><span>\
+</span><span style="color:#bf616a;">  --enable-libopus </span><span>\
+</span><span style="color:#bf616a;">  --enable-libsvtav1 </span><span>\
+</span><span style="color:#bf616a;">  --enable-libdav1d </span><span>\
+</span><span style="color:#bf616a;">  --enable-librav1e </span><span>\
+</span><span style="color:#bf616a;">  --enable-libvorbis </span><span>\
+</span><span style="color:#bf616a;">  --enable-libvpx </span><span>\
+</span><span style="color:#bf616a;">  --enable-libx264 </span><span>\
+</span><span style="color:#bf616a;">  --enable-libx265 </span><span>\
+</span><span style="color:#bf616a;">  --enable-nonfree </span><span>&amp;&amp; \
+</span><span style="color:#bf616a;">make -j8 </span><span>&amp;&amp; \
+</span><span style="color:#bf616a;">make</span><span> install
+</span></code></pre>
+<h1 id="使ってみる">使ってみる</h1>
+<p><code>.bashrc</code> か <code>.profile</code> あたりでパスを通しておきます. 既にパスの通った場所に bin ファイルを移動しても問題ありません.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">PATH</span><span>=&quot;$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">/.ffmpeg/bin:</span><span>$</span><span style="color:#bf616a;">PATH</span><span>&quot;
+</span></code></pre>
+<h2 id="動作確認">動作確認</h2>
+<p>有効化したライブラリは <code>ffmpeg</code> を実行すれば確認できます.</p>
+<blockquote>
+<p>configuration: --prefix=/home/osanshouo/.ffmpeg-build --pkg-config-flags=--static --extra-cflags=-I/home/osanshouo/.ffmpeg-build/include --extra-ldflags=-L/home/osanshouo/.ffmpeg-build/lib --extra-libs='-lpthread -lm' --ld=g++ --bindir=/home/osanshouo/.ffmpeg/bin --disable-ffplay --enable-gpl --enable-openssl --enable-libaom --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libsvtav1 --enable-libdav1d --enable-librav1e --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-nonfree</p>
+</blockquote>
+<p>また, システムのもの以外は静的にリンクされているので, ソースコードおよび中間生成物を削除しても構いません.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> ldd ffmpeg
+</span><span>	</span><span style="color:#bf616a;">linux-vdso.so.1</span><span> (0x00007ffd940c2000)
+</span><span>	</span><span style="color:#bf616a;">libxcb.so.1</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libxcb.so.1 (0x00007fc6610ba000)
+</span><span>	</span><span style="color:#bf616a;">libm.so.6</span><span> =&gt; /lib/x86_64-linux-gnu/libm.so.6 (0x00007fc660f37000)
+</span><span>	</span><span style="color:#bf616a;">libass.so.9</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libass.so.9 (0x00007fc660d04000)
+</span><span>	</span><span style="color:#bf616a;">libfreetype.so.6</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libfreetype.so.6 (0x00007fc660c48000)
+</span><span>	</span><span style="color:#bf616a;">libz.so.1</span><span> =&gt; /lib/x86_64-linux-gnu/libz.so.1 (0x00007fc660a2a000)
+</span><span>	</span><span style="color:#bf616a;">libbz2.so.1.0</span><span> =&gt; /lib/x86_64-linux-gnu/libbz2.so.1.0 (0x00007fc660a17000)
+</span><span>	</span><span style="color:#bf616a;">libvpx.so.5</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libvpx.so.5 (0x00007fc6607ec000)
+</span><span>	</span><span style="color:#bf616a;">libpthread.so.0</span><span> =&gt; /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fc6607cb000)
+</span><span>	</span><span style="color:#bf616a;">liblzma.so.5</span><span> =&gt; /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fc6607a3000)
+</span><span>	</span><span style="color:#bf616a;">libdl.so.2</span><span> =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fc66079e000)
+</span><span>	</span><span style="color:#bf616a;">libaom.so.0</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libaom.so.0 (0x00007fc6602f0000)
+</span><span>	</span><span style="color:#bf616a;">libmp3lame.so.0</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libmp3lame.so.0 (0x00007fc660078000)
+</span><span>	</span><span style="color:#bf616a;">libopus.so.0</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libopus.so.0 (0x00007fc66001a000)
+</span><span>	</span><span style="color:#bf616a;">libgcc_s.so.1</span><span> =&gt; /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007fc660000000)
+</span><span>	</span><span style="color:#bf616a;">librt.so.1</span><span> =&gt; /lib/x86_64-linux-gnu/librt.so.1 (0x00007fc65fff6000)
+</span><span>	</span><span style="color:#bf616a;">libvorbis.so.0</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libvorbis.so.0 (0x00007fc65ffc8000)
+</span><span>	</span><span style="color:#bf616a;">libvorbisenc.so.2</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libvorbisenc.so.2 (0x00007fc65ff1d000)
+</span><span>	</span><span style="color:#bf616a;">libx264.so.155</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libx264.so.155 (0x00007fc65fc5f000)
+</span><span>	</span><span style="color:#bf616a;">libx265.so.165</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libx265.so.165 (0x00007fc65ed10000)
+</span><span>	</span><span style="color:#bf616a;">libc.so.6</span><span> =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007fc65eb4f000)
+</span><span>	</span><span style="color:#bf616a;">/lib64/ld-linux-x86-64.so.2</span><span> (0x00007fc6642d2000)
+</span><span>	</span><span style="color:#bf616a;">libXau.so.6</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libXau.so.6 (0x00007fc65e94b000)
+</span><span>	</span><span style="color:#bf616a;">libXdmcp.so.6</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libXdmcp.so.6 (0x00007fc65e745000)
+</span><span>	</span><span style="color:#bf616a;">libfribidi.so.0</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libfribidi.so.0 (0x00007fc65e728000)
+</span><span>	</span><span style="color:#bf616a;">libfontconfig.so.1</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libfontconfig.so.1 (0x00007fc65e6e2000)
+</span><span>	</span><span style="color:#bf616a;">libharfbuzz.so.0</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0 (0x00007fc65e5e5000)
+</span><span>	</span><span style="color:#bf616a;">libpng16.so.16</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libpng16.so.16 (0x00007fc65e5ac000)
+</span><span>	</span><span style="color:#bf616a;">libstdc++.so.6</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007fc65e428000)
+</span><span>	</span><span style="color:#bf616a;">libogg.so.0</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libogg.so.0 (0x00007fc65e21f000)
+</span><span>	</span><span style="color:#bf616a;">libnuma.so.1</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libnuma.so.1 (0x00007fc65e211000)
+</span><span>	</span><span style="color:#bf616a;">libbsd.so.0</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libbsd.so.0 (0x00007fc65e1f5000)
+</span><span>	</span><span style="color:#bf616a;">libexpat.so.1</span><span> =&gt; /lib/x86_64-linux-gnu/libexpat.so.1 (0x00007fc65e1b8000)
+</span><span>	</span><span style="color:#bf616a;">libuuid.so.1</span><span> =&gt; /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007fc65e1af000)
+</span><span>	</span><span style="color:#bf616a;">libglib-2.0.so.0</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007fc65e090000)
+</span><span>	</span><span style="color:#bf616a;">libgraphite2.so.3</span><span> =&gt; /usr/lib/x86_64-linux-gnu/libgraphite2.so.3 (0x00007fc65e063000)
+</span><span>	</span><span style="color:#bf616a;">libpcre.so.3</span><span> =&gt; /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007fc65dfed000)
+</span></code></pre>
+<h2 id="AV1_にエンコード">AV1 にエンコード</h2>
+<p>rav1e を使うときは <code>librav1e</code> を, SVT-AV1 を使うときは <code>libsvtav1</code> を指定します.
+デフォルト設定で軽く試した限りでは rav1e はかなり遅い一方で, SVT-AV1 は思っていたよりかなり速く実用レベルという感じでした.
+ただこのあたりはオプションの設定次第で大きく変わるかもしれません.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">ffmpeg -i</span><span> input.mp4</span><span style="color:#bf616a;"> -c</span><span>:v libsvtav1 output.webm
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu">CompilationGuide/Ubuntu – FFmpeg</a></li>
+<li><a href="https://nyarinkopv.hatenablog.com/entry/2021/01/01/155908">ffmpegをビルドしなおしてみましょう2021 - ねこにコベイン</a></li>
+<li><a href="https://askubuntu.com/questions/1189174/how-do-i-use-ffmpeg-and-rav1e-to-create-high-quality-av1-files">video - How do I use FFmpeg and rav1e to create high quality AV1 files? - Ask Ubuntu</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

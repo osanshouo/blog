@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[SymPy] 直交多項式 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[SymPy] 直交多項式</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数学">数学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/SymPy">SymPy</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-08-09">2024-08-09</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>SymPy で直交多項式系を生成してグラフにプロットするコード例です.
+単に Gram-Schmidt 法で多項式系
+$$1, \ \ x, \ \ x^2 , \ \ x^3 , \ \ \cdots$$
+を内積
+$$\braket{ f, g } = \int_I f(x) g(x) w(x) dx$$
+に関して正規直交化しているだけです.
+コードの冒頭で重み関数 <code>w</code> と定義域 <code>I</code>, それから生成する次数の上限 <code>N</code> を指定します
+($\phi_0(x)$ から $\phi_{N-1}(x)$ までを生成します).
+このコードの場合は Hermite 多項式に関するものです.</p>
+<p>グラフを生成する部分では最初にプロットする範囲 <code>xmax</code>, <code>xmin</code>, <code>ymax</code> を手で指定しています.
+また SymPy の多項式を <a href="https://docs.sympy.org/latest/modules/utilities/lambdify.html">Lambdify</a> 
+を通じて NumPy array を処理できる関数に変換しています.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>sympy </span><span style="color:#b48ead;">import </span><span>symbols, integrate, exp, oo, sqrt, simplify, lambdify
+</span><span style="color:#b48ead;">import </span><span>numpy </span><span style="color:#b48ead;">as </span><span>np
+</span><span style="color:#b48ead;">import </span><span>matplotlib.pyplot </span><span style="color:#b48ead;">as </span><span>plt
+</span><span>
+</span><span>
+</span><span>N = </span><span style="color:#d08770;">6
+</span><span>x = </span><span style="color:#bf616a;">symbols</span><span>(&quot;</span><span style="color:#a3be8c;">x</span><span>&quot;)
+</span><span>
+</span><span>
+</span><span>w = </span><span style="color:#bf616a;">exp</span><span>(-x*x)
+</span><span>I = [ -oo, oo ]
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">braket</span><span>(</span><span style="color:#bf616a;">f</span><span>, </span><span style="color:#bf616a;">g</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">integrate</span><span>( f*g*w, (x, I[</span><span style="color:#d08770;">0</span><span>], I[</span><span style="color:#d08770;">1</span><span>]) )
+</span><span>
+</span><span>phi = [ </span><span style="color:#d08770;">1 </span><span>]
+</span><span>phi[</span><span style="color:#d08770;">0</span><span>] = phi[</span><span style="color:#d08770;">0</span><span>] / </span><span style="color:#bf616a;">sqrt</span><span>(</span><span style="color:#bf616a;">braket</span><span>(phi[</span><span style="color:#d08770;">0</span><span>], phi[</span><span style="color:#d08770;">0</span><span>]))
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>n </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">1</span><span>, N):
+</span><span>    pn = x**n
+</span><span>    </span><span style="color:#b48ead;">for </span><span>k </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n):
+</span><span>        pn = pn - </span><span style="color:#bf616a;">braket</span><span>(x**n, phi[k])*phi[k]
+</span><span>    pn = </span><span style="color:#bf616a;">simplify</span><span>(pn)
+</span><span>    pn = pn / </span><span style="color:#bf616a;">sqrt</span><span>(</span><span style="color:#bf616a;">braket</span><span>(pn, pn))
+</span><span>    phi.</span><span style="color:#bf616a;">append</span><span>(pn)
+</span><span>
+</span><span>
+</span><span>
+</span><span style="color:#65737e;"># グラフのプロット
+</span><span>xmax = </span><span style="color:#d08770;">3
+</span><span>ymax = </span><span style="color:#d08770;">2.5
+</span><span>xmin = - xmax
+</span><span>X = np.</span><span style="color:#bf616a;">linspace</span><span>(xmin, xmax, </span><span style="color:#d08770;">128</span><span>)
+</span><span>
+</span><span>fig = plt.</span><span style="color:#bf616a;">figure</span><span>()
+</span><span>ax = fig.</span><span style="color:#bf616a;">add_subplot</span><span>(</span><span style="color:#d08770;">111</span><span>)
+</span><span>
+</span><span>ax.</span><span style="color:#bf616a;">plot</span><span>(X, phi[</span><span style="color:#d08770;">0</span><span>]*np.</span><span style="color:#bf616a;">ones</span><span>(</span><span style="color:#96b5b4;">len</span><span>(X)))
+</span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">1</span><span>,N):
+</span><span>    pn = phi[i]
+</span><span>    </span><span style="color:#96b5b4;">print</span><span>(&quot;</span><span style="color:#a3be8c;">p[</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">] = </span><span>&quot;.</span><span style="color:#bf616a;">format</span><span>(i), pn)
+</span><span>    
+</span><span>    pn = </span><span style="color:#bf616a;">lambdify</span><span>(x, pn, &quot;</span><span style="color:#a3be8c;">numpy</span><span>&quot;)
+</span><span>
+</span><span>    ax.</span><span style="color:#bf616a;">plot</span><span>(X, </span><span style="color:#bf616a;">pn</span><span>(X))
+</span><span>
+</span><span>
+</span><span>ax.</span><span style="color:#bf616a;">set_xlim</span><span>([xmin, xmax])
+</span><span>ax.</span><span style="color:#bf616a;">set_ylim</span><span>([-ymax, ymax])
+</span><span>ax.</span><span style="color:#bf616a;">set_aspect</span><span>(&#39;</span><span style="color:#a3be8c;">equal</span><span>&#39;)
+</span><span>ax.</span><span style="color:#bf616a;">grid</span><span>(</span><span style="color:#bf616a;">ls</span><span>=&quot;</span><span style="color:#a3be8c;">dotted</span><span>&quot;)
+</span><span>ax.</span><span style="color:#bf616a;">axvline</span><span>(</span><span style="color:#bf616a;">x</span><span>=</span><span style="color:#d08770;">0</span><span>, </span><span style="color:#bf616a;">c</span><span>=&quot;</span><span style="color:#a3be8c;">black</span><span>&quot;, </span><span style="color:#bf616a;">lw</span><span>=</span><span style="color:#d08770;">0.5</span><span>)
+</span><span>ax.</span><span style="color:#bf616a;">axhline</span><span>(</span><span style="color:#bf616a;">y</span><span>=</span><span style="color:#d08770;">0</span><span>, </span><span style="color:#bf616a;">c</span><span>=&quot;</span><span style="color:#a3be8c;">black</span><span>&quot;, </span><span style="color:#bf616a;">lw</span><span>=</span><span style="color:#d08770;">0.5</span><span>)
+</span><span>plt.</span><span style="color:#bf616a;">show</span><span>()
+</span><span>plt.</span><span style="color:#bf616a;">close</span><span>()
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

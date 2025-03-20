@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+WSL2にdockerを導入 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">WSL2にdockerを導入</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-03-23">2021-03-23</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>せっかく WSL2 に移行したので docker もインストールしてみました.</p>
+<h1 id="導入手順">導入手順</h1>
+<p>インターネット検索すれば日本語の記事がたくさん出てきますが, WSL2 はかなり新しい技術で変化が非常に速いですから,
+公式の情報に従うのが一番でしょう. 幸いにも日本語化されているのでとても楽です.</p>
+<ul>
+<li><a href="https://docs.docker.jp/docker-for-windows/wsl.html">Docker Desktop WSL 2 バックエンド — Docker-docs-ja 19.03 ドキュメント</a></li>
+<li><a href="https://docs.microsoft.com/ja-jp/windows/wsl/tutorials/wsl-containers">Windows Subsystem for Linux で Docker コンテナーの使用を開始する | Microsoft Docs</a></li>
+</ul>
+<p>この通りにインストールしたら簡単にできました. Linux 側に docker をインストールする必要はなく,
+Win10 側で Docker Desktop が動いていれば <code>docker</code> コマンドが通ります (！).</p>
+<p>勝手にスタートアップに登録されるのですが, 起動時にそこそこ負荷がかかるしメモリも圧迫します.
+日常的に使うのならその方が便利なのでしょうけれども, 導入した PC ではそんなに頻繁には使わないと思われるのでオフにしました.
+使うときに起動すればよいでしょう.</p>
+<h1 id="使い方">使い方</h1>
+<p>docker はすぐにコマンドを忘れるんですよね... </p>
+<h2 id="イメージ">イメージ</h2>
+<ul>
+<li><code>docker images</code> または <code>docker image ls</code>: ローカルにあるイメージの一覧</li>
+<li><code>docker pull debian:stable-slim</code> とか: Docker Hub からイメージをダウンロード</li>
+</ul>
+<h2 id="コンテナ">コンテナ</h2>
+<ul>
+<li><code>docker ps -a</code>: コンテナの稼働状況の一覧</li>
+<li><code>docker run -it [image]</code>: <code>[image]</code> をもとにコンテナを作成し対話モードでアタッチ
+<ul>
+<li><code>--name [name]</code> でコンテナ名を指定</li>
+<li><code>-v [HOST]:[CONTAINER]</code> でホスト側のパス <code>[HOST]</code> をコンテナ側のパス <code>[CONTAINER]</code> としてマウント</li>
+<li>注意: オプションはイメージ名の前で指定すること</li>
+</ul>
+</li>
+<li><code>docker start [id]</code>: コンテナ <code>[id]</code> を起動
+<ul>
+<li>オプション <code>-ai</code> で対話モードで起動しアタッチする (<code>--attach --interactive</code> の略)</li>
+</ul>
+</li>
+<li><code>docker stop [id]</code>: コンテナ <code>[id]</code> を停止</li>
+<li><code>docker attach [id]</code>: 起動しているコンテナ <code>[id]</code> にアタッチ</li>
+<li><code>C-p C-q</code>: コンテナからデタッチ 
+<ul>
+<li><a href="https://qiita.com/hironobu_s/items/358b0ba5a7089521b60e">この記事</a>に従って WSL2 側の設定ファイルをいじれば変更できる</li>
+</ul>
+</li>
+</ul>
+<h2 id="その他">その他</h2>
+<ul>
+<li><code>docker cp [file] [id]:[path]</code>: ローカルのファイル <code>[file]</code> をコンテナ <code>[id]</code> のパス <code>[path]</code> にコピー
+<ul>
+<li>ホスト側とコンテナ側は逆でも可</li>
+<li>コンテナが停止していてもよい</li>
+</ul>
+</li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

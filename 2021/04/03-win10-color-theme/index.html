@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] Win10のカラーテーマを取得 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] Win10のカラーテーマを取得</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Windows">Windows</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-04-03">2021-04-03</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/03-win10-color-theme/#環境">環境</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/03-win10-color-theme/#import_マクロ">import マクロ</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/03-win10-color-theme/#色の取得">色の取得</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/04/03-win10-color-theme/#アクセントカラー">アクセントカラー</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/04/03-win10-color-theme/#ダークモード">ダークモード</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/03-win10-color-theme/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>WinRT でアプリのカラーテーマ<sup class="footnote-reference"><a href="#1">1</a></sup>を取得するには <code>Windows::UI::ViewManagement::UISettings</code> クラスの 
+<a href="https://microsoft.github.io/windows-docs-rs/doc/bindings/Windows/UI/ViewManagement/struct.UISettings.html#method.GetColorValue"><code>GetColorValue</code></a> 
+メソッドを叩きます.</p>
+<h1 id="環境">環境</h1>
+<p>本記事の内容は Win10 v20H2, Rust 1.51.0, windows-rs 0.7.0 で確認しました.</p>
+<h1 id="import_マクロ">import マクロ</h1>
+<p><code>build.rs</code> で必要な WinRT API を指定し import します.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    windows::build!(
+</span><span>        Windows::</span><span style="color:#d08770;">UI</span><span>::Color,
+</span><span>        Windows::</span><span style="color:#d08770;">UI</span><span>::ViewManagement::{
+</span><span>            UISettings, UIColorType
+</span><span>        },
+</span><span>    )
+</span><span>}
+</span></code></pre>
+<h1 id="色の取得">色の取得</h1>
+<p><code>UISettings</code> クラスの <code>GetColorValue</code> メソッドに欲しい色のタイプ 
+(<a href="https://microsoft.github.io/windows-docs-rs/doc/bindings/Windows/UI/ViewManagement/struct.UIColorType.html"><code>UIColorType</code></a>) を渡します.
+戻り値は <a href="https://microsoft.github.io/windows-docs-rs/doc/bindings/Windows/UI/struct.Color.html"><code>Color</code></a> です.</p>
+<h2 id="アクセントカラー">アクセントカラー</h2>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>bindings::Windows::</span><span style="color:#d08770;">UI</span><span>::ViewManagement::{
+</span><span>    UISettings, UIColorType,
+</span><span>};
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; windows::Result&lt;()&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> ui_settings = UISettings::new()?;
+</span><span>    </span><span style="color:#b48ead;">let</span><span> color = ui_settings.GetColorValue(UIColorType::Accent)?;
+</span><span>
+</span><span>    println!(&quot;</span><span style="color:#d08770;">{:?}</span><span>&quot;, &amp;color);
+</span><span>
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<h2 id="ダークモード">ダークモード</h2>
+<p>ダークモードに設定されているときに <code>true</code>, ライトモードのときには <code>false</code> を返す関数です.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>bindings::Windows::</span><span style="color:#d08770;">UI</span><span>::{Color, ViewManagement::{
+</span><span>    UISettings, UIColorType,
+</span><span>}};
+</span><span>
+</span><span style="color:#b48ead;">const </span><span style="color:#d08770;">DARK</span><span>: Color = Color { A: </span><span style="color:#d08770;">255</span><span>, R: </span><span style="color:#d08770;">0</span><span>, G: </span><span style="color:#d08770;">0</span><span>, B: </span><span style="color:#d08770;">0 </span><span>};
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">is_dark_mode</span><span>() -&gt; windows::Result&lt;</span><span style="color:#b48ead;">bool</span><span>&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> ui_settings = UISettings::new()?;
+</span><span>    </span><span style="color:#b48ead;">let</span><span> color = ui_settings.GetColorValue(UIColorType::Background)?;
+</span><span>    
+</span><span>    Ok(color == </span><span style="color:#d08770;">DARK</span><span>)
+</span><span>}
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/uwp/api/windows.ui.viewmanagement.uisettings?view=winrt-19041">UISettings Class</a></li>
+</ul>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>本記事のコードは「設定」でいう「Windows モード」ではなく「アプリ モード」を取得するものです.</p>
+</div>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

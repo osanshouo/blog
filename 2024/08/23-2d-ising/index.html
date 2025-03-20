@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+2次元 Ising 模型 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">2次元 Ising 模型</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/物理学">物理学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/統計力学">統計力学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Python">Python</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-08-23">2024-08-23</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>2次元 Ising 模型の分配関数などを定義に従って計算する落書きコード.
+遅すぎて役に立たないですが...</p>
+<h1 id="Python">Python</h1>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">import </span><span>numpy </span><span style="color:#b48ead;">as </span><span>np
+</span><span style="color:#b48ead;">import </span><span>matplotlib.pyplot </span><span style="color:#b48ead;">as </span><span>plt
+</span><span style="color:#b48ead;">from </span><span>matplotlib </span><span style="color:#b48ead;">import </span><span>rc
+</span><span style="color:#bf616a;">rc</span><span>(&quot;</span><span style="color:#a3be8c;">text</span><span>&quot;, </span><span style="color:#bf616a;">usetex</span><span>=</span><span style="color:#d08770;">True</span><span>)
+</span><span>plt.rcParams[&quot;</span><span style="color:#a3be8c;">mathtext.fontset</span><span>&quot;] = &quot;</span><span style="color:#a3be8c;">cm</span><span>&quot;
+</span><span>plt.rcParams[&#39;</span><span style="color:#a3be8c;">font.family</span><span>&#39;] = &#39;</span><span style="color:#a3be8c;">Times New Roman</span><span>&#39;
+</span><span>plt.rcParams[&#39;</span><span style="color:#a3be8c;">font.size</span><span>&#39;] = </span><span style="color:#d08770;">16
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">state</span><span>(</span><span style="color:#bf616a;">n</span><span>, </span><span style="color:#bf616a;">N</span><span>):
+</span><span>    </span><span style="color:#65737e;">&#39;&#39;&#39;
+</span><span style="color:#65737e;">    入力: n: 状態の名前 (0,1,...,N-1), N: 格子サイズ 
+</span><span style="color:#65737e;">    出力: N*N 行列
+</span><span style="color:#65737e;">    &#39;&#39;&#39;
+</span><span>    s = np.</span><span style="color:#bf616a;">zeros</span><span>((N,N))
+</span><span>    </span><span style="color:#b48ead;">for </span><span>l </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(N*N):
+</span><span>        </span><span style="color:#b48ead;">if </span><span>(n &gt;&gt; l)&amp;</span><span style="color:#d08770;">1 </span><span>== </span><span style="color:#d08770;">0</span><span>:
+</span><span>            s[l//N, l%N] = </span><span style="color:#d08770;">1
+</span><span>        </span><span style="color:#b48ead;">else</span><span>:
+</span><span>            s[l//N, l%N] = -</span><span style="color:#d08770;">1
+</span><span>    </span><span style="color:#b48ead;">return </span><span>s
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">hamiltonian</span><span>(</span><span style="color:#bf616a;">s</span><span>, </span><span style="color:#bf616a;">N</span><span>):
+</span><span>    e = </span><span style="color:#d08770;">0.
+</span><span>    </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(N):
+</span><span>        </span><span style="color:#b48ead;">for </span><span>j </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(N):
+</span><span>            e += s[i,j]*( s[i, (j+</span><span style="color:#d08770;">1</span><span>)%N] + s[(i+</span><span style="color:#d08770;">1</span><span>)%N, j] )
+</span><span>    </span><span style="color:#b48ead;">return </span><span>e
+</span><span>    
+</span><span>
+</span><span>Tmin, Tmax, div = </span><span style="color:#d08770;">0.1</span><span>, </span><span style="color:#d08770;">4</span><span>, </span><span style="color:#d08770;">128
+</span><span>T = np.</span><span style="color:#bf616a;">linspace</span><span>(Tmin, Tmax, div)
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">ising</span><span>(</span><span style="color:#bf616a;">N</span><span>):
+</span><span>    Z = </span><span style="color:#d08770;">0. </span><span style="color:#65737e;"># 分配関数
+</span><span>    S = </span><span style="color:#d08770;">0. </span><span style="color:#65737e;"># 磁化
+</span><span>    E = </span><span style="color:#d08770;">0. </span><span style="color:#65737e;"># エネルギー
+</span><span>    C = </span><span style="color:#d08770;">0. </span><span style="color:#65737e;"># エネルギー分散 (比熱)
+</span><span>    </span><span style="color:#b48ead;">for </span><span>n </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">2</span><span>**(N*N)):
+</span><span>        s = </span><span style="color:#bf616a;">state</span><span>(n,N)
+</span><span>        e = </span><span style="color:#bf616a;">hamiltonian</span><span>(s,N)
+</span><span>        p = np.</span><span style="color:#bf616a;">exp</span><span>(-e/T)
+</span><span>        Z += p
+</span><span>        S += np.</span><span style="color:#bf616a;">sum</span><span>(s) * p
+</span><span>        E += e * p
+</span><span>        C += e**</span><span style="color:#d08770;">2 </span><span>* p
+</span><span>    </span><span style="color:#b48ead;">return </span><span>Z, S/Z, E/Z, C/Z
+</span><span>
+</span><span>fig = plt.</span><span style="color:#bf616a;">figure</span><span>()
+</span><span>ax = fig.</span><span style="color:#bf616a;">add_subplot</span><span>(</span><span style="color:#d08770;">111</span><span>)
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>N </span><span style="color:#b48ead;">in </span><span>[</span><span style="color:#d08770;">2</span><span>, </span><span style="color:#d08770;">4</span><span>]:
+</span><span>    Z, S, E, C = </span><span style="color:#bf616a;">ising</span><span>(N)
+</span><span>    ax.</span><span style="color:#bf616a;">plot</span><span>(T, (C - E**</span><span style="color:#d08770;">2</span><span>)/(N*T)**</span><span style="color:#d08770;">2</span><span>, </span><span style="color:#bf616a;">label</span><span>=&quot;</span><span style="color:#a3be8c;">N=</span><span style="color:#d08770;">{}</span><span>&quot;.</span><span style="color:#bf616a;">format</span><span>(N))
+</span><span>
+</span><span>ax.</span><span style="color:#bf616a;">grid</span><span>()
+</span><span>plt.</span><span style="color:#bf616a;">show</span><span>()
+</span></code></pre>
+<h1 id="Rust">Rust</h1>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#65737e;">/// 2次元 Ising 模型の状態を表す struct.
+</span><span>#[</span><span style="color:#bf616a;">derive</span><span>(Debug, Clone)]
+</span><span style="color:#b48ead;">struct </span><span>State {
+</span><span>    </span><span style="color:#65737e;">// /// スピン状態 \pm 1 の一覧
+</span><span>    </span><span style="color:#65737e;">// vec: Vec&lt;f64&gt;,
+</span><span>    </span><span style="color:#bf616a;">idx</span><span>: </span><span style="color:#b48ead;">usize</span><span>,
+</span><span>    </span><span style="color:#65737e;">/// 格子サイズ (vec.len = size * size)
+</span><span>    </span><span style="color:#bf616a;">size</span><span>: </span><span style="color:#b48ead;">usize</span><span>,
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">impl </span><span>State {
+</span><span>    </span><span style="color:#65737e;">/// 与えられた size を持つ Ising 模型の状態の総数.
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">number</span><span>(</span><span style="color:#bf616a;">size</span><span>: </span><span style="color:#b48ead;">usize</span><span>) -&gt; </span><span style="color:#b48ead;">usize </span><span>{
+</span><span>        </span><span style="color:#d08770;">2</span><span style="color:#b48ead;">usize</span><span>.</span><span style="color:#96b5b4;">pow</span><span>((size*size) as </span><span style="color:#b48ead;">u32</span><span>)
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/// 与えられた size を持つ, n 番目の状態を生成する.
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">new</span><span>(</span><span style="color:#bf616a;">n</span><span>: </span><span style="color:#b48ead;">usize</span><span>, </span><span style="color:#bf616a;">size</span><span>: </span><span style="color:#b48ead;">usize</span><span>) -&gt; </span><span style="color:#b48ead;">Self </span><span>{
+</span><span>        </span><span style="color:#65737e;">// let vec = (0..(size*size))
+</span><span>        </span><span style="color:#65737e;">//     .map(|l| 
+</span><span>        </span><span style="color:#65737e;">//         if (n &gt;&gt; l)&amp;1 == 0 { 1. } else { -1. }
+</span><span>        </span><span style="color:#65737e;">//     ).collect();
+</span><span>        </span><span style="color:#65737e;">// State { vec, size }
+</span><span>        State { idx: n, size }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/// 与えられた状態における, 格子点 (i, j) のスピンの値.
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">spin</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">i</span><span>: </span><span style="color:#b48ead;">usize</span><span>, </span><span style="color:#bf616a;">j</span><span>: </span><span style="color:#b48ead;">usize</span><span>) -&gt; </span><span style="color:#b48ead;">f64 </span><span>{
+</span><span>        </span><span style="color:#65737e;">//self.vec[self.size * (i%self.size) + (j%self.size)]
+</span><span>        </span><span style="color:#b48ead;">let</span><span> l = </span><span style="color:#bf616a;">self</span><span>.size * (i%</span><span style="color:#bf616a;">self</span><span>.size) + (j%</span><span style="color:#bf616a;">self</span><span>.size);
+</span><span>        </span><span style="color:#b48ead;">if </span><span>(</span><span style="color:#bf616a;">self</span><span>.idx &gt;&gt; l)&amp;</span><span style="color:#d08770;">1 </span><span>== </span><span style="color:#d08770;">0 </span><span>{ </span><span style="color:#d08770;">1. </span><span>} </span><span style="color:#b48ead;">else </span><span>{ -</span><span style="color:#d08770;">1. </span><span>}
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/// 与えられた状態における, 模型全体でのスピンの平均値
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">mag</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>) -&gt; </span><span style="color:#b48ead;">f64 </span><span>{
+</span><span>        </span><span style="color:#65737e;">//self.vec.iter().sum::&lt;f64&gt;() / (self.size.pow(2) as f64)
+</span><span>        </span><span style="color:#b48ead;">let</span><span> s = (</span><span style="color:#d08770;">0</span><span>..</span><span style="color:#bf616a;">self</span><span>.size*</span><span style="color:#bf616a;">self</span><span>.size)
+</span><span>            .</span><span style="color:#96b5b4;">map</span><span>(|</span><span style="color:#bf616a;">l</span><span>| (</span><span style="color:#bf616a;">self</span><span>.idx &gt;&gt; l)&amp;</span><span style="color:#d08770;">1</span><span>)
+</span><span>            .sum::&lt;</span><span style="color:#b48ead;">usize</span><span>&gt;();
+</span><span>        (</span><span style="color:#bf616a;">self</span><span>.size*</span><span style="color:#bf616a;">self</span><span>.size - </span><span style="color:#d08770;">2</span><span>*s) as </span><span style="color:#b48ead;">f64
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/// 与えられた状態における, Hamiltonian の値.
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">energy</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>) -&gt; </span><span style="color:#b48ead;">f64 </span><span>{
+</span><span>        </span><span style="color:#b48ead;">let mut</span><span> e = </span><span style="color:#d08770;">0.</span><span>;
+</span><span>        </span><span style="color:#b48ead;">for</span><span> i in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#bf616a;">self</span><span>.size {
+</span><span>            </span><span style="color:#b48ead;">for</span><span> j in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#bf616a;">self</span><span>.size {
+</span><span>                e -= </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">spin</span><span>(i,j)*( </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">spin</span><span>(i,j+</span><span style="color:#d08770;">1</span><span>) + </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">spin</span><span>(i+</span><span style="color:#d08770;">1</span><span>, j) );
+</span><span>            }
+</span><span>        }
+</span><span>        e
+</span><span>    }
+</span><span>}
+</span><span>    
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">ising</span><span>(</span><span style="color:#bf616a;">temp</span><span>: &amp;[</span><span style="color:#b48ead;">f64</span><span>], </span><span style="color:#bf616a;">size</span><span>: </span><span style="color:#b48ead;">usize</span><span>) -&gt; (Vec&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;, Vec&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;, Vec&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;) {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> z = vec![ </span><span style="color:#d08770;">0.</span><span>; temp.</span><span style="color:#96b5b4;">len</span><span>() ];
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> mag = vec![ </span><span style="color:#d08770;">0.</span><span>; temp.</span><span style="color:#96b5b4;">len</span><span>() ];
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> ene = vec![ </span><span style="color:#d08770;">0.</span><span>; temp.</span><span style="color:#96b5b4;">len</span><span>() ];
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> cov = vec![ </span><span style="color:#d08770;">0.</span><span>; temp.</span><span style="color:#96b5b4;">len</span><span>() ];
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for</span><span> n in </span><span style="color:#d08770;">0</span><span>..State::number(size) {
+</span><span>        </span><span style="color:#b48ead;">let</span><span> state = State::new(n as </span><span style="color:#b48ead;">usize</span><span>, size as </span><span style="color:#b48ead;">usize</span><span>);
+</span><span>        </span><span style="color:#b48ead;">let</span><span> e = state.</span><span style="color:#96b5b4;">energy</span><span>();
+</span><span>        </span><span style="color:#b48ead;">for</span><span> idx in </span><span style="color:#d08770;">0</span><span>..temp.</span><span style="color:#96b5b4;">len</span><span>() {
+</span><span>            </span><span style="color:#b48ead;">let</span><span> prob = (- e / temp[idx]).</span><span style="color:#96b5b4;">exp</span><span>();
+</span><span>            z[idx] += prob;
+</span><span>            mag[idx] += state.</span><span style="color:#96b5b4;">mag</span><span>() * prob;
+</span><span>            ene[idx] += e * prob;
+</span><span>            cov[idx] += e*e * prob;
+</span><span>        }
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">for</span><span> idx in </span><span style="color:#d08770;">0</span><span>..temp.</span><span style="color:#96b5b4;">len</span><span>() {
+</span><span>        mag[idx] /= z[idx];
+</span><span>        ene[idx] /= z[idx];
+</span><span>        cov[idx] /= z[idx];
+</span><span>    }
+</span><span>
+</span><span>    (mag, ene, cov)
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> temp: Vec&lt;</span><span style="color:#b48ead;">f64</span><span>&gt; = (</span><span style="color:#d08770;">1</span><span>..</span><span style="color:#d08770;">8</span><span>).</span><span style="color:#96b5b4;">map</span><span>(|</span><span style="color:#bf616a;">i</span><span>| i as </span><span style="color:#b48ead;">f64 </span><span>* </span><span style="color:#d08770;">0.5</span><span>).</span><span style="color:#96b5b4;">collect</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> size = </span><span style="color:#d08770;">4</span><span>;
+</span><span>    </span><span style="color:#b48ead;">let </span><span>(mag, ene, cov) = </span><span style="color:#96b5b4;">ising</span><span>(&amp;temp, size);
+</span><span>    println!(&quot;</span><span style="color:#d08770;">{:?}</span><span style="color:#96b5b4;">\n</span><span style="color:#d08770;">{:?}</span><span style="color:#96b5b4;">\n</span><span style="color:#d08770;">{:?}</span><span>&quot;, &amp;mag, &amp;ene, &amp;cov);
+</span><span>    </span><span style="color:#b48ead;">for</span><span> idx in </span><span style="color:#d08770;">0</span><span>..temp.</span><span style="color:#96b5b4;">len</span><span>() {
+</span><span>        print!(&quot;</span><span style="color:#d08770;">{} </span><span>&quot;, ( cov[idx] - ene[idx].</span><span style="color:#96b5b4;">powi</span><span>(</span><span style="color:#d08770;">2</span><span>) )/(size as </span><span style="color:#b48ead;">f64 </span><span>* temp[idx]).</span><span style="color:#96b5b4;">powi</span><span>(</span><span style="color:#d08770;">2</span><span>) )
+</span><span>    }
+</span><span>}
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

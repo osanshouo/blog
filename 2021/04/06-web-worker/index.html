@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+WebWorkerで並列計算 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">WebWorkerで並列計算</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Web">Web</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数値解析">数値解析</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-04-06">2021-04-06</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/06-web-worker/#環境">環境</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/06-web-worker/#シリアル計算">シリアル計算</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/06-web-worker/#並列計算">並列計算</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/06-web-worker/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>JavaScript では Web Workers API を通じて並列処理をサポートしています.
+本記事ではこれを用いて並列計算を試してみます.</p>
+<h1 id="環境">環境</h1>
+<ul>
+<li>Deno 1.18.3 on Debian 10.9 on WSL2 (Win10 v20H2)</li>
+<li>Intel Core i7-8550U</li>
+</ul>
+<p>Node.js をインストールしようと思っていたのですが, 
+4月20日に次期 LTS の version 16 がリリース予定というタイミングだったので, 
+Node.js はそれまで延期して deno を試すことにしました.</p>
+<h1 id="シリアル計算">シリアル計算</h1>
+<p>本記事で取り上げるお題は<a href="https://qiita.com/osanshouo/items/e5be8003f189dfe246f9">以前</a>も使った Leibniz 級数
+$$\frac{ \pi }{ 4 } = \sum_{n = 0}^\infty \frac{ ( - 1 )^n }{ 2 n + 1 }$$
+です. 交代級数を愚直に評価することは基本的にするべきではないんですが, いまは円周率の評価がしたい訳ではないのでよいでしょう.</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#b48ead;">const </span><span style="color:#bf616a;">N </span><span>= </span><span style="color:#d08770;">1e9</span><span>;
+</span><span>
+</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">sum </span><span>= </span><span style="color:#d08770;">0.0</span><span>;
+</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">signum </span><span>= </span><span style="color:#d08770;">1</span><span>;
+</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">denom </span><span>= </span><span style="color:#d08770;">1.0</span><span>;
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">i </span><span>= </span><span style="color:#d08770;">0</span><span>; </span><span style="color:#bf616a;">i</span><span>&lt;</span><span style="color:#bf616a;">N</span><span>; </span><span style="color:#bf616a;">i</span><span>++) {
+</span><span>    </span><span style="color:#bf616a;">sum </span><span>+= </span><span style="color:#bf616a;">signum </span><span>/ </span><span style="color:#bf616a;">denom</span><span>;
+</span><span>    </span><span style="color:#bf616a;">signum </span><span>*= -</span><span style="color:#d08770;">1</span><span>;
+</span><span>    </span><span style="color:#bf616a;">denom </span><span>+= </span><span style="color:#d08770;">2.0</span><span>;
+</span><span>}
+</span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(</span><span style="color:#d08770;">4.0</span><span>*</span><span style="color:#bf616a;">sum</span><span>);
+</span></code></pre>
+<p>上記環境ではこのコードの処理に 1.643 秒かかりました.</p>
+<h1 id="並列計算">並列計算</h1>
+<p>メインスレッドの処理はこんな感じでしょう. 見ての通り, Web Worker を取得し, 級数の下限と上限を渡し, 
+計算結果が返ってきたら <code>result</code> 変数に足し合わせていきます.</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#b48ead;">const </span><span style="color:#bf616a;">N </span><span>= </span><span style="color:#d08770;">1e9</span><span>;
+</span><span style="color:#b48ead;">const </span><span style="color:#bf616a;">THREAD </span><span>= </span><span style="color:#d08770;">4</span><span>;
+</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">result </span><span>= </span><span style="color:#d08770;">0</span><span>;
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">c</span><span>=</span><span style="color:#d08770;">0</span><span>; </span><span style="color:#bf616a;">c</span><span>&lt;</span><span style="color:#bf616a;">THREAD</span><span>; </span><span style="color:#bf616a;">c</span><span>++) {
+</span><span>    </span><span style="color:#b48ead;">const </span><span style="color:#bf616a;">worker </span><span>= new Worker(
+</span><span>	new URL(&quot;</span><span style="color:#a3be8c;">./worker.js</span><span>&quot;, </span><span style="color:#b48ead;">import</span><span>.meta.</span><span style="color:#bf616a;">url</span><span>).href,
+</span><span>	{type: &quot;</span><span style="color:#a3be8c;">module</span><span>&quot;}
+</span><span>    );
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">start </span><span>= (</span><span style="color:#bf616a;">N </span><span>/ </span><span style="color:#bf616a;">THREAD</span><span>) * </span><span style="color:#bf616a;">c</span><span>;
+</span><span>    </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">end </span><span>= (</span><span style="color:#bf616a;">N </span><span>/ </span><span style="color:#bf616a;">THREAD</span><span>) * (</span><span style="color:#bf616a;">c</span><span>+</span><span style="color:#d08770;">1</span><span>);
+</span><span>    </span><span style="color:#bf616a;">worker</span><span>.</span><span style="color:#96b5b4;">postMessage</span><span>([</span><span style="color:#bf616a;">start</span><span>, </span><span style="color:#bf616a;">end</span><span>]);
+</span><span>    
+</span><span>    </span><span style="color:#bf616a;">worker</span><span>.</span><span style="color:#8fa1b3;">onmessage </span><span>= </span><span style="color:#b48ead;">function</span><span>(</span><span style="color:#bf616a;">e</span><span>) {
+</span><span>        </span><span style="color:#bf616a;">result </span><span>+= </span><span style="color:#bf616a;">e</span><span>.data;
+</span><span>        </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(</span><span style="color:#bf616a;">result</span><span>*</span><span style="color:#d08770;">4.</span><span>);
+</span><span>        </span><span style="color:#bf616a;">worker</span><span>.</span><span style="color:#96b5b4;">terminate</span><span>();
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Web Worker には <code>classic</code> と <code>module</code> というふたつのタイプがあるようですが,
+deno では現在のところ <code>module</code> しかサポートしていません.</p>
+<p>すべての worker の処理が終了した時点で結果を表示すればよいのですが,
+うまくそれを検出する方法に困って結果が返ってくる度に <code>result</code> を表示するようにしました.</p>
+<p><code>worker.js</code> はこうなります. これは級数を分割しただけなのでとても簡単です.</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#8fa1b3;">onmessage </span><span>= </span><span style="color:#b48ead;">function</span><span>(</span><span style="color:#bf616a;">e</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">start </span><span>= </span><span style="color:#bf616a;">e</span><span>.data[</span><span style="color:#d08770;">0</span><span>];
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">end </span><span>= </span><span style="color:#bf616a;">e</span><span>.data[</span><span style="color:#d08770;">1</span><span>];
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">sum </span><span>= </span><span style="color:#d08770;">0.0</span><span>;
+</span><span>    </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">signum </span><span>= </span><span style="color:#d08770;">1</span><span>;
+</span><span>    </span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">denom </span><span>= </span><span style="color:#d08770;">2.</span><span>*</span><span style="color:#bf616a;">start </span><span>+ </span><span style="color:#d08770;">1.</span><span>;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">i </span><span>= </span><span style="color:#bf616a;">start</span><span>; </span><span style="color:#bf616a;">i</span><span>&lt;</span><span style="color:#bf616a;">end</span><span>; </span><span style="color:#bf616a;">i</span><span>++) {
+</span><span>        </span><span style="color:#bf616a;">sum </span><span>+= </span><span style="color:#bf616a;">signum </span><span>/ </span><span style="color:#bf616a;">denom</span><span>;
+</span><span>        </span><span style="color:#bf616a;">signum </span><span>*= -</span><span style="color:#d08770;">1</span><span>;
+</span><span>        </span><span style="color:#bf616a;">denom </span><span>+= </span><span style="color:#d08770;">2.0</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#8fa1b3;">postMessage</span><span>(</span><span style="color:#bf616a;">sum</span><span>);
+</span><span>}
+</span></code></pre>
+<p>手元の環境ではこの処理に 0.642 秒という結果になりました.
+約 2.56 倍の高速化ができました.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://deno.land/manual/runtime/workers">Manual | Deno</a></li>
+<li><a href="https://developer.mozilla.org/ja/docs/Web/API/Web_Workers_API/Using_web_workers">Web Worker の使用 - Web API | MDN</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>
