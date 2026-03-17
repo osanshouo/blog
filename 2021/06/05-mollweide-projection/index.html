@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Mollweide図法 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Mollweide図法</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数値解析">数値解析</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数学">数学</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-06-05">2021-06-05</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/05-mollweide-projection/#緯度と経度">緯度と経度</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/05-mollweide-projection/#Mollweide_図法">Mollweide 図法</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/05-mollweide-projection/#計算方法">計算方法</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/05-mollweide-projection/#コード">コード</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/05-mollweide-projection/#Python">Python</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/06/05-mollweide-projection/#Rust">Rust</a></li>
+            
+          </ul>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>本記事では緯度・経度データを可視化するために 
+<a href="https://ja.wikipedia.org/wiki/%E3%83%A2%E3%83%AB%E3%83%AF%E3%82%A4%E3%83%87%E5%9B%B3%E6%B3%95">Mollweide 図法</a>による座標に換算する方法について論じます.</p>
+<h1 id="緯度と経度">緯度と経度</h1>
+<p>本記事では天文学および地球科学の慣例に従い, 球座標 $( r, \theta, \phi )$ の $\theta$ は赤道面から測った緯度を表すものとします.
+数学や物理学では北極から測った $\frac{ \pi }{ 2 } - \theta$ を $\theta$ と書くので注意してください.
+$$x = r \cos \theta \cos \phi$$
+$$y = r \cos \theta \sin \phi$$
+$$z = r \sin \theta$$
+また経度 $\phi$ は $( - \pi, \pi ]$ に値を取るものとします (東経・西経と考えればわかりやすいでしょう).
+体積要素 $dV$ は
+$$dV = r^2 \cos \theta \, dr \, d\theta \, d\phi$$
+です.</p>
+<h1 id="Mollweide_図法">Mollweide 図法</h1>
+<p>緯度と経度の組 $( \theta, \phi )$ を2次元平面の点 $( X, Y )$ への次の写像を Mollweide 図法と呼びます.
+$$X = \frac{ \sqrt{ 8 } }{ \pi } \phi \cos \beta$$
+$$Y = \sqrt{ 2 } \sin \beta$$
+ただし $\beta$ は緯度 $\theta$ の関数で, 次の方程式により陰に定めます.
+$$2 \beta + \sin 2 \beta = \pi \sin \theta$$</p>
+<p>Mollweide 図法は等積写像です. すなわち, 次式が成立します.
+$$\cos \theta \, d \phi \wedge d \theta = d X \wedge d Y$$
+この性質のために, Mollweide 図法は天球面上の星の分布や地表上の温度分布といった分布図に適しています.</p>
+<h1 id="計算方法">計算方法</h1>
+<p>緯度と経度 $( \theta, \phi )$ を Mollweide 図法 $( X, Y )$ に換算するためには上の超越方程式を解く必要があります.
+赤道付近 $| \theta | \lesssim \frac{ \pi }{ 8 }$ では
+$$\beta \sim \frac{ \pi }{ 4 } \theta$$
+と, 極付近 $|\frac{ \pi }{ 2 } - \theta | \lesssim \frac{ \pi }{ 64 }$ では
+$$\beta \sim \pm \frac{ \pi }{ 2 } \mp \left[ \frac{ 8 }{ 3 } \left( \frac{ \pi }{ 2 } - \theta \right)^2 \right]^{1/3}$$
+(複号は上が北極, 下が南極) と近似解が求まりますが, 一般的には数値的に求める必要があります. 
+これは <a href="https://ja.wikipedia.org/wiki/%E3%83%8B%E3%83%A5%E3%83%BC%E3%83%88%E3%83%B3%E6%B3%95">Newton 法</a>を用いれば簡単です.
+つまり, 次の漸化式
+$$\beta_0 = \theta$$
+$$\beta_{i+1} = \frac{ 2 \beta_i + \sin 2 \beta_i - \pi \sin \theta }{ 2 + 2 \cos 2 \beta_i }$$
+を解けば $\beta = \lim_{i \to \infty} \beta_i$ となります. </p>
+<p>ただしもちろん数値的に極限を取ることはできませんから, 漸化式を有限回で打ち切る必要があります.
+上記漸化式を第 $i$ 項まで解いたとき, 誤差
+$$\left| 2 \beta_i + \sin 2 \beta_i - \pi \sin \theta \right|$$
+の大きさをプロットしたものが次の図です.</p>
+<figure>
+  <img src="./calc-beta.svg" alt="Newton法により数値的に求めたbetaとその誤差のプロット"/>
+  <figcaption>上図: $\theta$ の関数としての $\beta$. 下図: $\beta$ の定義式における誤差.
+  色付き実線は Newton 法により求めた結果, 黒の点線は誤差が 10<sup>-5</sup> を超えないように反復回数を調整した場合の結果.</figcaption>
+</figure>
+<p>ここからわかるように極に近いほど収束が遅いため, 正確な値が必要ならば反復回数を動的に調整するべきです (図中の黒の点線).
+しかし, 人が理解しやすいように可視化するという観点からは, 0.1% 程度の誤差は許容範囲でしょうし,
+反復回数を8回程度に決め打ちしても実用上十分だと思われます.</p>
+<p>もっとも一旦コードをつくってしまえば, あとはそれをコピペするだけです.</p>
+<h1 id="コード">コード</h1>
+<h2 id="Python">Python</h2>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">mollweide_beta_scalar</span><span>(</span><span style="color:#bf616a;">lat</span><span>, </span><span style="color:#bf616a;">err</span><span>=</span><span style="color:#d08770;">1e-5</span><span>):
+</span><span>    </span><span style="color:#b48ead;">if </span><span>np.</span><span style="color:#bf616a;">abs</span><span>(</span><span style="color:#d08770;">2.</span><span>*lat) == np.pi:
+</span><span>        </span><span style="color:#b48ead;">return </span><span>lat
+</span><span>    
+</span><span>    beta = lat
+</span><span>    </span><span style="color:#b48ead;">while </span><span>np.</span><span style="color:#bf616a;">abs</span><span>( </span><span style="color:#d08770;">2.</span><span>*beta + np.</span><span style="color:#bf616a;">sin</span><span>(</span><span style="color:#d08770;">2.</span><span>*beta) - np.pi*np.</span><span style="color:#bf616a;">sin</span><span>(lat) ) &gt; err:
+</span><span>        beta -= (</span><span style="color:#d08770;">2.</span><span>*beta + np.</span><span style="color:#bf616a;">sin</span><span>(</span><span style="color:#d08770;">2.</span><span>*beta) - np.pi*np.</span><span style="color:#bf616a;">sin</span><span>(lat))/(</span><span style="color:#d08770;">2. </span><span>+ </span><span style="color:#d08770;">2.</span><span>*np.</span><span style="color:#bf616a;">cos</span><span>(</span><span style="color:#d08770;">2.</span><span>*beta))
+</span><span>    </span><span style="color:#b48ead;">return </span><span>beta
+</span><span>
+</span><span>mollweide_beta = np.</span><span style="color:#bf616a;">vectorize</span><span>(mollweide_beta_scalar)
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">mollweide</span><span>(</span><span style="color:#bf616a;">lat</span><span>, </span><span style="color:#bf616a;">lon</span><span>):
+</span><span>    beta = </span><span style="color:#bf616a;">mollweide_beta</span><span>(lat)
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">return </span><span>[
+</span><span>        np.</span><span style="color:#bf616a;">sqrt</span><span>(</span><span style="color:#d08770;">8.</span><span>)/np.pi*lon*np.</span><span style="color:#bf616a;">cos</span><span>(beta),
+</span><span>        np.</span><span style="color:#bf616a;">sqrt</span><span>(</span><span style="color:#d08770;">2.</span><span>)*np.</span><span style="color:#bf616a;">sin</span><span>(beta)
+</span><span>    ]
+</span></code></pre>
+<h2 id="Rust">Rust</h2>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">mollweide_beta</span><span>(</span><span style="color:#bf616a;">lat</span><span>: </span><span style="color:#b48ead;">f64</span><span>) -&gt; </span><span style="color:#b48ead;">f64 </span><span>{
+</span><span>    </span><span style="color:#b48ead;">const </span><span style="color:#d08770;">ERROR</span><span>: </span><span style="color:#b48ead;">f64 </span><span>= 1e-</span><span style="color:#d08770;">5</span><span>;
+</span><span>    </span><span style="color:#b48ead;">use </span><span>std::f64::consts::</span><span style="color:#d08770;">PI</span><span>;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#d08770;">2.</span><span>*lat.</span><span style="color:#96b5b4;">abs</span><span>() == </span><span style="color:#d08770;">PI </span><span>{ </span><span style="color:#b48ead;">return</span><span> lat; }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> b = lat;
+</span><span>    </span><span style="color:#b48ead;">while </span><span>(</span><span style="color:#d08770;">2.</span><span>*b + (</span><span style="color:#d08770;">2.</span><span>*b).</span><span style="color:#96b5b4;">sin</span><span>() - </span><span style="color:#d08770;">PI</span><span>*lat.</span><span style="color:#96b5b4;">sin</span><span>()).</span><span style="color:#96b5b4;">abs</span><span>() &gt; </span><span style="color:#d08770;">ERROR </span><span>{
+</span><span>        b -= (</span><span style="color:#d08770;">2.</span><span>*b + (</span><span style="color:#d08770;">2.</span><span>*b).</span><span style="color:#96b5b4;">sin</span><span>() - </span><span style="color:#d08770;">PI</span><span>*lat.</span><span style="color:#96b5b4;">sin</span><span>())/(</span><span style="color:#d08770;">2. </span><span>+ </span><span style="color:#d08770;">2.</span><span>*(</span><span style="color:#d08770;">2.</span><span>*b).</span><span style="color:#96b5b4;">cos</span><span>());
+</span><span>    }
+</span><span>
+</span><span>    b
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">mollweide</span><span>(</span><span style="color:#bf616a;">lat</span><span>: </span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#bf616a;">lon</span><span>: </span><span style="color:#b48ead;">f64</span><span>) -&gt; (</span><span style="color:#b48ead;">f64</span><span>, </span><span style="color:#b48ead;">f64</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">use </span><span>std::f64::consts::{</span><span style="color:#d08770;">PI</span><span>, </span><span style="color:#d08770;">SQRT_2</span><span>};
+</span><span>    </span><span style="color:#b48ead;">let</span><span> beta = </span><span style="color:#96b5b4;">mollweide_beta</span><span>(lat);
+</span><span>
+</span><span>    ( </span><span style="color:#d08770;">2.</span><span>*</span><span style="color:#d08770;">SQRT_2</span><span>/</span><span style="color:#d08770;">PI</span><span>*lon*beta.</span><span style="color:#96b5b4;">cos</span><span>(), </span><span style="color:#d08770;">SQRT_2</span><span>*beta.</span><span style="color:#96b5b4;">sin</span><span>() )
+</span><span>}
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

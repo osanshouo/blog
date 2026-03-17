@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+素集合データ構造 (Union-Find木) - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">素集合データ構造 (Union-Find木)</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/離散数学">離散数学</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-05-29">2024-05-29</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/05/29-union-find/#問題">問題</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/05/29-union-find/#考え方">考え方</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/05/29-union-find/#グラフの定義">グラフの定義</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/05/29-union-find/#木構造による表現">木構造による表現</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/05/29-union-find/#最適化_(1)_経路圧縮">最適化 (1) 経路圧縮</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2024/05/29-union-find/#最適化_(2)_union_by_rank">最適化 (2) union by rank</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/05/29-union-find/#Rust_コード">Rust コード</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/05/29-union-find/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><h1 id="問題">問題</h1>
+<p>次の問題について考えます.</p>
+<blockquote>
+<p>[<strong>問題</strong>] ある集合が, 互いに素な部分集合の族によって完全に分類されているとする.
+このとき, 与えられた二つの元が, 同一の部分集合に属するかどうか判定せよ.</p>
+</blockquote>
+<p>もう少し丁寧に説明すると, ある集合 $S$ が与えられたとして, 
+その部分集合の族 $F_i \subset S$ ($i = 0, 1, 2, ...$) が次の条件を満たすとします.
+$$i \neq j \ \ \Rightarrow \ \ F_i \cap F_j = \emptyset$$
+$$\bigcup_i F_i = S$$
+このとき, $S$ のふたつの元 $a$, $b$ が与えられたとき, 
+それが同一の $F_i$ に属する元かどうか判定してください, という問題です.</p>
+<p>この問題は, グラフ理論の言葉を用いると次のように述べることもできます.</p>
+<blockquote>
+<p>[<strong>問題</strong>] 連結とは限らない無向グラフが与えられたとする.
+その二つの頂点が与えられたとき, それらを結ぶ道が存在するかどうか判定せよ.
+ただし, すべての頂点は自分自身と自明な道で結ばれているものと解釈する.</p>
+</blockquote>
+<p>つまり, 与えられたふたつの頂点が同一の連結成分上のものかどうか判定せよ, ということですね.
+与えられたグラフの各連結成分が, 上の問題でいう部分集合 $F_i$ に相当します.
+以下ではこのグラフ理論の言葉づかいを用いて議論を進めます.</p>
+<h1 id="考え方">考え方</h1>
+<h2 id="グラフの定義">グラフの定義</h2>
+<p>与えられたグラフの頂点の数を $N$ とし, 
+各頂点を $0$ から $N - 1$ までの番号でラベル付けします.
+無向グラフは, 辺 (頂点と頂点の組) をすべて与えることによって定義されます.
+例えば, 次のグラフの定義では, 1行にふたつの数 $a$, $b$ が書かれていますが,
+これは頂点 $a$, $b$ を結ぶ辺が存在する, という意味です.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>1 2
+</span><span>3 4
+</span><span>3 2
+</span><span>2 4
+</span><span>4 2
+</span><span>0 0
+</span></code></pre>
+<p>最終行では端点が同一の頂点であるような辺 (ループ) が定義されていますが, 
+いまの問題では頂点は自分自身と道で結ばれていますから, その存在はまったく無意味です.
+また, 第4行と第5行では頂点 2, 4 を結ぶ二つの辺が定義されています (多重辺) が,
+いまの問題の範疇ではやはり多重辺は意味を持ちません.
+つまり, 仮に第5行と第6行を省略しても問題の答えは変わりません.</p>
+<h2 id="木構造による表現">木構造による表現</h2>
+<p>この問題は, 実は (グラフ構造ではなく) 木構造を用いた方が簡単です.
+頂点 $a$, $b$ を結ぶ辺が存在するということを, $a$ を親, $b$ を子とする木構造と解釈し直してみましょう
+(無向グラフを考えているため, どちらが親かは重要ではなく, 逆にしても構いません).</p>
+<p>最初は辺が一切ない状態から出発します. 
+このとき, すべての頂点は自分自身を根とする自明な木を構成しています.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>[0] [1] [2] [3] [4]
+</span></code></pre>
+<p>ここに最初の辺 $(1, 2)$ を追加します. 
+この操作は, 頂点 $2$ を頂点 $1$ の子とすることでふたつの木を結合する (union) ものとみなせます.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>[0] [1] [3] [4]
+</span><span>     │ 
+</span><span>    [2]
+</span></code></pre>
+<p>第二の辺 $(3, 4)$ の追加も同様です.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>[0] [1] [3]
+</span><span>     │   │
+</span><span>    [2] [4]
+</span></code></pre>
+<p>第三の辺 $(3, 2)$ ですが, 頂点 $2$ は根ではないので, 
+それを頂点 $3$ の子とするのではなく, 頂点 $2$ の根である頂点 $1$ を頂点 $3$ の子とします.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>[0]   [3]
+</span><span>      ╱ ╲
+</span><span>    [1] [4]
+</span><span>     │
+</span><span>    [2]
+</span></code></pre>
+<p>第四の辺 $(2, 4)$ ですが, 既に頂点 $2$, $4$ はひとつの木にまとめられていますから, 何もする必要はありません.
+ここでどうやって頂点 $2$, $4$ がひとつの木にまとまっているか判定したかというと,
+木を辿ることで両者の根を調べ, それがどちらも頂点 $3$ で一致したため同じ木だと判断したのです.
+残りの辺も同様に何も操作は要りません.
+以上の木構造を構成する過程は Union と呼ばれています.</p>
+<p>与えられたグラフを上述の木構造にまとめることができたら, 後は簡単です.
+頂点 $a$, $b$ が連結かどうかは, $a$, $b$ の親を辿って行ったときに得られる根が一致するかどうか, 
+によって判定できます.
+この過程は Find と呼ばれています.</p>
+<h2 id="最適化_(1)_経路圧縮">最適化 (1) 経路圧縮</h2>
+<p>考え方は以上の通りなのですが, この操作を愚直に行っても速いとは言えません.
+ある頂点について, その親を求める操作に木の高さ分だけの時間を要するからです.
+しかし, いまの問題では木構造は重要ではなく, どの根と繋がっているかだけが重要です.
+そこで, ある頂点についてその根を求める操作をした際には, 
+その頂点を根の直接の子となるように繋ぎ直してしまえばよいのです.</p>
+<p>この繋ぎ直しは, 頂点から根まで辿る経路上の途中の頂点についても行うことができ,
+すべて根の子にしてしまいましょう.
+そうすれば次回以降その木の操作を行う際に動作が速くなります.</p>
+<h2 id="最適化_(2)_union_by_rank">最適化 (2) union by rank</h2>
+<p>さらに, 上の説明ではふたつの木を結合する操作を, 単純に入力通りにしていました.
+しかし, ふたつの木の高さがわかっているならば, より高さの小さい方を子として結合することで,
+木の高さが増大するのを抑えることができます.</p>
+<h1 id="Rust_コード">Rust コード</h1>
+<p>もう少し最適化できると思いますが, 疲れたのでここまで.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">derive</span><span>(Debug)]
+</span><span style="color:#b48ead;">struct </span><span>Node {
+</span><span>    </span><span style="color:#bf616a;">parent</span><span>: Option&lt;</span><span style="color:#b48ead;">usize</span><span>&gt;,
+</span><span>}
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">derive</span><span>(Debug)]
+</span><span style="color:#b48ead;">struct </span><span>UFTree {
+</span><span>    </span><span style="color:#bf616a;">arena</span><span>: Vec&lt;Node&gt;,
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">impl </span><span>UFTree {
+</span><span>    </span><span style="color:#65737e;">/// 与えられたノードの根を探索しそのインデックスを返す.
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">root</span><span>(&amp;</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">vertex</span><span>: </span><span style="color:#b48ead;">usize</span><span>) -&gt; </span><span style="color:#b48ead;">usize </span><span>{
+</span><span>        </span><span style="color:#65737e;">// 根まで木を辿る
+</span><span>        </span><span style="color:#b48ead;">let</span><span> r = </span><span style="color:#b48ead;">match </span><span style="color:#bf616a;">self</span><span>.arena[vertex].parent {
+</span><span>            Some(p) =&gt; {
+</span><span>                </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">root</span><span>(p)
+</span><span>            },
+</span><span>            None =&gt; vertex,
+</span><span>        };
+</span><span>
+</span><span>        </span><span style="color:#65737e;">// 問題のノードを根に直接繋ぎ直す
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>Some(_) = </span><span style="color:#bf616a;">self</span><span>.arena[vertex].parent {
+</span><span>            </span><span style="color:#bf616a;">self</span><span>.arena[vertex].parent = Some(r);
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="color:#65737e;">// 根のインデックスを返す
+</span><span>        r
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/// 与えられたノードの根を探索しそのインデックスを返す.
+</span><span>    </span><span style="color:#65737e;">/// 同時に, 根まで辿るのに要した階層の数 (rank) を計算する.
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">root_with_rank</span><span>(&amp;</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">vertex</span><span>: </span><span style="color:#b48ead;">usize</span><span>) -&gt; (</span><span style="color:#b48ead;">usize</span><span>, </span><span style="color:#b48ead;">usize</span><span>) {
+</span><span>        </span><span style="color:#65737e;">// 根まで木を辿る
+</span><span>        </span><span style="color:#b48ead;">let </span><span>(r, level) = </span><span style="color:#b48ead;">match </span><span style="color:#bf616a;">self</span><span>.arena[vertex].parent {
+</span><span>            Some(p) =&gt; {
+</span><span>                </span><span style="color:#b48ead;">let </span><span>(r, level) = </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">root_with_rank</span><span>(p);
+</span><span>                (r, level + </span><span style="color:#d08770;">1</span><span>)
+</span><span>            },
+</span><span>            None =&gt; (vertex, </span><span style="color:#d08770;">0</span><span>),
+</span><span>        };
+</span><span>
+</span><span>        </span><span style="color:#65737e;">// 問題のノードを根に直接繋ぎ直す
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>Some(_) = </span><span style="color:#bf616a;">self</span><span>.arena[vertex].parent {
+</span><span>            </span><span style="color:#bf616a;">self</span><span>.arena[vertex].parent = Some(r);
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="color:#65737e;">// 根のインデックスを返す
+</span><span>        (r, level)
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/// ふたつのノードを含む部分木をひとつにまとめる.
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">unite</span><span>(&amp;</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">a</span><span>: </span><span style="color:#b48ead;">usize</span><span>, </span><span style="color:#bf616a;">b</span><span>: </span><span style="color:#b48ead;">usize</span><span>) {
+</span><span>        </span><span style="color:#b48ead;">let </span><span>(root_of_a, rank_of_a) = </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">root_with_rank</span><span>(a);
+</span><span>        </span><span style="color:#b48ead;">let </span><span>(root_of_b, rank_of_b) = </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">root_with_rank</span><span>(b);
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">if</span><span> root_of_a != root_of_b {
+</span><span>            </span><span style="color:#b48ead;">if</span><span> rank_of_a &gt; rank_of_b {
+</span><span>                </span><span style="color:#bf616a;">self</span><span>.arena[root_of_b].parent = Some(root_of_a);
+</span><span>            } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>                </span><span style="color:#bf616a;">self</span><span>.arena[root_of_a].parent = Some(root_of_b);
+</span><span>            }
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/// ふたつのノードが同一の部分木に属するか判定する.
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">find</span><span>(&amp;</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">a</span><span>: </span><span style="color:#b48ead;">usize</span><span>, </span><span style="color:#bf616a;">b</span><span>: </span><span style="color:#b48ead;">usize</span><span>) -&gt; </span><span style="color:#b48ead;">bool </span><span>{
+</span><span>        </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">root</span><span>(a) == </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">root</span><span>(b)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://atcoder.jp/contests/atc001/tasks/unionfind_a">AtCoder Typical Contest 001 B - Union Find</a></li>
+<li><a href="https://www.nogawanogawa.work/entry/union_find">Union-Find木について勉強する - どこにでもいるSEの備忘録</a></li>
+<li><a href="https://somachob.com/union-find/">【図で解説】０からわかるUnion-Find入門【C++】 | そまちょブログ</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure">Disjoint-set data structure - Wikipedia</a></li>
+<li><a href="https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2012/dbbca5218779336114dcd3b3195e7783_MIT6_046JS12_lec16.pdf">6.046J Lecture 16: Disjoint-set data structures</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

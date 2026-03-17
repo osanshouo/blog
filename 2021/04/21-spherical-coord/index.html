@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Sympy] 球座標系でのベクトル解析 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Sympy] 球座標系でのベクトル解析</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Python">Python</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/SymPy">SymPy</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-04-21">2021-04-21</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#65737e;">&#39;&#39;&#39;
+</span><span style="color:#65737e;">球座標系でのベクトル解析
+</span><span style="color:#65737e;">
+</span><span style="color:#65737e;">(c)2021 osanshouo https://osanshouo.github.io/blog/
+</span><span style="color:#65737e;">Licensed under CC BY 4.0 https://creativecommons.org/licenses/by/4.0/legalcodeCreative-Commons 
+</span><span style="color:#65737e;">&#39;&#39;&#39;
+</span><span>
+</span><span style="color:#b48ead;">from </span><span>sympy </span><span style="color:#b48ead;">import </span><span>symbols, cos, sin
+</span><span>
+</span><span>r, theta, phi = </span><span style="color:#bf616a;">symbols</span><span>(&quot;</span><span style="color:#a3be8c;">r, theta, phi</span><span>&quot;)
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">dot</span><span>(</span><span style="color:#bf616a;">A</span><span>, </span><span style="color:#bf616a;">B</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span>A[</span><span style="color:#d08770;">0</span><span>]*B[</span><span style="color:#d08770;">0</span><span>] + A[</span><span style="color:#d08770;">1</span><span>]*B[</span><span style="color:#d08770;">1</span><span>] + A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">2</span><span>]
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">cross</span><span>(</span><span style="color:#bf616a;">A</span><span>, </span><span style="color:#bf616a;">B</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span>[
+</span><span>        A[</span><span style="color:#d08770;">1</span><span>]*B[</span><span style="color:#d08770;">2</span><span>] - A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">1</span><span>],
+</span><span>        A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">0</span><span>] - A[</span><span style="color:#d08770;">0</span><span>]*B[</span><span style="color:#d08770;">2</span><span>],
+</span><span>        A[</span><span style="color:#d08770;">0</span><span>]*B[</span><span style="color:#d08770;">1</span><span>] - A[</span><span style="color:#d08770;">1</span><span>]*B[</span><span style="color:#d08770;">0</span><span>],
+</span><span>    ]
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">grad</span><span>(</span><span style="color:#bf616a;">f</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span>[
+</span><span>        f.</span><span style="color:#bf616a;">diff</span><span>(r),
+</span><span>        f.</span><span style="color:#bf616a;">diff</span><span>(theta)/r,
+</span><span>        f.</span><span style="color:#bf616a;">diff</span><span>(phi)/(r*</span><span style="color:#bf616a;">sin</span><span>(theta))
+</span><span>    ]
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">div</span><span>(</span><span style="color:#bf616a;">A</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span>(r*r*A[</span><span style="color:#d08770;">0</span><span>]).</span><span style="color:#bf616a;">diff</span><span>(r)/(r*r) + (A[</span><span style="color:#d08770;">1</span><span>]*</span><span style="color:#bf616a;">sin</span><span>(theta)).</span><span style="color:#bf616a;">diff</span><span>(theta)/(r*</span><span style="color:#bf616a;">sin</span><span>(theta)) + A[</span><span style="color:#d08770;">2</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi)/(r*</span><span style="color:#bf616a;">sin</span><span>(theta))
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">rot</span><span>(</span><span style="color:#bf616a;">v</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span>[
+</span><span>        ( (v[</span><span style="color:#d08770;">2</span><span>]*</span><span style="color:#bf616a;">sin</span><span>(theta)).</span><span style="color:#bf616a;">diff</span><span>(theta) - v[</span><span style="color:#d08770;">1</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi) )/(r*</span><span style="color:#bf616a;">sin</span><span>(theta)),
+</span><span>        ( v[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi)/</span><span style="color:#bf616a;">sin</span><span>(theta) - (r*v[</span><span style="color:#d08770;">2</span><span>]).</span><span style="color:#bf616a;">diff</span><span>(r) )/r,
+</span><span>        ( (r*v[</span><span style="color:#d08770;">1</span><span>]).</span><span style="color:#bf616a;">diff</span><span>(r) - v[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#bf616a;">diff</span><span>(theta) )/r
+</span><span>    ]
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">material_deriv</span><span>(</span><span style="color:#bf616a;">A</span><span>, </span><span style="color:#bf616a;">B</span><span>):
+</span><span>    </span><span style="color:#65737e;">&#39;&#39;&#39;(A \cdot </span><span style="color:#96b5b4;">\n</span><span style="color:#65737e;">abla) B&#39;&#39;&#39;
+</span><span>    </span><span style="color:#b48ead;">return </span><span>[
+</span><span>        A[</span><span style="color:#d08770;">0</span><span>]*B[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#bf616a;">diff</span><span>(r) + A[</span><span style="color:#d08770;">1</span><span>]*B[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#bf616a;">diff</span><span>(theta)/r + A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi)/(r*</span><span style="color:#bf616a;">sin</span><span>(theta)) - (A[</span><span style="color:#d08770;">1</span><span>]*B[</span><span style="color:#d08770;">1</span><span>] + A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">2</span><span>])/r,
+</span><span>        A[</span><span style="color:#d08770;">0</span><span>]*B[</span><span style="color:#d08770;">1</span><span>].</span><span style="color:#bf616a;">diff</span><span>(r) + A[</span><span style="color:#d08770;">1</span><span>]*B[</span><span style="color:#d08770;">1</span><span>].</span><span style="color:#bf616a;">diff</span><span>(theta)/r + A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">1</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi)/(r*</span><span style="color:#bf616a;">sin</span><span>(theta)) + A[</span><span style="color:#d08770;">1</span><span>]*B[</span><span style="color:#d08770;">0</span><span>]/r - A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">2</span><span>]*</span><span style="color:#bf616a;">cos</span><span>(theta)/(r*</span><span style="color:#bf616a;">sin</span><span>(theta)),
+</span><span>        A[</span><span style="color:#d08770;">0</span><span>]*B[</span><span style="color:#d08770;">2</span><span>].</span><span style="color:#bf616a;">diff</span><span>(r) + A[</span><span style="color:#d08770;">1</span><span>]*B[</span><span style="color:#d08770;">2</span><span>].</span><span style="color:#bf616a;">diff</span><span>(theta)/r + A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">2</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi)/(r*</span><span style="color:#bf616a;">sin</span><span>(theta)) + A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">0</span><span>]/r + A[</span><span style="color:#d08770;">2</span><span>]*B[</span><span style="color:#d08770;">1</span><span>]*</span><span style="color:#bf616a;">cos</span><span>(theta)/(r*</span><span style="color:#bf616a;">sin</span><span>(theta))
+</span><span>    ]
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">laplacian</span><span>(</span><span style="color:#bf616a;">f</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span>(f.</span><span style="color:#bf616a;">diff</span><span>(r)*r*r).</span><span style="color:#bf616a;">diff</span><span>(r)/(r*r) + (f.</span><span style="color:#bf616a;">diff</span><span>(theta)*</span><span style="color:#bf616a;">sin</span><span>(theta)).</span><span style="color:#bf616a;">diff</span><span>(theta)/(r*r*</span><span style="color:#bf616a;">sin</span><span>(theta)) + f.</span><span style="color:#bf616a;">diff</span><span>(phi).</span><span style="color:#bf616a;">diff</span><span>(phi)/(r*r*</span><span style="color:#bf616a;">sin</span><span>(theta)*</span><span style="color:#bf616a;">sin</span><span>(theta))
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">laplacian_vec</span><span>(</span><span style="color:#bf616a;">A</span><span>):
+</span><span>    </span><span style="color:#b48ead;">return </span><span>[
+</span><span>        </span><span style="color:#bf616a;">laplacian</span><span>(A[</span><span style="color:#d08770;">0</span><span>]) - </span><span style="color:#d08770;">2</span><span>*A[</span><span style="color:#d08770;">1</span><span>].</span><span style="color:#bf616a;">diff</span><span>(theta)/(r*r) - </span><span style="color:#d08770;">2</span><span>*A[</span><span style="color:#d08770;">2</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi)/(r*r*</span><span style="color:#bf616a;">sin</span><span>(theta)) - </span><span style="color:#d08770;">2</span><span>*A[</span><span style="color:#d08770;">0</span><span>]/(r*r) - </span><span style="color:#d08770;">2</span><span>*A[</span><span style="color:#d08770;">1</span><span>]*</span><span style="color:#bf616a;">cos</span><span>(theta)/(r*r*</span><span style="color:#bf616a;">sin</span><span>(theta)),
+</span><span>        </span><span style="color:#bf616a;">laplacian</span><span>(A[</span><span style="color:#d08770;">1</span><span>]) + </span><span style="color:#d08770;">2</span><span>*A[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#bf616a;">diff</span><span>(theta)/(r*r) - </span><span style="color:#d08770;">2</span><span>*A[</span><span style="color:#d08770;">2</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi)*</span><span style="color:#bf616a;">cos</span><span>(theta)/(r*r*</span><span style="color:#bf616a;">sin</span><span>(theta)*</span><span style="color:#bf616a;">sin</span><span>(theta)) - A[</span><span style="color:#d08770;">1</span><span>]/(r*r*</span><span style="color:#bf616a;">sin</span><span>(theta)*</span><span style="color:#bf616a;">sin</span><span>(theta)),
+</span><span>        </span><span style="color:#bf616a;">laplacian</span><span>(A[</span><span style="color:#d08770;">2</span><span>]) + </span><span style="color:#d08770;">2</span><span>*A[</span><span style="color:#d08770;">0</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi)/(r*r*</span><span style="color:#bf616a;">sin</span><span>(theta)) + </span><span style="color:#d08770;">2</span><span>*A[</span><span style="color:#d08770;">1</span><span>].</span><span style="color:#bf616a;">diff</span><span>(phi)*</span><span style="color:#bf616a;">cos</span><span>(theta)/(r*r*</span><span style="color:#bf616a;">sin</span><span>(theta)*</span><span style="color:#bf616a;">sin</span><span>(theta)) - A[</span><span style="color:#d08770;">2</span><span>]/(r*r*</span><span style="color:#bf616a;">sin</span><span>(theta)*</span><span style="color:#bf616a;">sin</span><span>(theta)),
+</span><span>    ]
+</span><span>
+</span><span style="color:#b48ead;">if </span><span>__name__ == &quot;</span><span style="color:#a3be8c;">__main__</span><span>&quot;:
+</span><span>    </span><span style="color:#b48ead;">from </span><span>sympy </span><span style="color:#b48ead;">import </span><span>Function, simplify
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">simplify_vec</span><span>(</span><span style="color:#bf616a;">A</span><span>):
+</span><span>        </span><span style="color:#b48ead;">return </span><span>[ </span><span style="color:#bf616a;">simplify</span><span>(A[</span><span style="color:#d08770;">0</span><span>]), </span><span style="color:#bf616a;">simplify</span><span>(A[</span><span style="color:#d08770;">1</span><span>]), </span><span style="color:#bf616a;">simplify</span><span>(A[</span><span style="color:#d08770;">2</span><span>]) ]
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">vec_mul</span><span>(</span><span style="color:#bf616a;">psi</span><span>, </span><span style="color:#bf616a;">A</span><span>):
+</span><span>        </span><span style="color:#b48ead;">return </span><span>[ psi*A[</span><span style="color:#d08770;">0</span><span>], psi*A[</span><span style="color:#d08770;">1</span><span>], psi*A[</span><span style="color:#d08770;">2</span><span>] ]
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">vec_sum</span><span>(</span><span style="color:#bf616a;">terms</span><span>):
+</span><span>        result = []
+</span><span>        </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">3</span><span>):
+</span><span>            tmp = </span><span style="color:#d08770;">0
+</span><span>            </span><span style="color:#b48ead;">for </span><span>term </span><span style="color:#b48ead;">in </span><span>terms:
+</span><span>                tmp += term[i]
+</span><span>            result.</span><span style="color:#bf616a;">append</span><span>(tmp)
+</span><span>        </span><span style="color:#b48ead;">return </span><span>result
+</span><span>
+</span><span>    psi = </span><span style="color:#bf616a;">symbols</span><span>(&quot;</span><span style="color:#a3be8c;">psi</span><span>&quot;)
+</span><span>    f = </span><span style="color:#bf616a;">Function</span><span>(&#39;</span><span style="color:#a3be8c;">f</span><span>&#39;)(r, theta, phi)
+</span><span>    g = </span><span style="color:#bf616a;">Function</span><span>(&#39;</span><span style="color:#a3be8c;">g</span><span>&#39;)(r, theta, phi)
+</span><span>    h = </span><span style="color:#bf616a;">Function</span><span>(&#39;</span><span style="color:#a3be8c;">h</span><span>&#39;)(r, theta, phi)
+</span><span>    i = </span><span style="color:#bf616a;">Function</span><span>(&#39;</span><span style="color:#a3be8c;">i</span><span>&#39;)(r, theta, phi)
+</span><span>    j = </span><span style="color:#bf616a;">Function</span><span>(&#39;</span><span style="color:#a3be8c;">j</span><span>&#39;)(r, theta, phi)
+</span><span>    k = </span><span style="color:#bf616a;">Function</span><span>(&#39;</span><span style="color:#a3be8c;">k</span><span>&#39;)(r, theta, phi)
+</span><span>    A = [ f, g, h ]
+</span><span>    B = [ i, j, k ]
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">vec_sum</span><span>([ A, B ]) == [ f+i, g+j, h+k ]
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">vec_mul</span><span>(psi, A) == [ psi*f, psi*g, psi*h ]
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify</span><span>( </span><span style="color:#bf616a;">dot</span><span>(</span><span style="color:#bf616a;">grad</span><span>(psi), A) + psi*</span><span style="color:#bf616a;">div</span><span>(A) - </span><span style="color:#bf616a;">div</span><span>(</span><span style="color:#bf616a;">vec_mul</span><span>(psi, A))) == </span><span style="color:#d08770;">0
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify</span><span>(</span><span style="color:#bf616a;">div</span><span>(</span><span style="color:#bf616a;">cross</span><span>(A, B)) - </span><span style="color:#bf616a;">dot</span><span>(B, </span><span style="color:#bf616a;">rot</span><span>(A)) + </span><span style="color:#bf616a;">dot</span><span>(A, </span><span style="color:#bf616a;">rot</span><span>(B))) == </span><span style="color:#d08770;">0
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">rot</span><span>(</span><span style="color:#bf616a;">grad</span><span>(psi)) == [ </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">0 </span><span>]
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify</span><span>(</span><span style="color:#bf616a;">div</span><span>(</span><span style="color:#bf616a;">rot</span><span>(A))) == </span><span style="color:#d08770;">0
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">laplacian</span><span>(</span><span style="color:#d08770;">1</span><span>/r) == </span><span style="color:#d08770;">0
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify_vec</span><span>(</span><span style="color:#bf616a;">vec_sum</span><span>([ </span><span style="color:#bf616a;">rot</span><span>(</span><span style="color:#bf616a;">rot</span><span>(A)), </span><span style="color:#bf616a;">vec_mul</span><span>(-</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#bf616a;">grad</span><span>(</span><span style="color:#bf616a;">div</span><span>(A))), </span><span style="color:#bf616a;">laplacian_vec</span><span>(A)])) == [ </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">0 </span><span>]
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify_vec</span><span>(</span><span style="color:#bf616a;">vec_sum</span><span>([
+</span><span>        </span><span style="color:#bf616a;">material_deriv</span><span>(B, A),
+</span><span>        </span><span style="color:#bf616a;">material_deriv</span><span>(A, B),
+</span><span>        </span><span style="color:#bf616a;">cross</span><span>(A, </span><span style="color:#bf616a;">rot</span><span>(B)),
+</span><span>        </span><span style="color:#bf616a;">cross</span><span>(B, </span><span style="color:#bf616a;">rot</span><span>(A)),
+</span><span>        </span><span style="color:#bf616a;">vec_mul</span><span>(-</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#bf616a;">grad</span><span>(</span><span style="color:#bf616a;">dot</span><span>(A, B)))
+</span><span>    ])) == [ </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">0</span><span>, </span><span style="color:#d08770;">0 </span><span>]
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

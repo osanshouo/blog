@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Rust edition 2024に向けてrand::Rng::genが改名される模様 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Rust edition 2024に向けてrand::Rng::genが改名される模様</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-09-26">2024-09-26</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>Rust edition 2024 は 2025年2月20日にリリースされる予定の Rust 1.85 と同時にリリースされる見通しです.</p>
+<ul>
+<li><a href="https://doc.rust-lang.org/nightly/edition-guide/rust-2024/index.html">Rust 2024 🚧 - The Rust Edition Guide</a></li>
+</ul>
+<p>Edition 2024 には過去の edition と同様にいくつかの破壊的な変更が含まれる予定です.
+言うまでもなく後方互換性には配慮されており, 明示的に edition を上げない限り, 
+既存のコードは edition 2021 ないしそれ以前の edition のコードとして処理されるので,
+過去の Rust コードが何もしていないのに動かなくなることはありません.</p>
+<p>Edition 2024 での変更点の中で個人的に影響が大きいのが, <code>gen</code> がキーワードとして予約されるというものです.</p>
+<ul>
+<li><a href="https://doc.rust-lang.org/nightly/edition-guide/rust-2024/gen-keyword.html">gen keyword - The Rust Edition Guide</a></li>
+</ul>
+<p>この結果, <code>gen</code> という識別子を含むコードをそのまま edition 2024 に切り替えるとコンパイルに失敗すると思われます.
+最小限の修正で済ませるには, 既存の識別子 <code>gen</code> を
+<a href="https://doc.rust-lang.org/nightly/reference/identifiers.html#raw-identifiers">raw identifier</a> と呼ばれる形 <code>r#gen</code> に置き換えれば, 
+キーワードではない識別子 <code>gen</code> として解釈されるので OK です. 詳細は上記 Edition Guide をご覧ください.
+これはコマンド</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>cargo fix --edition
+</span></code></pre>
+<p>により自動的に実行できます.</p>
+<p>問題は, <code>gen</code> という識別子が <a href="https://docs.rs/rand/latest/rand/"><code>rand</code></a> クレートという使用頻度の高いクレートの基本的なメソッド名 
+(<code>Rng::gen</code>) として採用されていることです. 次の issue</p>
+<ul>
+<li><a href="https://github.com/rust-random/rand/issues/1435">CHANGE: Rename <code>Rng::gen</code> to avoid conflicting with a keyword in Rust 2024 · Issue #1435 · rust-random/rand · GitHub</a></li>
+</ul>
+<p>での議論により, <code>Rng::gen</code> は <code>Rng::random</code> に改名されることになりました.
+この名称は <a href="https://docs.rs/rand/latest/rand/fn.random.html"><code>rand::random</code></a> 関数とも整合的です.
+なお <code>Rng::gen</code> は一応非推奨 (deprecated) として残されるようです (<a href="https://github.com/vks/rand/commit/bd304d2e730a943fa9ac5a939355f3f7bd37c611">commit</a>).</p>
+<p>この変更は <code>rand 0.9</code> にて反映される予定です.</p>
+<ul>
+<li><a href="https://github.com/rust-random/rand/issues/1165">Tracker: rand 0.9 · Issue #1165 · rust-random/rand · GitHub</a></li>
+</ul>
+<p>早く <code>rand 1.0</code> にならないかな～と思っていたのですが, まさかこんな変更が必要になるとは.</p>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

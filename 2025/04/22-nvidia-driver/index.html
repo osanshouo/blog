@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+UbuntuのGeForce 5000系ドライバ対応状況 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">UbuntuのGeForce 5000系ドライバ対応状況</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/GPU">GPU</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2025-04-22">2025-04-22</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>※PCを新調する前に対応状況を調べたものです. まだ実際に試してはいません.
+Windows 用とはバージョン番号が違うのでややこしい.</p>
+<p>調査日: 2025-04-22</p>
+<h1 id="ドライバのバージョン">ドライバのバージョン</h1>
+<ul>
+<li><a href="https://www.nvidia.com/ja-jp/drivers/">https://www.nvidia.com/ja-jp/drivers/</a></li>
+</ul>
+<p>NVIDIA公式サイトで　GeForce 5000 系 (Blackwell), 例えば 5070 用の Linux 64bit 用ドライバを検索する.
+するとバージョン 570 が配布されているので, このバージョンのドライバをインストールすればよいことがわかる.
+現時点での安定最新版は 570.144 (2025-4-17) で, 大量のバグフィックスが含まれると<a href="https://news.mynavi.jp/article/20250416-3195052/">ニュース</a>になっていたもの.</p>
+<p>一方で 5060 Ti 用ドライバはベータ版である 575.51.02 (2025-4-16) のみとなっている.</p>
+<h2 id="CUDA_12.8">CUDA 12.8</h2>
+<ul>
+<li><a href="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html">https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html</a></li>
+</ul>
+<p>Linux で CUDA 12.8 を動かすにはドライバ 570.12 が必要な模様.</p>
+<h1 id="Ubuntu_公式リポジトリ">Ubuntu 公式リポジトリ</h1>
+<ul>
+<li><a href="https://packages.ubuntu.com/">https://packages.ubuntu.com/</a></li>
+</ul>
+<p>Ubuntu 公式リポジトリで nvidia driver を検索する.
+Ubuntu 25.04 (Plucky Puffin) 用のパッケージに限定すること.
+すると <code>nvidia-driver-570</code> が出てくる.</p>
+<ul>
+<li><a href="https://packages.ubuntu.com/plucky/nvidia-driver-570">https://packages.ubuntu.com/plucky/nvidia-driver-570</a></li>
+</ul>
+<p>変更履歴を確認すると, NVIDIA が新バージョンの安定版ドライバを出すと
+Ubuntu 側も速やかにバージョンアップしていることがわかる.</p>
+<p>ただし4月に入ってから新バージョンは出ていないし, <code>nvidia-driver-575</code> パッケージもない.
+従って 5060 Ti 用ドライバは現時点では公式リポジトリからは入手できないと思われる.
+ベータ版ではなく安定版がリリースされるまで, 公式リポジトリは更新されないか？</p>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

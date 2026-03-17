@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] ARMv8にクロスコンパイル - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] ARMv8にクロスコンパイル</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-04-15">2021-04-15</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/15-cross-compilation/#環境">環境</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/04/15-cross-compilation/#host">host</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/04/15-cross-compilation/#target">target</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/15-cross-compilation/#作業手順">作業手順</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/04/15-cross-compilation/#linker_をインストール">linker をインストール</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/04/15-cross-compilation/#rust_target_をインストール">rust target をインストール</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/04/15-cross-compilation/#コンパイル">コンパイル</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/15-cross-compilation/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>ARMv8 で動くバイナリを Rust で生成するメモです.</p>
+<h1 id="環境">環境</h1>
+<h2 id="host">host</h2>
+<ul>
+<li>Debian 10.9 (WSL2) on Win10 20H2</li>
+<li>Rust 1.51 stable-x86_64-unknown-linux-gnu</li>
+</ul>
+<h2 id="target">target</h2>
+<ul>
+<li>ARMv8 (aarch64-unknown-linux-musl)</li>
+</ul>
+<h1 id="作業手順">作業手順</h1>
+<p>Rust インストールが完了しており, <code>rustup</code> や <code>rustc</code> が使えるものとします.</p>
+<h2 id="linker_をインストール">linker をインストール</h2>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">sudo</span><span> apt install gcc-aarch64-linux-gnu
+</span></code></pre>
+<h2 id="rust_target_をインストール">rust target をインストール</h2>
+<p>なるべく静的リンクしたかったので musl 版をインストールしました.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">rustup</span><span> target add aarch64-unknown-linux-musl
+</span></code></pre>
+<h2 id="コンパイル">コンパイル</h2>
+<p>rustc を直接使うならば, linker を忘れずに指定します.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">rustc -C</span><span> linker=aarch64-linux-gnu-gcc</span><span style="color:#bf616a;"> --target</span><span>=aarch64-unknown-linux-musl hello_world.rs
+</span></code></pre>
+<p>cargo を使う場合, プロジェクトのルートディレクトリまたはホームディレクトリに <code>.cargo/config.toml</code> というファイルを作成し,
+そこで linker を指定します. 
+なおビルドのデフォルトターゲットとして設定する場合には, 最初の2行のコメントアウトを外してください.
+デフォルト設定するのならばプロジェクトディレクトリに, そうでなければホームディレクトリに設定するのが良さそうです.</p>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span style="color:#65737e;"># [build]
+</span><span style="color:#65737e;"># target = &quot;aarch64-unknown-linux-musl&quot;
+</span><span>
+</span><span>[target.aarch64-unknown-linux-musl]
+</span><span style="color:#bf616a;">linker </span><span>= &quot;</span><span style="color:#a3be8c;">aarch64-linux-gnu-gcc</span><span>&quot;
+</span></code></pre>
+<p>そして target を指定してビルドします. </p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">cargo</span><span> build</span><span style="color:#bf616a;"> --target</span><span> aarch64-unknown-linux-musl
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://qiita.com/0gajun/items/b4c354ba88a96749d353">Rustをcross compileしてRaspberry Pi3で動かすぞ！</a></li>
+<li><a href="https://qiita.com/tetsu_koba/items/1ab400a3d4ec9725b044">rustをインストールしてhello world をARM用にクロスコンパイルするまでの手順</a></li>
+<li><a href="https://qiita.com/tetsu_koba/items/d467f2b3c2bb8b816185#_reference-5d8caedaa6b5ed20b070">rustのcargoでarm64 linux向けにクロスビルドする</a></li>
+<li><a href="https://mijinc0.github.io/blog/post/20190602_building_catapult_for_arm/">x86_64 ubuntu上でcatapultをarm64用にビルドする(cow)</a></li>
+<li><a href="https://rust-lang.github.io/rustup/cross-compilation.html">Cross-compilation - The rustup book</a></li>
+<li><a href="https://doc.rust-lang.org/cargo/reference/config.html">Configuration - The Cargo Book</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

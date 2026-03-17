@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] 円周率の表記 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] 円周率の表記</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-08-05">2021-08-05</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>Rust 1.53 において stable で解禁された non-ascii-idents ですが, 私にとってその最も重要な用途は円周率をギリシャ文字 <code>π</code> で表記することです.
+これは次のような形で実現されます.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#bf616a;">allow</span><span>(mixed_script_confusables)]
+</span><span style="color:#b48ead;">use </span><span>std::f64::consts::</span><span style="color:#d08770;">PI </span><span>as π;
+</span></code></pre>
+<p>円周率の π なんて見慣れているはずですが, コード中にギリシャ文字が出てくると慣れるまではすこし驚くかもしれません.
+おそらくフォントの問題もあるでしょう (エディタに Computer Modern や Latin Modern Math を設定している人なんてほとんどいないと思います).</p>
+<p>冒頭の mixed_script_confusables の許可ですが, これは non-ascii-ident が意図せず紛れ込んでいる可能性を警告するもので,
+コード中に特定の<a href="https://ja.wikipedia.org/wiki/%E7%94%A8%E5%AD%97_(Unicode)">用字</a>を含む識別子がひとつだけ存在するかをチェックします.
+従って上の場合にはギリシャ文字識別子が円周率以外にもコード中に存在すればこのアトリビュートがなくとも警告は出ないのですが,
+円周率しかないこともしばしばでしょうし, 常にこのアトリビュートを設定しておけばよいと思います.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://blog.rust-lang.org/2021/06/17/Rust-1.53.0.html">Announcing Rust 1.53.0 | Rust Blog</a></li>
+<li><a href="https://doc.rust-lang.org/stable/nightly-rustc/rustc_lint/non_ascii_idents/static.MIXED_SCRIPT_CONFUSABLES.html">MIXED_SCRIPT_CONFUSABLES in rustc_lint::non_ascii_idents - Rust</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

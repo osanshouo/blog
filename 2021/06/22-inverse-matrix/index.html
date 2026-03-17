@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Levi-Civita記号と逆行列 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Levi-Civita記号と逆行列</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数学">数学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/線型代数">線型代数</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/SymPy">SymPy</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-06-22">2021-06-22</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/22-inverse-matrix/#Levi-Civita_記号">Levi-Civita 記号</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/22-inverse-matrix/#行列式">行列式</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/22-inverse-matrix/#逆行列">逆行列</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/06/22-inverse-matrix/#SymPy">SymPy</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>Levi-Civita 記号を用いると, 行列式や逆行列を陽に表示することができます.
+$\mathcal{O} ( n! )$ の計算時間が必要なので数値的にはあまり有用ではないのですが, 解析的な計算にこの表式が必要になることがあります.</p>
+<p>本記事では $n$ 次元空間を扱い, 添え字 $i$, $j$, ... は 1 から $n$ を走るものとします.
+また, 重複添え字については和を取る <a href="https://ja.wikipedia.org/wiki/%E3%82%A2%E3%82%A4%E3%83%B3%E3%82%B7%E3%83%A5%E3%82%BF%E3%82%A4%E3%83%B3%E3%81%AE%E7%B8%AE%E7%B4%84%E8%A8%98%E6%B3%95">Einstein の規約</a>
+を採用します.</p>
+<h1 id="Levi-Civita_記号">Levi-Civita 記号</h1>
+<p>Levi-Civita 記号$\epsilon_{i j \cdots k}$ を, 添え字 $i$, $j$, ..., $k$ が 1, 2, ..., $n$ の偶置換ならば $+1$, 
+奇置換ならば $-1$, それ以外ならば $0$ を表す記号として定義します.</p>
+<h1 id="行列式">行列式</h1>
+<p>本節の目標は, 任意の $n$ 次正方行列 $A$ について, その行列式 $\mathrm{det} ( A )$ は
+$$\epsilon_{i j \cdots k} \mathrm{det} ( A ) = \epsilon_{p q \cdots r} A_{i p} A_{j q} \cdots A_{k r} \tag{1}$$
+$$\mathrm{det} ( A ) = \frac{ 1 }{ n! } \epsilon_{i j \cdots k} \epsilon_{p q \cdots r} A_{i p} A_{j q} \cdots A_{k r} \tag{2}$$
+を満足することを証明することです. 第1式が証明できれば, 第2式は第1式の両辺に $\epsilon_{i j \cdots k}$ を作用させて
+$$\epsilon_{i j \cdots k} \epsilon_{i j \cdots k} = n!$$
+(これは 1, 2, ..., $n$ の並び替えが $n!$ 個あることと等価です) を用いて整理しただけなのでただちに従います. </p>
+<p>第1式の右辺は $i$, $j$, ..., $k$ について完全反対称ですから, これは Levi-Civita 記号 $\epsilon_{i j \cdots, k}$ に比例します
+(外積代数の一般論から, $n$ 次元ベクトル空間 $V$ の $n$ 次の外積 $\bigwedge^n V$ は1次元ベクトル空間です).
+従って問題はその比例係数を求めることですが, $i=1$, $j=2$, ..., $k=n$ のとき, 右辺は行列式の定義 
+(<a href="https://ja.wikipedia.org/wiki/%E8%A1%8C%E5%88%97%E5%BC%8F%E3%81%AB%E5%AF%BE%E3%81%99%E3%82%8B%E3%83%A9%E3%82%A4%E3%83%97%E3%83%8B%E3%83%83%E3%83%84%E3%81%AE%E6%98%8E%E7%A4%BA%E5%85%AC%E5%BC%8F">Leibniz の公式</a>) 
+そのものです.</p>
+<h1 id="逆行列">逆行列</h1>
+<p>行列 $A$ の行列式 $\mathrm{det} ( A )$ について, それが行列 $A$ の $n^2$ 個の成分 $A_{i j}$ の関数であることに注意して, 
+変分 $A + \delta A$ に関する行列式を計算します. 行列式の性質から
+$$\mathrm{det} ( A + \delta A ) = \mathrm{det} A ( I + A^{-1} \delta A ) = \mathrm{det} ( A ) \mathrm{det} ( I + A^{-1} \delta A)$$
+となりますが, 
+$$\mathrm{det} ( I + A^{-1} \delta A ) = \mathrm{tr} ( A^{-1} \delta A ) + \mathcal{O} ( \delta A^2 )$$
+により
+$$\mathrm{det} ( A + \delta A ) = \mathrm{det} ( A ) \mathrm{tr} ( B \delta A )$$
+が従います. 特に $\delta A$ を $e_{i j}$ に比例するように選べば
+$$\frac{ \partial \mathrm{det} ( A ) }{ \partial A_{i j} } = \mathrm{det} ( A ) [ A^{-1} ]_{j i} \tag{*}$$
+という等式が結論されます ($A^{-1}$ の添え字に注意してください).</p>
+<p>前節の行列式の表式 (1) を $A_{i j}$ で微分します.
+$$\frac{ \partial \mathrm{det} ( A ) }{ \partial A_{i j} } = \frac{ 1 }{ n! } \epsilon_{a b \cdots c} \epsilon_{p q \cdots r} \frac{ \partial }{ \partial A_{i j} } \left( A_{a p} A_{b q} \cdots A_{c r} \right)$$
+右辺の微分が $A_{a p}$ を叩くと $\delta_{a i} \delta_{p j}$ となり, その項は全体としては
+$$\frac{ 1 }{ n! } \epsilon_{i b \cdots c} \epsilon_{j q \cdots r} A_{b q} \cdots A_{c r}$$
+となります. 一方, 微分が $A_{b q}$ を叩くと $\delta_{b i} \delta_{ q j}$ となりますが, この Kronecker デルタは Levi-Civita 記号にぶつけて消去し,
+Levi-Civita 記号の残った添え字 $a$ を $b$ に, 添え字 $p$ を添え字 $q$ に書き直すと, 上と同一の項を与えます.
+同様に $n$ 項すべてが同じ上の形に帰着されますから, 結局
+$$\frac{ \partial \mathrm{det} ( A ) }{ \partial A_{i j} } = \frac{ 1 }{ (n - 1)! } \epsilon_{i b \cdots c} \epsilon_{j q \cdots r} A_{b q} \cdots A_{c r}$$
+が結論されます. これを行列式の微分と逆行列の関係式 (*) に代入すると, 逆行列の陽な表式
+$$\left[ A^{-1} \right]_{j i} = \frac{ 1 }{ (n - 1)! \mathrm{det} ( A ) } \epsilon_{i b \cdots c} \epsilon_{j q \cdots r} A_{b q} \cdots A_{c r} \tag{3}$$
+に到達します.</p>
+<h1 id="SymPy">SymPy</h1>
+<p>本記事の結果が正しいか SymPy で検証してみます (注: 最適化していないのでとてもとても遅いです).</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>operator </span><span style="color:#b48ead;">import </span><span>mul
+</span><span style="color:#b48ead;">from </span><span>functools </span><span style="color:#b48ead;">import </span><span style="color:#96b5b4;">reduce
+</span><span style="color:#b48ead;">from </span><span>sympy </span><span style="color:#b48ead;">import </span><span>symbols, factorial, simplify, Matrix
+</span><span style="color:#b48ead;">from </span><span>sympy.combinatorics </span><span style="color:#b48ead;">import </span><span>Permutation
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">levicivita</span><span>(</span><span style="color:#bf616a;">p</span><span>):
+</span><span>    </span><span style="color:#65737e;">&#39;&#39;&#39;添え字のリストを受け取り Levi-Civita 記号を計算する&#39;&#39;&#39;
+</span><span>    </span><span style="color:#b48ead;">try</span><span>:
+</span><span>        p = </span><span style="color:#bf616a;">Permutation</span><span>(p)
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">1 </span><span style="color:#b48ead;">if </span><span>p.is_even </span><span style="color:#b48ead;">else </span><span>-</span><span style="color:#d08770;">1
+</span><span>    </span><span style="color:#b48ead;">except</span><span>:
+</span><span>        </span><span style="color:#b48ead;">return </span><span style="color:#d08770;">0
+</span><span>
+</span><span>    
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">matrix</span><span>(</span><span style="color:#bf616a;">n</span><span>):
+</span><span>    </span><span style="color:#65737e;">&#39;&#39;&#39;一般の行列を生成&#39;&#39;&#39;
+</span><span>    a = []
+</span><span>    </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n):
+</span><span>        ai = []
+</span><span>        </span><span style="color:#b48ead;">for </span><span>j </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n):
+</span><span>            aij = </span><span style="color:#bf616a;">symbols</span><span>(&quot;</span><span style="color:#a3be8c;">a</span><span style="color:#d08770;">{}</span><span>&quot;.</span><span style="color:#bf616a;">format</span><span>(n*i + j))
+</span><span>            ai.</span><span style="color:#bf616a;">append</span><span>(aij)
+</span><span>        a.</span><span style="color:#bf616a;">append</span><span>(ai)
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">Matrix</span><span>(a)
+</span><span>
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">det</span><span>(</span><span style="color:#bf616a;">A</span><span>, </span><span style="color:#bf616a;">n</span><span>):
+</span><span>    </span><span style="color:#65737e;">&#39;&#39;&#39;行列式を計算&#39;&#39;&#39;
+</span><span>    d = </span><span style="color:#d08770;">0
+</span><span>    p = </span><span style="color:#bf616a;">Permutation</span><span>([i </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n)])
+</span><span>    d += </span><span style="color:#bf616a;">levicivita</span><span>(p) * </span><span style="color:#96b5b4;">reduce</span><span>(mul, [A[i, p.</span><span style="color:#bf616a;">apply</span><span>(i)] </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n)], </span><span style="color:#d08770;">1</span><span>)
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">while </span><span>(p := p.</span><span style="color:#bf616a;">next_lex</span><span>()) is not </span><span style="color:#d08770;">None</span><span>:
+</span><span>        d += </span><span style="color:#bf616a;">levicivita</span><span>(p) * </span><span style="color:#96b5b4;">reduce</span><span>(mul, [A[i, p.</span><span style="color:#bf616a;">apply</span><span>(i)] </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n)], </span><span style="color:#d08770;">1</span><span>)
+</span><span>        
+</span><span>    </span><span style="color:#b48ead;">return </span><span>d
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">inverse</span><span>(</span><span style="color:#bf616a;">A</span><span>, </span><span style="color:#bf616a;">n</span><span>):
+</span><span>    </span><span style="color:#65737e;">&#39;&#39;&#39;逆行列を計算&#39;&#39;&#39;
+</span><span>    d = </span><span style="color:#bf616a;">det</span><span>(A, n)
+</span><span>    f = </span><span style="color:#d08770;">1</span><span>/</span><span style="color:#bf616a;">factorial</span><span>(n-</span><span style="color:#d08770;">1</span><span>)/d
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">loop_q</span><span>(</span><span style="color:#bf616a;">bij</span><span>, </span><span style="color:#bf616a;">b</span><span>, </span><span style="color:#bf616a;">i</span><span>, </span><span style="color:#bf616a;">j</span><span>):
+</span><span>        q = </span><span style="color:#bf616a;">Permutation</span><span>([k </span><span style="color:#b48ead;">for </span><span>k </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n)])
+</span><span>        </span><span style="color:#b48ead;">if </span><span>b.</span><span style="color:#bf616a;">apply</span><span>(</span><span style="color:#d08770;">0</span><span>) == j and q.</span><span style="color:#bf616a;">apply</span><span>(</span><span style="color:#d08770;">0</span><span>) == i:
+</span><span>            bij += </span><span style="color:#bf616a;">levicivita</span><span>(b) * </span><span style="color:#bf616a;">levicivita</span><span>(q) * </span><span style="color:#96b5b4;">reduce</span><span>(mul, [A[b.</span><span style="color:#bf616a;">apply</span><span>(k), q.</span><span style="color:#bf616a;">apply</span><span>(k)] </span><span style="color:#b48ead;">for </span><span>k </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">1</span><span>, n)], </span><span style="color:#d08770;">1</span><span>)
+</span><span>        </span><span style="color:#b48ead;">while </span><span>(q := q.</span><span style="color:#bf616a;">next_lex</span><span>()) is not </span><span style="color:#d08770;">None</span><span>:
+</span><span>            </span><span style="color:#b48ead;">if </span><span>b.</span><span style="color:#bf616a;">apply</span><span>(</span><span style="color:#d08770;">0</span><span>) == j and q.</span><span style="color:#bf616a;">apply</span><span>(</span><span style="color:#d08770;">0</span><span>) == i:
+</span><span>                bij += </span><span style="color:#bf616a;">levicivita</span><span>(b) * </span><span style="color:#bf616a;">levicivita</span><span>(q) * </span><span style="color:#96b5b4;">reduce</span><span>(mul, [A[b.</span><span style="color:#bf616a;">apply</span><span>(k), q.</span><span style="color:#bf616a;">apply</span><span>(k)] </span><span style="color:#b48ead;">for </span><span>k </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(</span><span style="color:#d08770;">1</span><span>, n)], </span><span style="color:#d08770;">1</span><span>)
+</span><span>        </span><span style="color:#b48ead;">return </span><span>bij
+</span><span>    
+</span><span>    B = []
+</span><span>    </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n):
+</span><span>        bi = []
+</span><span>        </span><span style="color:#b48ead;">for </span><span>j </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n):
+</span><span>            bij = </span><span style="color:#d08770;">0
+</span><span>            
+</span><span>            b = </span><span style="color:#bf616a;">Permutation</span><span>([i </span><span style="color:#b48ead;">for </span><span>i </span><span style="color:#b48ead;">in </span><span style="color:#96b5b4;">range</span><span>(n)])
+</span><span>            bij = </span><span style="color:#bf616a;">loop_q</span><span>(bij, b, i, j)
+</span><span>            </span><span style="color:#b48ead;">while </span><span>(b := b.</span><span style="color:#bf616a;">next_lex</span><span>()) is not </span><span style="color:#d08770;">None</span><span>:
+</span><span>                bij = </span><span style="color:#bf616a;">loop_q</span><span>(bij, b, i, j)
+</span><span>            
+</span><span>            bi.</span><span style="color:#bf616a;">append</span><span>(f * bij)
+</span><span>        B.</span><span style="color:#bf616a;">append</span><span>(bi)
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">Matrix</span><span>(B)
+</span><span>            
+</span><span>
+</span><span style="color:#65737e;"># テスト
+</span><span>
+</span><span style="color:#65737e;">### 次元を設定する ###
+</span><span>n = </span><span style="color:#d08770;">4
+</span><span style="color:#65737e;">######################
+</span><span>
+</span><span>A = </span><span style="color:#bf616a;">matrix</span><span>(n)
+</span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">det</span><span>(A, n) == A.</span><span style="color:#bf616a;">det</span><span>()
+</span><span>B = </span><span style="color:#bf616a;">inverse</span><span>(A, n)
+</span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify</span><span>(B * A) == Matrix.</span><span style="color:#bf616a;">eye</span><span>(n)
+</span><span style="color:#b48ead;">assert </span><span style="color:#bf616a;">simplify</span><span>(A * B) == Matrix.</span><span style="color:#bf616a;">eye</span><span>(n)
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

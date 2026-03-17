@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+WSL2とtmuxでtrue colorが表示されない - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">WSL2とtmuxでtrue colorが表示されない</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-10-02">2024-10-02</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/10/02-tmux-true-color/#環境">環境</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/10/02-tmux-true-color/#状況">状況</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/10/02-tmux-true-color/#解決法">解決法</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/10/02-tmux-true-color/#補足:_環境変数_$TERM_について">補足: 環境変数 $TERM について</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/10/02-tmux-true-color/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><h1 id="環境">環境</h1>
+<ul>
+<li>Win10 22H2, Win11 23H2</li>
+<li>WSL2 + Windows Terminal (1.20.11781.0)</li>
+<li>Debian 12.7 + tmux 3.3a, Debian 11.11 + tmux 3.1c</li>
+</ul>
+<h1 id="状況">状況</h1>
+<p>tmux 使用時にターミナルが true color を表示できない.
+tmux を使っていなければ表示できる.</p>
+<p>true color が正しく表示できているかのチェックは次の記事の方法がお手軽で助かりました.</p>
+<ul>
+<li><a href="https://www.pandanoir.info/entry/2019/11/02/202146">TrueColor対応のはなし(端末、シェル、tmux、vim) - Panda Noir</a></li>
+</ul>
+<h1 id="解決法">解決法</h1>
+<p>いろいろ調べると <code>~/.tmux.conf</code> の設定を見直せば解決したと言っている人が多い.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">set</span><span> -g default-terminal &quot;</span><span style="color:#a3be8c;">screen-256color</span><span>&quot;
+</span><span style="color:#bf616a;">set-option -sa</span><span> terminal-overrides &quot;</span><span style="color:#a3be8c;">,xterm-256color:Tc</span><span>&quot;
+</span></code></pre>
+<p>ただこれだけでは解決せず, いろいろ調べた結果, <code>~/.bashrc</code> で環境変数 <code>$TERM</code> を指定しているのが悪さをしており,
+この行を消せば true color を表示できるようになった.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#65737e;">#export TERM=xterm-256color
+</span></code></pre>
+<p>この設定はもともと別の環境で true color が表示されないのを解決するために入れた気がするんですけどね...</p>
+<h1 id="補足:_環境変数_$TERM_について">補足: 環境変数 <code>$TERM</code> について</h1>
+<p><code>$TERM</code> で指定可能な値は以下の場所に格納されており, 上から順に探しに行く模様.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>${HOME}/.terminfo
+</span><span>/etc/terminfo
+</span><span>/lib/terminfo
+</span><span>/usr/share/terminfo
+</span></code></pre>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://qiita.com/yami_beta/items/ef535d3458addd2e8fbb">tmux 上で Vim を True Color (24 bit color) で使う #Vim - Qiita</a></li>
+<li><a href="https://www.pandanoir.info/entry/2019/11/02/202146">TrueColor対応のはなし(端末、シェル、tmux、vim) - Panda Noir</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

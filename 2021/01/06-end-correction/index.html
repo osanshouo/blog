@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+2次元開口端補正の導出 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">2次元開口端補正の導出</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/物理学">物理学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/音響">音響</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-01-06">2021-01-06</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#セットアップ">セットアップ</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#各領域の解">各領域の解</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#領域_I">領域 I</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#領域_II">領域 II</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#領域_III">領域 III</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#漸近接続">漸近接続</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#領域_I-II">領域 I-II</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#領域_II-III">領域 II-III</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#共鳴条件">共鳴条件</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/06-end-correction/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>長さ $L$ の気柱の一方の端点が開いているとき, その中の音波に関する共鳴条件は
+$$k_n = \frac{ 2 n - 1 }{ 2 } \frac{  \pi }{ L + l_\mathrm{E} } , \ \ n = 1, 2, 3, \cdots$$
+により与えられ, 気柱の長さ $L$ にある補正量 $l_\mathrm{E}$ を加えた長さの気柱として振る舞っているように見える.
+補正量 $l_\mathrm{E}$ を <a href="https://ja.wikipedia.org/wiki/%E9%96%8B%E5%8F%A3%E7%AB%AF%E8%A3%9C%E6%AD%A3"><strong>開口端補正</strong></a> (end correction) と呼び, 気柱の半径 $a$ の 0.6-0.8 倍程度の値である.
+フランジなし円柱に関する開口端補正の解析的な表式は <a href="https://doi.org/10.1103%2FPhysRev.73.383">Levine &amp; Schwinger (1948)</a> 
+によって得られているものの, その導出は極めて煩雑な計算を伴う.
+しかし2次元フランジありの開口端補正に関しては比較的容易にそれを導くことができる.
+そこで本記事では柴田正和『漸近級数と特異摂動法』に従って開口端補正の表式を導出する.</p>
+<h1 id="セットアップ">セットアップ</h1>
+<figure>
+    <img src="./end-correction.svg"/>
+</figure>
+<p>図のような幅 $2 a$, 長さ $L$ の通路状の領域について考える. 
+時間依存性について Fourier 変換することにより, 速度ポテンシャル $\varphi$ は2次元 Helmholtz 方程式
+$$( \nabla^2 + k^2 ) \varphi = 0$$
+を満足する. これを遠方 $x \to \infty$ から平面波 $e^{- i k x}$ が入射しているという境界条件のもとで解き,
+この通路に生じる定在波を求めることが目標である.
+以下では通路内 (領域 I), 開口端付近 (領域 II), 外部 (領域 III) を別個に取り扱う.</p>
+<h1 id="各領域の解">各領域の解</h1>
+<h2 id="領域_I">領域 I</h2>
+<p>領域 I の解としては, 通路に沿った平面波のみに興味がある. その一般解は 1 次元波動方程式から
+$$\varphi = A e^{i k x} + C e^{- i k x}$$
+であるが, $x = L$ において流体速度の壁面の法線成分がゼロ $\partial_x \varphi = 0$ という境界条件を課すことにより
+$$\varphi = \frac{ B }{ 2 } ( e^{i k (x + L)} + e^{- i k (x + L)} ) = B \cos k ( x + L ) \tag{1}$$
+となる. </p>
+<h2 id="領域_II">領域 II</h2>
+<p>領域 II は開口端付近の距離 $\sim a$ の領域であるが, いま音波の波長が通路の半径より十分に小さいという条件のもとでは, 
+この領域の流れは非圧縮性とみなすことができ, 従ってその解を等角写像の方法によって求めることができる.
+物理的な空間を $z = x + i y$ により複素平面上の領域とみなすとき, Schwarz-Christoffel 変換
+$$z = \frac{ 2 a }{ \pi } \left[ - i \sqrt{ w^2 - 1 } + \ln \frac{ w }{ \sqrt{ w^2 - 1 } + i } \right]$$
+によりこの領域は上半平面 $H^+$ へと写像される. そこで $H^+$ 上の関数
+$$\Phi ( w ) = D \ln w + F \tag{2}$$
+($D$, $F$ は定数) を複素速度ポテンシャルとみなすとき, 後で見るように正しく求める流れを与える.</p>
+<h2 id="領域_III">領域 III</h2>
+<p>領域 III の解は入射波 $e^{- i k x}$ と壁面による反射波 $e^{i k x}$, そして開口端からの放射の和である.
+このうち開口端からの放射については, 極座標 $( r, \theta )$ を用いるとき明らかに極角 $\theta$ に依存せず,
+従って2次元 Helmholtz 方程式の極座標系での表式
+$$\partial_r^2 \varphi + \frac{ 1 }{ r } \partial_r \varphi + k^2 \varphi = 0$$
+からその解は0次の Bessel 関数である. これが遠方で外向き波であるためには, その解として Hankel 関数 $H_0^{(1)}$ を選べばよい.
+従って領域 III の解は $T$ を係数として
+$$\varphi = 2 \cos k x + T H_0^{(1)} ( k r ) \tag{3}$$
+により与えられる. </p>
+<h1 id="漸近接続">漸近接続</h1>
+<p>領域 I, II, III はそれぞれオーバーラップ領域を持つため, そこでこれらの解が滑らかに接続される必要がある.</p>
+<h2 id="領域_I-II">領域 I-II</h2>
+<p>まず領域 I と領域 II の解を接続する. 領域 I の解 (1) は $x \to - 0$ の極限で
+$$\varphi \sim B \cos k L - B k x \sin k L$$
+という漸近形を持ち, $x$ の一次関数となる. 一方領域 II の解 (2) は, まず $w \to 0$ の極限で Schwarz-Christoffel 変換は
+$$w \sim \exp \left( \frac{ \pi }{ 2 a } z - \ln \frac{ e }{ 2 i } \right)$$
+となるため, 速度ポテンシャル $\varphi = \mathrm{Re} , \Phi$ の漸近形は
+$$\varphi \sim D \frac{ \pi }{ 2 a } x - D \ln \frac{ e }{ 2 } + F$$
+となり, やはり $x$ の一次関数である. 従って定数項および $x$ の係数が一致するという条件
+$$B \cos k L = - D \ln \frac{ e }{ 2 } + F \tag{4a}$$
+$$B k \sin k L = - D \frac{ \pi }{ 2 a } \tag{4b}$$
+が満足されれば, これらの解は滑らかに接続される.</p>
+<h2 id="領域_II-III">領域 II-III</h2>
+<p>領域 III の解は開口端付近で漸近形
+$$\varphi \sim 2 + T \left( 1 + \frac{ 2 i }{ \pi } \ln \frac{ \gamma k r }{ 2 } \right)$$
+を持つ ($\gamma$ は Euler の定数). 一方, 領域 II の解は, $w \to \infty$ での Schwarz-Christoffel 変換の漸近形
+$$w \sim \frac{ i \pi }{ 2 a } z$$
+から
+$$\varphi \sim D \ln \frac{ \pi r }{ 2 a } + F$$
+となる. 従ってどちらも $\ln r$ の一次関数であり, これらが滑らかに接続される条件は
+$$2 + \left( 1 + \frac{ 2 i }{ \pi } \ln \frac{ \gamma k }{ 2 } \right) T = D \ln \frac{ \pi }{ 2 a } L F \tag{4c}$$
+$$\frac{ 2 i }{ \pi } T = D \tag{4d}$$
+である.</p>
+<h1 id="共鳴条件">共鳴条件</h1>
+<p>式 (4a)-(4d) は係数 $B$, $D$, $F$, $T$ に関する4本の連立方程式であり, これを解くことによりこれら未定の係数が決定される.
+特に, 通路内の平面波の振幅 $B$ は
+$$B = \frac{ 2 }{ \cos k L + k a \Lambda \sin k L + i k a \sin k L }$$
+$$\Lambda = - \frac{ 2 }{ \pi } \ln \frac{ 2 \gamma k a }{ e \pi }$$
+と求まる. </p>
+<p>さて, $Z = | B |^2 / 4$ という量を考えると, これは入射波と通路内の定在波のエネルギーの比に相当する量を表す. これは
+$$Z = \left[ ( \cos k L + k a \Lambda \sin k L )^2 + ( k a \sin k L )^2 \right]^{-1}$$
+と評価され, 特に $k a \to 0$ の極限では
+$$Z = \frac{ 1 }{ \cos^2 k L }$$
+に帰着する. これは
+$$k_n = \frac{ 2 n - 1 }{ 2 } \frac{ \pi }{ L } , \ \ n = 1, 2, 3, \cdots$$
+という波数において発散する, すなわちこの振動数で無限小の摂動が加わると通路内に定在波が生じる.
+これが共鳴であり, 開口端補正を無視し端点で圧力がゼロであるという境界条件を課すことによって得られるものに一致する.</p>
+<p>一方, $k a$ をゼロとしない場合, 共鳴振動数は上述の値から変更される. 特に $Z$ を $\Delta k = k - k_n$ の関数とみなすとき,
+$| \Delta k | \ll k_n$ のとき $Z$ は
+$$Z^{-1} = \left( \Delta k L + k_n a \Lambda \right)^2 + ( k_n a )^2$$
+と近似でき, $\Delta k = - k_n a \Lambda / L$ のときに $Z$ が極大値を取る. 従って共鳴波数は
+$$k_n + \Delta k = \frac{ 2 n - 1 }{ 2 } \frac{ \pi }{ L } \left( 1 - \frac{ a \Lambda }{ L } \right) \approx \frac{ 2 n - 1 }{ 2 } \frac{ \pi }{ L + l_\mathrm{E} }$$
+$$l_\mathrm{E} = a \Lambda = - \frac{ 2 }{ \pi } a \ln \frac{ 2 \gamma k_n a }{ e \pi }$$
+と求まる.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li>柴田正和『漸近級数と特異摂動法』森北出版, 2009年, ISBN 978-4-627-07631-0</li>
+<li>Howe, Michale (2014). Acoustics and Aerodynamic Sound. Cambridge University Press. doi:<a href="https://doi.org/10.1017%2FCBO9781107360273">10.1017/CBO9781107360273</a>. ISBN 9781107360273</li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

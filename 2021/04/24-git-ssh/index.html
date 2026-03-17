@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+GitでSSH鍵を指定するとssh-agentと競合する - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">GitでSSH鍵を指定するとssh-agentと競合する</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-04-24">2021-04-24</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>Git 2.10 以降には <a href="https://git-scm.com/docs/git-config#Documentation/git-config.txt-coresshCommand">sshCommand</a> というオプションがあり,
+これを指定すればリポジトリ毎に ssh 鍵を指定して pull や push ができます.</p>
+<ul>
+<li><a href="https://qiita.com/sonots/items/826b90b085f294f93acf">git clone 時に秘密鍵を指定する</a></li>
+</ul>
+<p>ところが手元の環境ではうまくいかず, しばらく調べた結果, ssh-agent と競合しており, 
+単に ssh 鍵を指定しただけでは ssh-agent に登録されている別の鍵が使用されているとわかりました.
+その場合, ssh コマンドに <code>-o IdentitiesOnly=yes</code> というオプションを追加すれば解決します.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">git</span><span> config</span><span style="color:#bf616a;"> --local</span><span> core.sshCommand &#39;</span><span style="color:#a3be8c;">ssh -i ~/.ssh/id_rsa -o IdentitiesOnly=yes -F /dev/null</span><span>&#39;
+</span></code></pre>
+<ul>
+<li><a href="https://stackoverflow.com/questions/26258157/disable-sshagent-with-command-line-option">ssh - Disable SSHAgent with command line option - Stack Overflow</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

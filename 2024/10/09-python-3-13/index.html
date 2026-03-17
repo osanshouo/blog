@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Python 3.13.0を試してみた - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Python 3.13.0を試してみた</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Python">Python</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-10-09">2024-10-09</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/10/09-python-3-13/#インストール">インストール</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/10/09-python-3-13/#JIT_コンパイル">JIT コンパイル</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/10/09-python-3-13/#マルチスレッド計算">マルチスレッド計算</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>2024-10-07 に Python 3.13.0 が<a href="https://pythoninsider.blogspot.com/2024/10/python-3130-final-released.html">リリースされました</a>. 
+リリースノートはこちら:</p>
+<ul>
+<li><a href="https://docs.python.org/3.13/whatsnew/3.13.html">What’s New In Python 3.13 — Python 3.13.0 documentation</a></li>
+</ul>
+<p>個人的な注目点はふたつです.</p>
+<ul>
+<li>Global Interpreter Lock (GIL) の無効化された free-threaded モードが実験的に実装されました. 
+これまで Python での高速な並列計算のためにはマルチプロセス化するしかなかった訳ですが,
+これにより Python でのマルチスレッド並列計算が可能になりました.</li>
+<li>実験的な JIT コンパイラが実装されました.
+これにより Python の最大の弱点であった実行速度の遅さが改善に向かうかもしれません.</li>
+</ul>
+<p>もっとも, 実行速度が必要なら最初から Rust で書くよ, という話もありますが...</p>
+<h1 id="インストール">インストール</h1>
+<p>JIT コンパイラを有効化してビルドするためには <code>clang-18</code> が必要です. 必要なら次のドキュメントに従ってインストールします.</p>
+<ul>
+<li><a href="https://github.com/python/cpython/tree/main/Tools/jit">cpython/Tools/jit at main · python/cpython · GitHub</a></li>
+</ul>
+<p>基本的な Python のビルドおよびインストールの手順は以前の記事「<a href="https://osanshouo.github.io/blog/2021/03/20-python-build/">WSL2でPython環境構築 (2021年3月版)</a>」そのままですが, 
+GIL 無効化および JIL コンパイラ有効化を <code>./configure</code> のオプションで明示的に指定する必要があります.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">./configure </span><span>\
+</span><span style="color:#bf616a;">    --prefix</span><span>=$</span><span style="color:#bf616a;">HOME</span><span>/.local \
+</span><span style="color:#bf616a;">    --with-ensurepip </span><span>\
+</span><span style="color:#bf616a;">    --enable-optimizations </span><span>\
+</span><span style="color:#bf616a;">    --with-lto </span><span>\
+</span><span style="color:#bf616a;">    --disable-gil </span><span>\
+</span><span style="color:#bf616a;">    --enable-experimental-jit</span><span>=yes
+</span></code></pre>
+<p>公式ドキュメントはこちら:</p>
+<ul>
+<li><a href="https://docs.python.org/3/using/configure.html">3. Configure Python — Python 3.13.0 documentation</a></li>
+</ul>
+<p><code>--disable-gil</code> オプションをつけてビルドすると, GIL が有効な (旧式の) バイナリ <code>python3.13</code> と
+GIL が無効化された (実験的な) バイナリ <code>python3.13t</code> が生成されます.</p>
+<h1 id="JIT_コンパイル">JIT コンパイル</h1>
+<p>例として以前書いた SymPy のコードを実行してみます.</p>
+<ul>
+<li><a href="https://osanshouo.github.io/blog/2021/08/12-lie-transform/">[SymPy] Lie変換摂動論の方程式の導出</a></li>
+</ul>
+<p>上の configure オプションはデフォルトで JIT コンパイラを有効化し, 
+環境変数 <code>PYTHON_JIT=0</code> が設定されているときにのみ JIT コンパイラを無効化する設定になります.</p>
+<p>実際に試してみたところ, <code>time env PYTHON_JIT=0 python3 lie.py</code> と <code>time python3 lie.py</code> でほぼ実行時間に差はなく,
+むしろ (実行時の条件によるとは思いますが) JIT 無効化時の方が安定している印象です.
+現時点ではまだあまり JIT の恩恵はないようです (もしくは何か失敗しているのかもしれません).</p>
+<h1 id="マルチスレッド計算">マルチスレッド計算</h1>
+<p>GIL を実行時に有効化するにはコマンドラインオプション <code>-X gil=1</code> を渡します.
+簡単なマルチスレッドプログラムはこんな感じになると思います.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">import </span><span>threading
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">main_task</span><span>():
+</span><span>    // ここにコードを書く
+</span><span>
+</span><span>thread1 = threading.</span><span style="color:#bf616a;">Thread</span><span>(</span><span style="color:#bf616a;">target</span><span>=main_task, </span><span style="color:#bf616a;">args</span><span>=[])
+</span><span>thread2 = threading.</span><span style="color:#bf616a;">Thread</span><span>(</span><span style="color:#bf616a;">target</span><span>=main_task, </span><span style="color:#bf616a;">args</span><span>=[])
+</span><span>
+</span><span>thread1.</span><span style="color:#bf616a;">start</span><span>()
+</span><span>thread2.</span><span style="color:#bf616a;">start</span><span>()
+</span><span>
+</span><span>thread1.</span><span style="color:#bf616a;">join</span><span>()
+</span><span>thread2.</span><span style="color:#bf616a;">join</span><span>()
+</span></code></pre>
+<p>試してみた結果, 確かに GIL を無効化することでマルチスレッド計算が高速化していましたが, 
+約6秒の処理が約5秒になったくらいで, 期待ほどの高速化は達成できませんでした.</p>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

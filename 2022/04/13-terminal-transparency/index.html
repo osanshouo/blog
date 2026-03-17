@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+Windows Terminalの背景透過について - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">Windows Terminalの背景透過について</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Windows">Windows</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2022-04-13">2022-04-13</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>Microsoft が従来のコマンドプロンプトのコンソール <code>conhost.exe</code> に代わるターミナルアプリとして開発している 
+<a href="https://github.com/microsoft/terminal">Windows Terminal</a> は, 
+開発初期から「背景ぼかし (アクリル)」機能には対応していたものの長らく「背景透過」に対応していませんでした.</p>
+<ul>
+<li><a href="https://github.com/microsoft/terminal/issues/603">Feature Request: Standard Opacity options like the traditional console. · Issue #603 · microsoft/terminal · GitHub</a></li>
+</ul>
+<p>これは必要な API を Windows 10 が提供していなかったためであり, 
+Windows 11 でそれが実装された後の <a href="https://github.com/microsoft/terminal/pull/11180">PR #11180</a> で解決し, 
+プレビュー版では <a href="https://github.com/microsoft/terminal/releases/tag/v1.12.2922.0">v1.12.2922.0</a>, 
+安定版では <a href="https://github.com/microsoft/terminal/releases/tag/v1.12.10732.0">v1.12.10732.0</a> で実装されました.
+つまり現在 Microsoft Store からダウンロードできる最新版ではめでたく背景透過が設定できるようになっています.</p>
+<h1 id="背景透過の設定">背景透過の設定</h1>
+<p>上述のように現時点では背景透過は Windows 11 でのみ対応しています. 公式ドキュメントが必要な情報を提供してくれています.</p>
+<p><a href="https://docs.microsoft.com/ja-jp/windows/terminal/customize-settings/profile-appearance#opacity">Windows ターミナルの外観プロファイル設定 | Microsoft Docs</a></p>
+<p>アクリル効果はおしゃれではあるものの実用性はあまりありません.
+背景透過には背後のウィンドウの文字が読めるという利点があり, この設定をする場合はそれが目当てになるでしょう.</p>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

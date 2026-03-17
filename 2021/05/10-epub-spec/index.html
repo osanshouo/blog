@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+EPUBのファイル構造 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">EPUBのファイル構造</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/EPUB">EPUB</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-05-10">2021-05-10</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#仕様書">仕様書</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#ファイル構造">ファイル構造</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#mimetype">mimetype</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#META-INF">META-INF</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#パッケージドキュメント">パッケージドキュメント</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#目次">目次</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#本文">本文</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#EPUB_ファイルの作成">EPUB ファイルの作成</a>
+          
+          <ul>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#zip_圧縮">zip 圧縮</a></li>
+            
+            <li><a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#妥当性検証">妥当性検証</a></li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/05/10-epub-spec/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><h1 id="仕様書">仕様書</h1>
+<p>最新版である EPUB 3.2 の仕様は以下の6つのドキュメントに分かれています.
+原文は当然英語ですが, ありがたいことに Wataru Yoshimura さんにより非公式の日本語訳が公開されています<sup class="footnote-reference"><a href="#1">1</a></sup>.</p>
+<ul>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-spec.html">EPUB 3.2 日本語訳</a></li>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-packages.html">EPUB Packages 3.2 日本語訳</a></li>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-contentdocs.html">EPUB Content Documents 3.2 日本語訳</a></li>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-mediaoverlays.html">EPUB Media Overlays 3.2 日本語訳</a></li>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-ocf.html">EPUB Open Container Format (OCF) 3.2 日本語訳</a></li>
+<li><a href="http://idpf.org/epub/a11y/accessibility.html">EPUB Accessibility 1.0</a></li>
+</ul>
+<p>また, これら仕様の概要をまとめたものとして次の文書があります.</p>
+<ul>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-overview.html">EPUB 3 Overview</a> - EPUB 3 の概要をまとめたもの.</li>
+</ul>
+<h1 id="ファイル構造">ファイル構造</h1>
+<p>必須ファイルおよび最小限の本文を用意した EPUB ファイルは次のような構造を持ちます.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>├─ mimetype 
+</span><span>├─ META-INF
+</span><span>│    └─ container.xml
+</span><span>└─ EPUB 
+</span><span>     ├─ package.opf
+</span><span>     ├─ toc.xhtml
+</span><span>     └─ 001.xhtml
+</span></code></pre>
+<h2 id="mimetype">mimetype</h2>
+<ul>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-ocf.html#sec-zip-container-mime">EPUB OCF §4.3</a></li>
+</ul>
+<p>EPUB ファイルには <code>mimetype</code> というファイルが存在しなければなりません. そして, その内容は <code>application/epub+zip</code> で, 余計な空白を入れてはいけません
+(従ってファイルサイズは 20 byte になります).</p>
+<h2 id="META-INF">META-INF</h2>
+<ul>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-ocf.html#sec-container-metainf">EPUB OCF §3.5</a> </li>
+</ul>
+<p>EPUB ファイルには <code>META-INF</code> ディレクトリが存在しなければなりません. そして, このディレクトリに <code>container.xml</code> というファイルが存在する必要があります.
+その他のファイルは optional で必要ありません.</p>
+<p><code>container.xml</code> では文書の情報を記述した <code>package.opf</code> のパスを指定します. 
+このファイルを <a href="https://imagedrive.github.io/Submission/epub32/epub-spec.html#dfn-package-document">パッケージ ドキュメント</a> と呼びます.
+次の例では <code>EPUB</code> ディレクトリにある <code>package.opf</code> というファイルをパッケージドキュメントとして指定しています.</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#c0c5ce;" class="language-xml "><code class="language-xml" data-lang="xml"><span>&lt;?</span><span style="color:#bf616a;">xml </span><span style="color:#d08770;">version</span><span>=&quot;</span><span style="color:#a3be8c;">1.0</span><span>&quot;?&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">container </span><span style="color:#d08770;">version</span><span>=&quot;</span><span style="color:#a3be8c;">1.0</span><span>&quot; </span><span style="color:#d08770;">xmlns</span><span>=&quot;</span><span style="color:#a3be8c;">urn:oasis:names:tc:opendocument:xmlns:container</span><span>&quot;&gt;
+</span><span>  &lt;</span><span style="color:#bf616a;">rootfiles</span><span>&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">rootfile </span><span style="color:#d08770;">full-path</span><span>=&quot;</span><span style="color:#a3be8c;">EPUB/package.opf</span><span>&quot; </span><span style="color:#d08770;">media-type</span><span>=&quot;</span><span style="color:#a3be8c;">application/oebps-package+xml</span><span>&quot; /&gt;
+</span><span>  &lt;/</span><span style="color:#bf616a;">rootfiles</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">container</span><span>&gt;
+</span></code></pre>
+<p>なおパッケージドキュメントの場所は任意です. ここでは仕様書のように <code>EPUB</code> ディレクトリに収めましたが, <code>OEBPS</code> という名称もよく使われるようです
+(<a href="https://imagedrive.github.io/Submission/epub32/epub-overview.html#epub2">Open EBook Publication Structure</a> の略のようです).</p>
+<h2 id="パッケージドキュメント">パッケージドキュメント</h2>
+<p>ひとつのパッケージドキュメントはひとつの EPUB パッケージを定めます (<a href="https://imagedrive.github.io/Submission/epub32/epub-spec.html#dfn-epub-package">参考</a>).
+その詳細は <a href="https://imagedrive.github.io/Submission/epub32/epub-packages.html">EPUB Packages 3.2 日本語訳</a> で定義されています.</p>
+<ul>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-packages.html#sec-package-elem">EPUB Packages §3.4.1</a></li>
+</ul>
+<p>パッケージドキュメントのルート要素は <code>package</code> であり, 日本語文書ならばおおよそ次の例のようになるはずです. 
+必要ならば <code>dir=&quot;rtl&quot;</code> 属性も指定しますが, 以下では「左→右」 (ltr) 文書を前提とします.
+<code>package</code> 要素は <code>metadata</code>, <code>manifest</code>, <code>spine</code> という要素をそれぞれひとつずつ含んでいる必要があります.</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#c0c5ce;" class="language-xml "><code class="language-xml" data-lang="xml"><span>&lt;?</span><span style="color:#bf616a;">xml </span><span style="color:#d08770;">version</span><span>=&quot;</span><span style="color:#a3be8c;">1.0</span><span>&quot; </span><span style="color:#d08770;">encoding</span><span>=&quot;</span><span style="color:#a3be8c;">UTF-8</span><span>&quot;?&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">package </span><span style="color:#d08770;">unique-identifier</span><span>=&quot;</span><span style="color:#a3be8c;">pub-id</span><span>&quot; </span><span style="color:#d08770;">version</span><span>=&quot;</span><span style="color:#a3be8c;">3.0</span><span>&quot; </span><span style="color:#d08770;">xmlns</span><span>=&quot;</span><span style="color:#a3be8c;">http://www.idpf.org/2007/opf</span><span>&quot; </span><span style="color:#d08770;">xml:lang</span><span>=&quot;</span><span style="color:#a3be8c;">ja</span><span>&quot;&gt;
+</span><span>  &lt;</span><span style="color:#bf616a;">metadata </span><span style="color:#d08770;">xmlns:dc</span><span>=&quot;</span><span style="color:#a3be8c;">http://purl.org/dc/elements/1.1/</span><span>&quot;&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">dc:identifier </span><span style="color:#d08770;">id</span><span>=&quot;</span><span style="color:#a3be8c;">pub-id</span><span>&quot;&gt;urn:uuid:702bb9c7-f6cb-c781-2246-da0bd72535fc&lt;/</span><span style="color:#bf616a;">dc:identifier</span><span>&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">dc:title</span><span>&gt;EPUBのファイル構造&lt;/</span><span style="color:#bf616a;">dc:title</span><span>&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">dc:language</span><span>&gt;ja&lt;/</span><span style="color:#bf616a;">dc:language</span><span>&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">meta </span><span style="color:#d08770;">property</span><span>=&quot;</span><span style="color:#a3be8c;">dcterms:modified</span><span>&quot;&gt;2021-05-10T12:00:00Z&lt;/</span><span style="color:#bf616a;">meta</span><span>&gt;
+</span><span>  &lt;/</span><span style="color:#bf616a;">metadata</span><span>&gt;
+</span><span>
+</span><span>  &lt;</span><span style="color:#bf616a;">manifest</span><span>&gt;
+</span><span>    </span><span style="color:#65737e;">&lt;!-- ここで文書を構成するファイルをすべて指定する --&gt;
+</span><span>  &lt;/</span><span style="color:#bf616a;">manifest</span><span>&gt;
+</span><span>
+</span><span>  &lt;</span><span style="color:#bf616a;">spine</span><span>&gt;
+</span><span>    </span><span style="color:#65737e;">&lt;!-- ここでファイルを表示する順番を指定する --&gt;
+</span><span>  &lt;/</span><span style="color:#bf616a;">spine</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">package</span><span>&gt;
+</span></code></pre>
+<p><code>metadata</code> 要素については上述のものが必須です. 適当に一意識別子, タイトル, 言語, 最終更新日を埋めてください.</p>
+<h3 id="manifest">manifest</h3>
+<ul>
+<li><a href="https://imagedrive.github.io/Submission/epub32/epub-packages.html#sec-pkg-manifest">EPUB Packages §3.4.4</a></li>
+</ul>
+<p>パッケージドキュメントの <code>manifest</code> 要素には文書を構成するファイルをすべて順不同で並べます.
+目次情報 <code>toc.xhtml</code> と本文 <code>001.xhtml</code> のふたつのファイルを指定する場合はこちら.</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#c0c5ce;" class="language-xml "><code class="language-xml" data-lang="xml"><span>&lt;</span><span style="color:#bf616a;">manifest</span><span>&gt;
+</span><span>  &lt;</span><span style="color:#bf616a;">item </span><span style="color:#d08770;">id</span><span>=&quot;</span><span style="color:#a3be8c;">toc</span><span>&quot; </span><span style="color:#d08770;">href</span><span>=&quot;</span><span style="color:#a3be8c;">toc.xhtml</span><span>&quot; </span><span style="color:#d08770;">media-type</span><span>=&quot;</span><span style="color:#a3be8c;">application/xhtml+xml</span><span>&quot; </span><span style="color:#d08770;">properties</span><span>=&quot;</span><span style="color:#a3be8c;">nav</span><span>&quot;/&gt;
+</span><span>  &lt;</span><span style="color:#bf616a;">item </span><span style="color:#d08770;">id</span><span>=&quot;</span><span style="color:#a3be8c;">main-001.xhtml</span><span>&quot; </span><span style="color:#d08770;">href</span><span>=&quot;</span><span style="color:#a3be8c;">001.xhtml</span><span>&quot; </span><span style="color:#d08770;">media-type</span><span>=&quot;</span><span style="color:#a3be8c;">application/xhtml+xml</span><span>&quot;/&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">manifest</span><span>&gt;
+</span></code></pre>
+<p>なお, EPUB には目次ファイル (<code>properties=&quot;nav&quot;</code>) が存在する必要があります (<a href="https://imagedrive.github.io/Submission/epub32/epub-packages.html#sec-package-nav">EPUB Packages §5</a>). 
+また, MathML を含むファイルにはここで <code>properties=&quot;mathml&quot;</code> 属性を明示する必要があります.</p>
+<h3 id="spine">spine</h3>
+<p><code>spine</code> 要素ではファイルを表示する順番を指定します.</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#c0c5ce;" class="language-xml "><code class="language-xml" data-lang="xml"><span>&lt;</span><span style="color:#bf616a;">spine </span><span style="color:#d08770;">page-progression-direction</span><span>=&quot;</span><span style="color:#a3be8c;">default</span><span>&quot;&gt;
+</span><span>  &lt;</span><span style="color:#bf616a;">itemref </span><span style="color:#d08770;">idref</span><span>=&quot;</span><span style="color:#a3be8c;">toc</span><span>&quot;/&gt;
+</span><span>  &lt;</span><span style="color:#bf616a;">itemref </span><span style="color:#d08770;">idref</span><span>=&quot;</span><span style="color:#a3be8c;">main-001.xhtml</span><span>&quot;/&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">spine</span><span>&gt;
+</span></code></pre>
+<h2 id="目次">目次</h2>
+<p>目次は HTML をつくる感じで適当に作ればよいです. 必ずしも spine に含める必要はありません (<a href="https://imagedrive.github.io/Submission/epub32/epub-packages.html#sec-package-nav-content-conf">EPUB Packages §5.2</a>).
+<code>ol</code> を入れ子にする場合は, 章題を表す <code>span</code> (または <code>a</code>) が必要です.</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#c0c5ce;" class="language-xml "><code class="language-xml" data-lang="xml"><span>&lt;?</span><span style="color:#bf616a;">xml </span><span style="color:#d08770;">version</span><span>=&quot;</span><span style="color:#a3be8c;">1.0</span><span>&quot; </span><span style="color:#d08770;">encoding</span><span>=&quot;</span><span style="color:#a3be8c;">UTF-8</span><span>&quot;?&gt;
+</span><span>&lt;!</span><span style="color:#b48ead;">DOCTYPE </span><span style="color:#bf616a;">html</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">html </span><span style="color:#d08770;">xmlns</span><span>=&quot;</span><span style="color:#a3be8c;">http://www.w3.org/1999/xhtml</span><span>&quot; </span><span style="color:#d08770;">xmlns:epub</span><span>=&quot;</span><span style="color:#a3be8c;">http://www.idpf.org/2007/ops</span><span>&quot; </span><span style="color:#d08770;">xml:lang</span><span>=&quot;</span><span style="color:#a3be8c;">ja</span><span>&quot; </span><span style="color:#d08770;">lang</span><span>=&quot;</span><span style="color:#a3be8c;">ja</span><span>&quot;&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">head</span><span>&gt;
+</span><span>  &lt;</span><span style="color:#bf616a;">title</span><span>&gt;目次&lt;/</span><span style="color:#bf616a;">title</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">head</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">body</span><span>&gt;
+</span><span>  &lt;</span><span style="color:#bf616a;">nav </span><span style="color:#d08770;">xmlns:epub</span><span>=&quot;</span><span style="color:#a3be8c;">http://www.idpf.org/2007/ops</span><span>&quot; </span><span style="color:#d08770;">epub:type</span><span>=&quot;</span><span style="color:#a3be8c;">toc</span><span>&quot;&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">h1</span><span>&gt;目次&lt;/</span><span style="color:#bf616a;">h1</span><span>&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">ol</span><span>&gt;
+</span><span>      &lt;</span><span style="color:#bf616a;">li</span><span>&gt;&lt;</span><span style="color:#bf616a;">a </span><span style="color:#d08770;">href</span><span>=&quot;</span><span style="color:#a3be8c;">001.xhtml</span><span>&quot;&gt;二次方程式の解の公式&lt;/</span><span style="color:#bf616a;">a</span><span>&gt;&lt;/</span><span style="color:#bf616a;">li</span><span>&gt;
+</span><span>	  &lt;</span><span style="color:#bf616a;">li</span><span>&gt;
+</span><span>	    &lt;</span><span style="color:#bf616a;">span</span><span>&gt;Galois 理論&lt;/</span><span style="color:#bf616a;">span</span><span>&gt;
+</span><span>		&lt;</span><span style="color:#bf616a;">ol</span><span>&gt;
+</span><span>		  &lt;</span><span style="color:#bf616a;">li</span><span>&gt;Galois 群&lt;/</span><span style="color:#bf616a;">li</span><span>&gt;
+</span><span>		  &lt;</span><span style="color:#bf616a;">li</span><span>&gt;五次方程式の解の公式&lt;/</span><span style="color:#bf616a;">li</span><span>&gt;
+</span><span>	    &lt;/</span><span style="color:#bf616a;">ol</span><span>&gt;
+</span><span>	  &lt;/</span><span style="color:#bf616a;">li</span><span>&gt;
+</span><span>    &lt;/</span><span style="color:#bf616a;">ol</span><span>&gt;
+</span><span>  &lt;/</span><span style="color:#bf616a;">nav</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">body</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">html</span><span>&gt;
+</span></code></pre>
+<p>なお EPUB 2 では <a href="https://imagedrive.github.io/Submission/epub32/epub-packages.html#sec-opf2-ncx">NCX</a> というものがありましたが, 
+EPUB 3 ではこの機能は上記ファイルに置き換えられたため, EPUB 3 対応リーダーのみをサポートするならば NCX ファイルは不要です.</p>
+<h2 id="本文">本文</h2>
+<p>ファイル名に関する制約は <a href="https://imagedrive.github.io/Submission/epub32/epub-ocf.html#sec-container-filenames">EPUB-OCF §3.4</a> にまとめられています.
+255bytes 以下で危なそうな文字 (ASCII だと<code>/</code>, <code>&lt;</code>, <code>&gt;</code>, <code>*</code>, <code>&quot;</code>, <code>:</code>, <code>?</code>, <code>\</code>, <code>|</code> など) は含めることができません.</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#c0c5ce;" class="language-xml "><code class="language-xml" data-lang="xml"><span>&lt;?</span><span style="color:#bf616a;">xml </span><span style="color:#d08770;">version</span><span>=&quot;</span><span style="color:#a3be8c;">1.0</span><span>&quot; </span><span style="color:#d08770;">encoding</span><span>=&quot;</span><span style="color:#a3be8c;">UTF-8</span><span>&quot;?&gt;
+</span><span>&lt;!</span><span style="color:#b48ead;">DOCTYPE </span><span style="color:#bf616a;">html</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">html </span><span style="color:#d08770;">xmlns</span><span>=&quot;</span><span style="color:#a3be8c;">http://www.w3.org/1999/xhtml</span><span>&quot; </span><span style="color:#d08770;">xmlns:epub</span><span>=&quot;</span><span style="color:#a3be8c;">http://www.idpf.org/2007/ops</span><span>&quot; </span><span style="color:#d08770;">xml:lang</span><span>=&quot;</span><span style="color:#a3be8c;">ja</span><span>&quot; </span><span style="color:#d08770;">lang</span><span>=&quot;</span><span style="color:#a3be8c;">ja</span><span>&quot;&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">head</span><span>&gt;
+</span><span>  &lt;</span><span style="color:#bf616a;">title</span><span>&gt;二次方程式の解の公式&lt;/</span><span style="color:#bf616a;">title</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">head</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">body</span><span>&gt;
+</span><span>  二次方程式 &lt;</span><span style="color:#bf616a;">math </span><span style="color:#d08770;">xmlns</span><span>=&quot;</span><span style="color:#a3be8c;">http://www.w3.org/1998/Math/MathML</span><span>&quot; </span><span style="color:#d08770;">display</span><span>=&quot;</span><span style="color:#a3be8c;">inline</span><span>&quot; </span><span style="color:#d08770;">alttext</span><span>=&quot;</span><span style="color:#a3be8c;">ax^2 + bx + c = 0</span><span>&quot;&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;a&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;</span><span style="color:#bf616a;">msup</span><span>&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;x&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;</span><span style="color:#bf616a;">mn</span><span>&gt;2&lt;/</span><span style="color:#bf616a;">mn</span><span>&gt;&lt;/</span><span style="color:#bf616a;">msup</span><span>&gt;&lt;</span><span style="color:#bf616a;">mo</span><span>&gt;+&lt;/</span><span style="color:#bf616a;">mo</span><span>&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;b&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;x&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;</span><span style="color:#bf616a;">mo</span><span>&gt;+&lt;/</span><span style="color:#bf616a;">mo</span><span>&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;c&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;</span><span style="color:#bf616a;">mo</span><span>&gt;=&lt;/</span><span style="color:#bf616a;">mo</span><span>&gt;&lt;</span><span style="color:#bf616a;">mn</span><span>&gt;0&lt;/</span><span style="color:#bf616a;">mn</span><span>&gt;&lt;/</span><span style="color:#bf616a;">math</span><span>&gt; の解の公式は次式により与えられる.
+</span><span>  &lt;</span><span style="color:#bf616a;">math </span><span style="color:#d08770;">xmlns</span><span>=&quot;</span><span style="color:#a3be8c;">http://www.w3.org/1998/Math/MathML</span><span>&quot; </span><span style="color:#d08770;">display</span><span>=&quot;</span><span style="color:#a3be8c;">block</span><span>&quot; </span><span style="color:#d08770;">alttext</span><span>=&quot;</span><span style="color:#a3be8c;">x = \frac{ - b \pm \sqrt{ b^2 - 4 a c } }{ 2 a }</span><span>&quot;&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;x&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;</span><span style="color:#bf616a;">mo</span><span>&gt;=&lt;/</span><span style="color:#bf616a;">mo</span><span>&gt;&lt;</span><span style="color:#bf616a;">mfrac</span><span>&gt;&lt;</span><span style="color:#bf616a;">mrow</span><span>&gt;&lt;</span><span style="color:#bf616a;">mo</span><span>&gt;-&lt;/</span><span style="color:#bf616a;">mo</span><span>&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;b&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;</span><span style="color:#bf616a;">mo</span><span>&gt;±&lt;/</span><span style="color:#bf616a;">mo</span><span>&gt;&lt;</span><span style="color:#bf616a;">msqrt</span><span>&gt;&lt;</span><span style="color:#bf616a;">mrow</span><span>&gt;&lt;</span><span style="color:#bf616a;">msup</span><span>&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;b&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;</span><span style="color:#bf616a;">mn</span><span>&gt;2&lt;/</span><span style="color:#bf616a;">mn</span><span>&gt;&lt;/</span><span style="color:#bf616a;">msup</span><span>&gt;&lt;</span><span style="color:#bf616a;">mo</span><span>&gt;-&lt;/</span><span style="color:#bf616a;">mo</span><span>&gt;&lt;</span><span style="color:#bf616a;">mn</span><span>&gt;4&lt;/</span><span style="color:#bf616a;">mn</span><span>&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;a&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;c&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;/</span><span style="color:#bf616a;">mrow</span><span>&gt;&lt;/</span><span style="color:#bf616a;">msqrt</span><span>&gt;&lt;/</span><span style="color:#bf616a;">mrow</span><span>&gt;&lt;</span><span style="color:#bf616a;">mrow</span><span>&gt;&lt;</span><span style="color:#bf616a;">mn</span><span>&gt;2&lt;/</span><span style="color:#bf616a;">mn</span><span>&gt;&lt;</span><span style="color:#bf616a;">mi</span><span>&gt;a&lt;/</span><span style="color:#bf616a;">mi</span><span>&gt;&lt;/</span><span style="color:#bf616a;">mrow</span><span>&gt;&lt;/</span><span style="color:#bf616a;">mfrac</span><span>&gt;&lt;/</span><span style="color:#bf616a;">math</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">body</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">html</span><span>&gt;
+</span></code></pre>
+<h1 id="EPUB_ファイルの作成">EPUB ファイルの作成</h1>
+<h2 id="zip_圧縮">zip 圧縮</h2>
+<p>EPUB ファイルは上記の一連のファイルを zip で固めたものです. mimetype は圧縮せず, 拡張フィールドも使用してはいけないことに注意して作成します
+(ZIP ファイルについては <a href="https://qiita.com/osanshouo/items/cb1a86b8f2fdb5e12446">[Rust] zip ファイルを読む - Qiita</a> を参照).</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">zip -0X</span><span> math.epub mimetype
+</span><span style="color:#bf616a;">zip -9r</span><span> math.epub META-INF EPUB
+</span></code></pre>
+<h2 id="妥当性検証">妥当性検証</h2>
+<p><a href="http://validator.idpf.org/">EPUB Validator (beta)</a> にて作成した EPUB が仕様を満足するかチェックすることができます.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://techdo.mediado.jp/entry/2019/04/01/112244">EPUBファイルを手で作ってみる。 - Tech Do | メディアドゥの技術ブログ</a></li>
+<li><a href="http://k-airyuu.hatenablog.com/entry/2014/03/07/152655">電子書籍づくり実践（書誌情報を書く） - 本好きに送る「電子書籍のつくり方」講座</a></li>
+</ul>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>アクセシビリティの規定は SHOULD であり, 必ずしも満たさなくてもよいです (<a href="https://imagedrive.github.io/Submission/epub32/epub-spec.html#sec-epub-pub-conf">EPUB3.2 §2.1</a>). </p>
+</div>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

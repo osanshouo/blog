@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] なぜスライスにwindows_mutはないのか - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] なぜスライスにwindows_mutはないのか</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/イテレータ">イテレータ</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-01-09">2021-01-09</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/09-windows-mut/#chunks_および_chunks_mut_について">chunks および chunks_mut について</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/09-windows-mut/#windows_について">windows について</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/09-windows-mut/#streaming_iterator">streaming iterator</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/01/09-windows-mut/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>Rust のスライスには <a href="https://doc.rust-lang.org/std/primitive.slice.html#method.windows"><code>windows</code></a> メソッドがあります.
+これは指定した数の連続した要素の「サブスライス」を順に返すイテレータを作成します.
+例えば次のコード</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> slice = &amp;[ </span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">2</span><span>, </span><span style="color:#d08770;">3</span><span>, </span><span style="color:#d08770;">5</span><span>, </span><span style="color:#d08770;">8 </span><span>];
+</span><span>
+</span><span style="color:#b48ead;">for</span><span> arr in slice.</span><span style="color:#96b5b4;">windows</span><span>(</span><span style="color:#d08770;">3</span><span>) {
+</span><span>    println!(&quot;</span><span style="color:#d08770;">{:?}</span><span>&quot;, arr);
+</span><span>}
+</span></code></pre>
+<p>を実行すると, <code>[1, 1, 2]</code>, <code>[1, 2, 3]</code>, <code>[2, 3, 5]</code>, <code>[3, 5, 8]</code> と順に表示されます.
+大きさの決まった「窓」を先頭から順番にずらしていくイメージです.</p>
+<p>よく似たメソッドに <code>chunks</code> があり, これは窓を重複なくずらすものです. 例えば</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> slice = &amp;[ </span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">2</span><span>, </span><span style="color:#d08770;">3</span><span>, </span><span style="color:#d08770;">5</span><span>, </span><span style="color:#d08770;">8 </span><span>];
+</span><span>
+</span><span style="color:#b48ead;">for</span><span> arr in slice.</span><span style="color:#96b5b4;">chunks</span><span>(</span><span style="color:#d08770;">3</span><span>) {
+</span><span>    println!(&quot;</span><span style="color:#d08770;">{:?}</span><span>&quot;, arr);
+</span><span>}
+</span></code></pre>
+<p>は <code>[1, 1, 2]</code>, <code>[3, 5, 8]</code> と順に表示されます. ほとんど同じものに見えますが, 実は両者には大きな違いがあります.
+<code>chunks</code> には可変参照を返す対応物 <code>chunks_mut</code> があるのに対して, <code>windows</code> にはありません.
+これはなぜでしょうか.</p>
+<h1 id="chunks_および_chunks_mut_について"><code>chunks</code> および <code>chunks_mut</code> について</h1>
+<p>これはほとんど同じもので, 前者の返り値 <code>std::iter::Chanks</code> は <code>Iterator&lt;Item = &amp;'a [T]&gt;</code>,
+後者の返り値 <code>std::iter::ChanksMut</code> は <code>Iterator&lt;Item = &amp;'a mut [T]&gt;</code> です.
+内部実装 (<a href="https://doc.rust-lang.org/src/core/slice/iter.rs.html#1356-1431">chunks</a>, 
+<a href="https://doc.rust-lang.org/src/core/slice/iter.rs.html#1516-1593">chunks_mut</a>) を見てもらえばわかるように,
+これは要するにスライスを <code>split_at</code> または <code>split_at_mut</code> しています.</p>
+<p>スライスのメソッド <code>split_at_mut</code> は興味深いメソッドで, 
+ひとつの <code>&amp;mut [T]</code> からふたつの <code>&amp;mut [T]</code> を作り出すことができます.
+Rust ではひとつのメモリ領域に対して同時に複数の可変参照が存在することはできませんが,
+しかし今の場合, ふたつの <code>&amp;mut [T]</code> が指す範囲が重複していないことが保証されているため, 安全です.
+なので <code>split_at_mut</code> は内部では <code>unsafe</code> になっています.</p>
+<h1 id="windows_について"><code>windows</code> について</h1>
+<p>それでは <code>WindowsMut</code> のようなものは実装できるでしょうか？
+これは要するに可変参照は同時にひとつしか存在できないというルールのために Rust では禁止されています.
+イテレータの返り値はすべて同じライフタイムを持ちますから, 
+<code>WindowsMut</code> が上のような調子で <code>&amp;mut [T]</code> を生成し続けてしまうと同じ領域を指す可変参照が同時に存在してしまいます.</p>
+<h1 id="streaming_iterator">streaming iterator</h1>
+<p>しかしイテレータとして実装するのでなければ <code>WindowsMut</code> を実現することができます.
+これは次の <code>next</code> までに先に生成した <code>&amp;mut [T]</code> がドロップされていることが保証されていればよいからで,
+streaming iterator と呼ばれる種類のものになります.
+streaming iterator については 
+<a href="https://qiita.com/osanshouo/items/0aa01131adeaf4bed9ba">[Rust] 自分への参照を返すイテレータもどき: streaming iterator</a> 
+を, <code>windows_mut</code> の実装については参考文献をご覧ください.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://users.rust-lang.org/t/iterator-over-mutable-windows-of-slice/17110">https://users.rust-lang.org/t/iterator-over-mutable-windows-of-slice/17110</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

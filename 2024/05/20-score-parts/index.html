@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Lilypond] 総譜とパート譜を同時に生成するテクニック - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Lilypond] 総譜とパート譜を同時に生成するテクニック</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/音楽">音楽</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Lilypond">Lilypond</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-05-20">2024-05-20</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/05/20-score-parts/#プロジェクト構造">プロジェクト構造</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/05/20-score-parts/#各パート">各パート</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/05/20-score-parts/#score.ily">score.ily</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/05/20-score-parts/#part.ily">part.ily</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/05/20-score-parts/#メインファイル">メインファイル</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>総譜 (スコア) とパート譜をともに Lilypond で作成することを考えます.
+ベースとなる音楽情報は総譜とパート譜で (ほぼ) 同じものですから,
+総譜とパート譜はソースコードの大部分を共有するべきです.
+基本的なことは公式ドキュメントにまとまっています.</p>
+<ul>
+<li><a href="https://lilypond.org/doc/v2.23/Documentation/learning/scores-and-parts.ja.html">GNU LilyPond 学習マニュアル: 4.4.5 楽譜とパート</a></li>
+<li><a href="https://lilypond.org/doc/v2.23/Documentation/notation/writing-parts.ja.html">LilyPond 記譜法リファレンス: 1.6.3 パートを記述する</a></li>
+</ul>
+<p>ただし, パート譜には以下の考慮事項があります.</p>
+<ul>
+<li>奇数ページの改ページ位置をできるだけ長い休符に合わせたい. 
+そのために手動で <code>\pageBreak</code> を挿入したいが, これは総譜には反映されるべきではない.</li>
+<li>必要に応じて, 休符部分に他のパートの音符を示しておきたい (影譜, <code>CueVoice</code>).</li>
+</ul>
+<p>このあたりをいい感じに行うワークアラウンドを考えたので, まとめておきます.
+もっと良い方法があるかもしれませんが...</p>
+<p>なお, 以下では弦楽四重奏を想定して説明します.</p>
+<h1 id="プロジェクト構造">プロジェクト構造</h1>
+<p>以下のファイルを作成します. </p>
+<ul>
+<li><code>String Quartet.ly</code>: メインとなる Lilypond ファイル. </li>
+<li><code>score.ily</code>: 総譜部分を担当する.</li>
+<li><code>part.ily</code>: パート譜部分を担当する.</li>
+<li><code>violin1.ily</code>, <code>violin2.ily</code>, <code>viola.ily</code>, <code>cello.ily</code>: 各パートの音楽データを入力する.</li>
+<li>(任意) <code>common.ily</code>: 共通のソースコードをまとめておくファイル 
+(調や拍子, 発想標語, その他共通で使用する Lilypond コードなど).</li>
+</ul>
+<h1 id="各パート">各パート</h1>
+<p>まず各パート <code>violin1.ily</code>, <code>violin2.ily</code>, <code>viola.ily</code>, <code>cello.ily</code> ですが, 
+これらのファイルには, <code>Staff</code> を含めず, 音楽データ (<code>Voice</code>) だけをまとめておきます.
+さらに, 各パートの <code>CueVoice</code> もここに入力しておくと良いでしょう.
+要点は, <code>CueVoice</code> は総譜には読み込まずパート譜だけで使用されるため, 
+<code>CueVoice</code> 内に改ページなどのパート譜のためのレイアウト設定を持たせておくことができる, という点です.</p>
+<p>例えば <code>violin1.ily</code> は次のような内容になるでしょう.</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span>violinFirst = </span><span style="color:#96b5b4;">\new</span><span> Voice </span><span style="color:#96b5b4;">\relative</span><span> c&#39; {
+</span><span>  </span><span style="color:#65737e;">%{ 音楽データを入力 %}
+</span><span>}
+</span><span>
+</span><span>violinFirstCue = </span><span style="color:#96b5b4;">\new</span><span> CueVoice {
+</span><span>  </span><span style="color:#65737e;">%{ 全小節を `s` で埋める (影譜が必要な部分のみ入力). \pageBreak 等はここに入力 %}
+</span><span>}
+</span></code></pre>
+<h1 id="score.ily"><code>score.ily</code></h1>
+<p>次に <code>score.ily</code> ですが, 総譜で単独の PDF ファイルを作成したいため, この中でひとつの <code>book</code> を作成します.</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span style="color:#96b5b4;">\book </span><span>{
+</span><span>  </span><span style="color:#96b5b4;">\score </span><span>{ 
+</span><span>    </span><span style="color:#96b5b4;">\new</span><span> StaffGroup &lt;&lt;
+</span><span>      </span><span style="color:#96b5b4;">\new</span><span> Staff </span><span style="color:#96b5b4;">\with </span><span>{ instrumentName = #&quot;Violin I&quot; } { </span><span style="color:#96b5b4;">\violinFirst </span><span>}
+</span><span>      </span><span style="color:#96b5b4;">\new</span><span> Staff </span><span style="color:#96b5b4;">\with </span><span>{ instrumentName = #&quot;Violin II&quot; } { </span><span style="color:#96b5b4;">\violinSecond </span><span>}
+</span><span>      </span><span style="color:#96b5b4;">\new</span><span> Staff </span><span style="color:#96b5b4;">\with </span><span>{ instrumentName = #&quot;Viola&quot; } { </span><span style="color:#96b5b4;">\viola </span><span>}
+</span><span>      </span><span style="color:#96b5b4;">\new</span><span> Staff </span><span style="color:#96b5b4;">\with </span><span>{ instrumentName = #&quot;Cello&quot; } { </span><span style="color:#96b5b4;">\cello </span><span>}
+</span><span>    &gt;&gt;
+</span><span>    
+</span><span>    </span><span style="color:#96b5b4;">\layout </span><span>{}
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#96b5b4;">\paper </span><span>{
+</span><span>    #(layout-set-staff-size 17)
+</span><span>    systems-per-page = #4
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>複数の楽章からなる楽曲の場合は, <code>\score</code> ブロックを増やしてください.</p>
+<h1 id="part.ily"><code>part.ily</code></h1>
+<p>パート譜ですが, ほぼ同じものをパートの数だけ作成するのは面倒です.
+そこで以下の方法で手間やソースコードの無駄を省くことができます.</p>
+<p><code>part.ily</code> には, 以下のように, 各パートによって異なる部分を変数とした Lilypond コードを入力します.
+この場合には <code>\INSTRUMENT</code>, <code>\PART</code>, <code>\CUE</code> が各パートによって異なる変数です.</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span style="color:#96b5b4;">\book </span><span>{
+</span><span>  </span><span style="color:#96b5b4;">\bookOutputSuffix \INSTRUMENT 
+</span><span>
+</span><span>  </span><span style="color:#96b5b4;">\score </span><span>{
+</span><span>    &lt;&lt;
+</span><span>      </span><span style="color:#96b5b4;">\new</span><span> Staff &lt;&lt; </span><span style="color:#96b5b4;">\PART \CUE</span><span> &gt;&gt;
+</span><span>    &gt;&gt;
+</span><span>    </span><span style="color:#96b5b4;">\layout </span><span>{}
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#96b5b4;">\paper </span><span>{
+</span><span>    #(layout-set-staff-size 20)
+</span><span>
+</span><span>    bookTitleMarkup = </span><span style="color:#96b5b4;">\markup \center</span><span>-column {
+</span><span>      </span><span style="color:#96b5b4;">\fill</span><span>-line {
+</span><span>        </span><span style="color:#96b5b4;">\fontsize</span><span> #4 </span><span style="color:#96b5b4;">\bold \fromproperty</span><span> #&#39;header:title
+</span><span>      }
+</span><span>      </span><span style="color:#96b5b4;">\fill</span><span>-line {
+</span><span>        </span><span style="color:#96b5b4;">\rounded</span><span>-box { </span><span style="color:#96b5b4;">\fontsize</span><span> #2 </span><span style="color:#96b5b4;">\INSTRUMENT </span><span>}
+</span><span>        </span><span style="color:#96b5b4;">\fromproperty</span><span> #&#39;header:composer
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p><code>\bookOutputSuffix</code> を指定することで各パートの出力ファイル名を制御することができます.
+今回の場合では, <code>String Quartet-Violin I.pdf</code> といった感じで出力されます.
+また, どのパートの楽譜か明示するために <code>bookTitleMarkup</code> を設定しておきました.
+このあたりは好みで自由に調整できます.</p>
+<p>複数の楽章からなる楽曲の場合は, 楽章の数だけ <code>\score</code> を増やすと同時に, 
+<code>\PART</code>, <code>\CUE</code> といった変数も楽章の数だけ用意します.</p>
+<h1 id="メインファイル">メインファイル</h1>
+<p>それではメインファイル <code>String Quartet.ly</code> ですが, ここで今まで作成してきたファイルを <code>\include</code> していきます.</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span style="color:#96b5b4;">\version</span><span> &quot;2.24.0&quot;
+</span><span style="color:#96b5b4;">\language</span><span> &quot;deutsch&quot;
+</span><span style="color:#96b5b4;">\pointAndClickOff
+</span><span>
+</span><span style="color:#96b5b4;">\header </span><span>{
+</span><span>  title = &quot;String Quartet&quot;
+</span><span>  </span><span style="color:#65737e;">%composer = &quot;&quot;
+</span><span>  tagline = ##f
+</span><span>}
+</span><span>
+</span><span style="color:#65737e;">%\include &quot;./common.ily&quot;
+</span><span style="color:#96b5b4;">\include</span><span> &quot;./violin1.ily&quot;
+</span><span style="color:#96b5b4;">\include</span><span> &quot;./violin2.ily&quot;
+</span><span style="color:#96b5b4;">\include</span><span> &quot;./viola.ily&quot;
+</span><span style="color:#96b5b4;">\include</span><span> &quot;./cello.ily&quot;
+</span><span>
+</span><span>
+</span><span style="color:#65737e;">%%% 総譜を作成 %%%
+</span><span style="color:#96b5b4;">\include</span><span> &quot;./score.ily&quot;
+</span><span>
+</span><span>
+</span><span style="color:#65737e;">%%% パート譜を作成 %%%
+</span><span>INSTRUMENT = &quot;Violin I&quot;
+</span><span>PART = </span><span style="color:#96b5b4;">\violinFirst
+</span><span>CUE = </span><span style="color:#96b5b4;">\violinFirstCue
+</span><span style="color:#96b5b4;">\include</span><span> &quot;./part.ily&quot;
+</span><span>
+</span><span>INSTRUMENT = &quot;Violin II&quot;
+</span><span>PART = </span><span style="color:#96b5b4;">\violinSecond
+</span><span>CUE = </span><span style="color:#96b5b4;">\violinSecondCue
+</span><span style="color:#96b5b4;">\include</span><span> &quot;./part.ily&quot;
+</span><span>
+</span><span>INSTRUMENT = &quot;Viola&quot;
+</span><span>PART = </span><span style="color:#96b5b4;">\viola
+</span><span>CUE = </span><span style="color:#96b5b4;">\violaCue
+</span><span style="color:#96b5b4;">\include</span><span> &quot;./part.ily&quot;
+</span><span>
+</span><span>INSTRUMENT = &quot;Cello&quot;
+</span><span>PART = </span><span style="color:#96b5b4;">\cello
+</span><span>CUE = </span><span style="color:#96b5b4;">\celloCue
+</span><span style="color:#96b5b4;">\include</span><span> &quot;./part.ily&quot;
+</span></code></pre>
+<p>総譜は単に別ファイルで作ったものを <code>\include</code> するだけです. 
+問題はパート譜ですが, 見ての通り, <code>\include &quot;./part.ily&quot;</code> 
+する直前でパートによって異なる変数に各パートの音楽データ等を代入することで, 
+ソースコードの重複を最小限にしてパート譜を作成することができます.</p>
+<p>以上で, 音楽データそのものは一か所に入力されており, それが総譜とパート譜の双方に反映されていますが,
+パート譜ではさらに追加の <code>\pageBreak</code> や影譜を自由に入力できる, という目標が達成できました.</p>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

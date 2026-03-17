@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+1次元N体シミュレーションの効率的なアルゴリズム - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">1次元N体シミュレーションの効率的なアルゴリズム</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/物理学">物理学</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数値解析">数値解析</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/N体シミュレーション">N体シミュレーション</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-04-30">2021-04-30</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/30-1dim-nbody/#はじめに">はじめに</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/30-1dim-nbody/#ヒープ">ヒープ</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/30-1dim-nbody/#アルゴリズム">アルゴリズム</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/04/30-1dim-nbody/#コメント">コメント</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>A. Noullez, D. Fanelli, E. Aurell による <a href="https://arxiv.org/abs/cond-mat/0101336">Heap-based algorithm for one-dimensional particle systems</a> という論文を読んだ際のメモです.</p>
+<h1 id="はじめに">はじめに</h1>
+<p>1次元 $N$ 体系の数値シミュレーションについて考えます.
+1次元重力多体系を想定し, 個々の粒子の軌道は他の粒子と衝突しなければ解析的に求まると仮定します.
+しかし衝突 (または交差) が起こると粒子の配置が入れ替わりますから, 
+常にどこで衝突が起こるかを追跡し続ける必要があります.
+ナイーブにはこれには $O ( N )$ の時間がかかるように思えますが, この論文は $O ( \ln N )$ でよいと主張しています.</p>
+<h1 id="ヒープ">ヒープ</h1>
+<p>本記事において $R$ 分木が完全 (complete) であるとは, すべての枝の深さが $D$ または $D-1$ であり,
+深さ $D$ の枝が可能な限り「左」に寄せられているもののことを言います.
+そのうえで, <a href="https://ja.wikipedia.org/wiki/%E3%83%92%E3%83%BC%E3%83%97">ヒープ</a> とは, 各ノードにある値 (<code>PartialOrd</code> を要求します) が付随した完全 $R$ 分木であり,
+常に親ノードの値はそのどの小ノードの値よりも小さい (または等しい) もののことを言います<sup class="footnote-reference"><a href="#1">1</a></sup>.
+完全 $R$ 分木では, あるノードのインデックスから親ノードと子ノードのインデックスが決まっているため, 
+ノード間の関係を保持する必要がなく, 実装が非常に簡単です.
+このあたり自分で実装し始めてから既に良さそうな Rust 実装 <a href="https://github.com/hanmertens/dary_heap">dary_heap</a> があることに気づきましたが, 
+この手のものはフルスクラッチで書かないと身につかないですし最後まで自分で実装しました.</p>
+<p>ヒープの構築はナイーブには $O ( N \ln N )$ の時間がかかりますが, 効率的なアルゴリズムが存在し $O ( N )$ で可能なようです<sup class="footnote-reference"><a href="#2">2</a></sup>.
+いずれにせよ, 本記事のアルゴリズムではヒープは最初に一回構築すればもう一から作り直すことはしないので問題はないでしょう.</p>
+<h1 id="アルゴリズム">アルゴリズム</h1>
+<p>$N$ 体シミュレーションの最初に初期条件に従って粒子群を生成します. これは長さ $N$ の <code>Vec&lt;_&gt;</code> に確保されるでしょう.
+次いで, 粒子 $j$ と粒子 $j+1$ が交差する時刻 $\tau_j$ のリストを生成します (これは長さ $N - 1$ です).
+時刻 $\tau_j$ と粒子 id の組のリスト <code>Vec&lt;(usize, f64)&gt;</code> などとするのが良いと思います.
+この交差時刻のリストからヒープを構築します.</p>
+<p>ヒープの定義から, そのルート要素は最も早い衝突時刻とそれがどの粒子で起こるかを教えてくれます.
+そこで, この粒子の組について, その位置と速度を衝突時刻まで進め (このとき当然両者の空間座標は一致するはずです), 衝突処理を行います 
+(弾性衝突またはすり抜けならば速度を交換するだけです).</p>
+<p>このあたりから原論文の記述がよくわからなくなるのですが,
+次に粒子 $j$ と $j+1$ の衝突時刻 $\tau_j$ をアップデートすれば良さそうです.
+この結果, おそらく $R$ 分木はヒープ条件を満足しなくなりますから, shiftdown 操作を行ってヒープ条件を満足するようにします.
+そして, 粒子の情報が更新されたことに伴って $\tau_{j-1}$ と $\tau_{j+1}$ も更新する必要があります.
+そこで更新後にこれらのデータについて shiftup なり shiftdown なりを行えば再びヒープ条件を満足するようにできます.
+これらの処理に要する時間は木の深さ程度 $O ( \ln N )$ です.</p>
+<p>さて, 再びヒープのルートを見れば次の衝突がいつどこで起こるかがわかります.
+そこで以上の処理を反復すれば $O ( \ln N )$ で時間発展を追跡することができます.</p>
+<h1 id="コメント">コメント</h1>
+<p>原論文のアルゴリズムはほぼこれだけで, あとは具体例に適用した結果などが載っています.
+要するに次の衝突時刻をトラックし続けるのにヒープが便利だよ, という話です.
+確かにもっともに聞こえますが, いろいろと情報が不足していてこれだけでは十分ではありません.</p>
+<p>まず, このアルゴリズムでは情報をアップデートした粒子とアップデートしていない粒子が混在するため, それをどうするか検討する必要があります.
+各粒子の情報にそれがいつのものかという時刻を持たせるのが最もわかりやすいでしょうか.
+独立時間刻みみたいなものですね.</p>
+<p>また, ヒープと粒子情報リストの間で対応関係をすぐに引けるようにしておく必要があります (いちいち探索していたら $O ( N )$ の時間がかかり台無しです).
+上の説明ではヒープに粒子 id も保持していますから粒子情報に飛ぶのは簡単ですが, 逆はどうしましょうか.
+粒子情報にヒープの中のインデックスも含めておくのが簡単ですかね ($R$ 分木をアップデートする度にそちらも併せて変更せざるを得ないのが面倒ですが).</p>
+<p>最後に, ファイル出力する際にすべての粒子の情報をアップデートする必要があり, それには $O ( N )$ の時間がかかるはずです.
+どの程度の頻度で出力するかによりますが, 交差を詳しく見たいと思っているのならばかなり高頻度で行うことになるでしょうし,
+上記アルゴリズムが $O ( \ln N )$ であるとはいえ, そちらの時間が主になりあまりご利益がなさそうです.
+しかし長時間進化が知りたい場合にはこのアルゴリズムによる時間削減効果はなかなか嬉しいかもしれません.</p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>メモリ領域のスタック領域とヒープ領域とは関係がありません.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>完全にソートする訳ではないので $O ( N \ln N )$ も必要ない, と言われればそんな気もしますが, 未確認です.</p>
+</div>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

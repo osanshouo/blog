@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[shell] 正規表現にマッチするテキストを抽出 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[shell] 正規表現にマッチするテキストを抽出</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Linux">Linux</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-10-31">2021-10-31</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>テキストからマッチする部分を取り出すには <code>grep</code> の <code>-o</code> オプションを使うのが簡単です.
+デフォルトでは <code>grep</code> は単一行ごとにマッチするかを判定しますが, 
+<code>-P</code> オプションをつければ複数行でのマッチが可能になります.</p>
+<ul>
+<li><a href="https://minus9d.hatenablog.com/entry/20130209/1360377537">grepで複数行を対象にサーチ - minus9d's diary</a></li>
+</ul>
+<p>一方, <code>grep</code> には複数のマッチ条件を指定する <code>-e</code> オプションがあります.
+しかし <code>-P</code> と <code>-e</code> は併用することができません. 正規表現の OR <code>|</code> を使うのが良いと思います.
+たとえば HTML 文書から <code>&lt;h1&gt;</code> タグおよび <code>&lt;h2&gt;</code> タグを抜き出すには次のようにします.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">grep -Poz </span><span>&#39;</span><span style="color:#a3be8c;">&lt;h1[\s\S]*?&lt;/h1&gt;|&lt;h2[\s\S]*?&lt;/h2&gt;</span><span>&#39; index.html
+</span></code></pre>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

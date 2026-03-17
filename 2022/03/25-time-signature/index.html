@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Lilypond] 拍子記号を非表示にする - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Lilypond] 拍子記号を非表示にする</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/音楽">音楽</a></div>
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Lilypond">Lilypond</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2022-03-25">2022-03-25</time></div>
+    </div>
+  </header>
+
+  
+
+  <div class="mainContent"><p>Lilypond において拍子記号の表示/非表示を設定するには, 基本的には</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span style="color:#96b5b4;">\override</span><span> Score.TimeSignature.break-visibility = ##(#f #f #f)
+</span></code></pre>
+<p>のようにすれば良いです.</p>
+<ul>
+<li><a href="https://lilypond.org/doc/v2.22/Documentation/notation/visibility-of-objects.ja.html#using-break_002dvisibility">LilyPond 記譜法リファレンス: 5.4.7 オブジェクトの可視性</a></li>
+</ul>
+<p>しかし, これでは楽譜冒頭の拍子記号は表示されたままです. 
+これを非表示にするには以下のようにします.</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span style="color:#96b5b4;">\score </span><span>{
+</span><span>    </span><span style="color:#96b5b4;">\new</span><span> Staff &lt;&lt;
+</span><span>        </span><span style="color:#65737e;">% ここに楽譜データを入力 %
+</span><span>    &gt;&gt;
+</span><span>
+</span><span>    </span><span style="color:#96b5b4;">\layout </span><span>{
+</span><span>        </span><span style="color:#96b5b4;">\context </span><span>{
+</span><span>            </span><span style="color:#96b5b4;">\Staff
+</span><span>            </span><span style="color:#96b5b4;">\remove</span><span> &quot;Time_signature_engraver&quot;
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<ul>
+<li><a href="https://lilypond.org/doc/v2.21/Documentation/notation/working-with-ancient-music_002d_002dscenarios-and-solutions.ja.html#transcribing-gregorian-chant">LilyPond 記譜法リファレンス: 2.9.6 古代音楽に取り組む—事例とその解決法</a></li>
+</ul>
+<h1 id="ページサイズを自動調整">ページサイズを自動調整</h1>
+<p>この設定を行うのは主に協奏曲のカデンツァや古楽だと思いますが, 
+譜例作成のために採用する場合, ページサイズを楽譜に合わせて縮小する</p>
+<pre data-lang="tex" style="background-color:#2b303b;color:#c0c5ce;" class="language-tex "><code class="language-tex" data-lang="tex"><span style="color:#96b5b4;">\paper </span><span>{
+</span><span>     page-breaking = #ly:one-line-auto-height-breaking
+</span><span>}
+</span></code></pre>
+<p>というオプションと併用すると思います.</p>
+<ul>
+<li><a href="https://lilypond.org/doc/v2.21/Documentation/notation/page-breaking#one_002dline_002dauto_002dheight-page-breaking">LilyPond 記譜法リファレンス: 4.3.2 改ページ</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+3次方程式 x^3-3x+1=0 について - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">3次方程式 x^3-3x+1=0 について</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/数学">数学</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2024-11-01">2024-11-01</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/11/01-cubic-equation/#グラフの概形">グラフの概形</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/11/01-cubic-equation/#三角関数による解">三角関数による解</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/11/01-cubic-equation/#Cardano_の公式による解">Cardano の公式による解</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/11/01-cubic-equation/#Galois_理論">Galois 理論</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2024/11/01-cubic-equation/#参考文献">参考文献</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>多項式 $f(x) = x^3 - 3x + 1$ の根 $f(x) = 0$ について調べます.</p>
+<h1 id="グラフの概形">グラフの概形</h1>
+<p>$f(x)$ の微分は
+$$f'(x) = 3x^2 - 3 = 3(x^2 - 1)$$
+ですから, $f(x)$ は $x = \pm 1$ に変曲点を持ち, $x &gt; 1$ では単調増加,
+$-1 &lt; x &lt; 1$ では単調減少, $x &lt; -1$ では単調増加です.
+$f(1) = -1$, $f(-1) = 3$ により $f(x)$ は $x&lt; -1$, $-1 &lt; x &lt; 1$, $1 &lt; x$ にそれぞれひとつずつ根を持ちます.</p>
+<p>従って $f(x)$ に実数以外の根はありません.</p>
+<h1 id="三角関数による解">三角関数による解</h1>
+<p>$f(2) = 3$, $f(-2) = -1$ ですから, $f(x)$ の根 $\alpha$ は $|\alpha| &lt; 2$ を満たします.
+そこで $x = 2 \cos \theta$ を $f(x)$ に代入すると
+$$f(2\cos\theta) = 8 \cos^3 \theta - 6 \cos \theta + 1 = 2 \cos 3 \theta + 1$$
+となるので, 方程式 $f(x) = 0$ は
+$$\cos 3 \theta = - \frac12$$
+に帰着できます. この方程式を満たす $\theta$ は 
+$3\theta = \frac{2}{3}\pi, \frac{4}{3}\pi, \frac{8}{3}\pi, \frac{10}{3}\pi, \cdots$ である.
+もとの変数 $x = 2 \cos \theta$ に戻すと
+$$x = 2 \cos \frac29 \pi, \ \ 2 \cos \frac49 \pi, \ \ 2 \cos \frac89 \pi$$
+を得ます. その近似値は以下の通りです.
+$$2 \cos \frac29 \pi = 1.532088886237956$$
+$$2 \cos \frac49 \pi = 0.34729635533386083$$
+$$2 \cos \frac89 \pi = -1.8793852415718166$$</p>
+<h1 id="Cardano_の公式による解">Cardano の公式による解</h1>
+<p>$x = u + v$ を $f(x)$ に代入すると
+$$f(x) = (u^3 + v^3 + 1) + 3 (u + v ) (u v - 1)$$
+となります. そのため, もし
+$$u^3 + v^3 + 1 = 0$$
+$$u v - 1 = 0$$
+を満たす組 $(u, v)$ を見つけることができれば, 求める根は $u + v$ として得られます.
+補助多項式 $g(y) = (y - u^3) (y - v^3)$ を展開して整理すると
+$$g(y) = y^2 - (u^3 + v^3) y + (u v)^3$$
+すなわち $g(y) = y^2 + y + 1$ を得ます. その根 ($u^3$, $v^3$) は容易に求まって
+$$u^3, v^3 = - \frac12 \pm \frac{ \sqrt{- 3} }{ 2 }$$
+です. 複号の選び方で2通りあるのが $u^3$ と $v^3$ というふたつの数に対応します.
+ここでは $u^3$ は複号 $+$, $v^3$ は複号 $-$ に選ぶことにします. 
+よって $f(x)$ の根 $\alpha$ は
+$$\alpha = \sqrt[3]{ - \frac12 + \frac{ \sqrt{-3} }{ 2 } } + \sqrt[3]{ - \frac12 - \frac{ \sqrt{-3} }{ 2 } }$$
+と求まりました.</p>
+<p>しかしこの Cardano の公式による表示では, 3個の根があるはずなのにひとつの表式しか得られず, 状況が見通しにくいです.
+そこで $u$, $v$ を極表示してみます.
+$$|u^3| = |v^3| = 1$$
+$$\mathrm{arg}\,u^3 = \frac23 \pi , \ \ \mathrm{arg}\,v^3 = \frac43 \pi$$
+ですから, $u^3 = e^{\frac23 i \pi}$, $v^3 = e^{\frac43 i \pi}$ です. 
+よってこれらの数の立方根を取れば $u$, $v$ を求めることができますが, 立方根の選び方にはそれぞれ3通りあるため
+$$u = e^{\frac29 i \pi} , \ \ e^{\frac89 i \pi} , \ \ e^{\frac{14}{9} i \pi}$$
+$$v = e^{\frac49 i \pi} , \ \ e^{\frac{10}{9} i \pi} , \ \ e^{\frac{16}{9} i \pi}$$
+となり, 合計9通りの選び方が生じます. しかし, いまもうひとつの条件
+$$uv - 1 = 0$$
+が課されているため, $u$ の選び方を決めた時点で $v$ のどの立方根を選ぶかが決まってしまい,
+その結果として3通りの根が得られます. これがもとの3次多項式 $f(x)$ の3個の根です.</p>
+<h1 id="Galois_理論">Galois 理論</h1>
+<p>根の三角関数による表示に現れる偏角は $\frac29 \pi$, $\frac49 \pi$, $\frac89 \pi$, 
+$\frac{16}{9}\pi \equiv - \frac29 \pi$, ... となっており, 2倍角の公式を繰り返すことで3つの根を順に辿ることができます.
+これは Galois 理論を用いて解釈できます.
+$f(x) = x^3 - 3x + 1$ の判別式は $D = - ( 4(-3)^3 + 27 ) = 27 ( 4 - 1 ) = 81$ と求まりますから, 
+$\sqrt{D} = 9 \in \mathbb{Q}$ です.
+よって $f(x)$ の Galois 群は3次の巡回群 $C_3$ です. このことが根の巡回性と対応します.</p>
+<p>$\alpha = 2 \cos \frac29 \pi$ とおくとき, 巡回拡大の一般論から $f(x)$ の最小分解体 $L$ は $L = \mathbb{Q}(\alpha)$ になります.
+$f(x)$ は $\alpha$ の最小多項式であり
+$$\alpha^3 - 3\alpha + 1 = 0$$
+が成り立つことに注意すると, 他の根は
+$$2 \cos \frac49 \pi = 2 [ 2 (\alpha/2)^2 - 1 ] = \alpha^2 - 2$$
+および
+$$2 \cos \frac89 \pi = 2 [ 2\{2(\alpha/2)^2 - 1\}^2 - 1 ] = \alpha^4 - 4\alpha^2 + 2$$ 
+$$= \alpha(3\alpha - 1) - 4\alpha^2 + 2 = - \alpha^2 - \alpha + 2$$
+となります. よって $f(x)$ の巡回関数として $q(x) = x^2 - 2$ または $q(x) = -x^2 -x + 2$ を取ることができます.
+あるいはこれを多項式環 $\mathbb{Q}[x]$ を $f(x) = x^3 - 3x + 1$ が生成するイデアルで割った 
+$\mathbb{Q}[x]/(f(x))$ の商体の元と見れば,
+$$x^2 - 2 = \frac{x - 1}{ x }$$
+$$-x^2 - x + 2 = \frac{ 1 }{ 1 - x}$$
+です.</p>
+<h1 id="参考文献">参考文献</h1>
+<ul>
+<li><a href="https://www.shinko-keirin.co.jp/keirinkan/kosu/mathematics/jissen/jissen40.html">授業実践記録</a></li>
+<li><a href="http://shochandas.xsrv.jp/solution/solution3.htm">解の巡回</a></li>
+</ul>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>

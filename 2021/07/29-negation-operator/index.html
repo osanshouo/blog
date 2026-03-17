@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>
+[Rust] 論理否定演算子の視認性向上策 - 鴨川のはりねずみ
+</title>
+  <link rel="icon" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/article-page.css">
+  
+  
+<script>
+  window.MathJax = {
+      tex: {
+	  inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+  };
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+
+<body>
+  <header>
+    <div class="header-container"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog">鴨川のはりねずみ</a></div>
+  </header>
+
+  <main class="main">
+    
+<article class="article">
+  <header>
+    <h1 class="title">[Rust] 論理否定演算子の視認性向上策</h1>
+    <div class="info-container">
+      <div class="tags-container">
+        
+        
+        <div class="tag"><a href="https:&#x2F;&#x2F;osanshouo.github.io&#x2F;blog/tags/Rust">Rust</a></div>
+        
+        
+      </div>
+      <div class="date"><time datetime="2021-07-29">2021-07-29</time></div>
+    </div>
+  </header>
+
+  
+  <details class="details-toc">
+    <summary>目次</summary>
+    <div class="toc">
+      <ul>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/07/29-negation-operator/#エディタの表示設定">エディタの表示設定</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/07/29-negation-operator/#括弧をつける">括弧をつける</a>
+          
+        </li>
+        
+        <li>
+          <a href="https://osanshouo.github.io/blog/2021/07/29-negation-operator/#Not_トレイト">Not トレイト</a>
+          
+        </li>
+        
+      </ul>
+    </div>
+  </details>
+  
+
+  <div class="mainContent"><p>Rust には特徴的な一文字の単項演算子 <code>?</code> があり, これは識別子ないし <code>()</code> の後ろにつき, かなり快適です.
+これはこの演算子は基本的には軽く読み飛ばせばよいという趣旨のもので, それに応じて軽い表記になっているためです.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::fs;
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), std::io::Error&gt; {
+</span><span>    </span><span style="color:#b48ead;">for</span><span> dir in fs::read_dir(&quot;</span><span style="color:#a3be8c;">./</span><span>&quot;)? {
+</span><span>        </span><span style="color:#b48ead;">let</span><span> entry = dir?;
+</span><span>        println!(&quot;</span><span style="color:#d08770;">{:?}</span><span>&quot;, entry.</span><span style="color:#96b5b4;">path</span><span>());
+</span><span>    }
+</span><span>
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>それに対して, 論理否定演算子 <code>!</code> は真理値をひっくり返すという作用の重大さの割に正直なところ視認性が悪いです.
+識別子の前につき, しかも単なる縦棒に近いため, うっかり見落とすのではないかといつもひやひやします.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#65737e;">/// 引数 (bool) が false なら `Ok!` と出力する. true ならば何もしない.
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_false</span><span>(</span><span style="color:#bf616a;">condition</span><span>: </span><span style="color:#b48ead;">bool</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">if </span><span>!condition {
+</span><span>        println!(&quot;</span><span style="color:#a3be8c;">Ok!</span><span>&quot;);
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Python で同等の処理は <code>if not</code> という形で書けます. 
+つまり <code>not</code> というキーワードが <code>!</code> に比べて冗長なため, 見落とす可能性が低いです.</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">check_bool</span><span>(</span><span style="color:#bf616a;">condition</span><span>):
+</span><span>    </span><span style="color:#65737e;">&#39;&#39;&#39;引数が false なら `Ok!` と出力する. true ならば何もしない.&#39;&#39;&#39;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">if </span><span>not condition:
+</span><span>        </span><span style="color:#96b5b4;">print</span><span>(&quot;</span><span style="color:#a3be8c;">Ok!</span><span>&quot;)
+</span></code></pre>
+<p>このあたりを何とかできないか, というのが本記事の主題です.</p>
+<h1 id="エディタの表示設定">エディタの表示設定</h1>
+<p>この手の問題はエディタ側でなんとかするのが王道でしょう. 
+演算子が一文字であり, しかもかなり線が細く見にくい文字だというのが問題の根源であり, 
+おそらく <code>!</code> が読みやすいフォントを採用するのが最も適切な解決策だと思いますが,
+好みのフォントの <code>!</code> が読みやすいかはわかりません.
+フォント自作まで行くと完全にぬかるみにはまってしまいます.</p>
+<p>より簡単な解決策としてはシンタックスハイライトをカスタマイズするというものがあります.
+例えば VS Code で論理否定演算子 <code>!</code> を太字かつ赤字にするならば, <code>settings.json</code> の
+<code>editor.tokenColorCustomizations</code> &gt; <code>textMateRules</code> に次の設定を追加してください.</p>
+<pre data-lang="json" style="background-color:#2b303b;color:#c0c5ce;" class="language-json "><code class="language-json" data-lang="json"><span>{
+</span><span>    &quot;</span><span style="color:#a3be8c;">scope</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">keyword.operator.logical.rust</span><span>&quot;,
+</span><span>    &quot;</span><span style="color:#a3be8c;">settings</span><span>&quot;: {
+</span><span>        &quot;</span><span style="color:#a3be8c;">foreground</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">#ff0000</span><span>&quot;,
+</span><span>        &quot;</span><span style="color:#a3be8c;">fontStyle</span><span>&quot;: &quot;</span><span style="color:#a3be8c;">bold</span><span>&quot;
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>なお VS Code におけるシンタックスハイライトのカスタマイズについては次の記事がわかりやすいです.</p>
+<ul>
+<li><a href="https://www.atmarkit.co.jp/ait/articles/1710/20/news023_2.html">Visual Studio Codeの設定「虎の巻」：構文ハイライト／配色テーマ自作編：特集：Visual Studio Codeを使いこなそう（2/4 ページ） - ＠IT</a></li>
+</ul>
+<h1 id="括弧をつける">括弧をつける</h1>
+<p>常に <code>!(...)</code> という形で書くようにすると, かなり可読性が向上します. 
+<code>!</code> の後にスペースを入れてもよいですが, それよりは括弧の方が良いと思います.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#65737e;">/// 引数 (bool) が false なら `Ok!` と出力する. true ならば何もしない.
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_false</span><span>(</span><span style="color:#bf616a;">condition</span><span>: </span><span style="color:#b48ead;">bool</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">if </span><span>!(condition) {
+</span><span>        println!(&quot;</span><span style="color:#a3be8c;">Ok!</span><span>&quot;);
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>不要な括弧なのでコンパイラに警告されるのではと思いましたが, 
+少なくとも最新 stable ではこれは警告されず rustfmt でも修正されないようです.
+ただ個人的にはあまり好みではありません.</p>
+<h1 id="Not_トレイト"><code>Not</code> トレイト</h1>
+<p>そもそも <code>!</code> 演算子が何かというと <code>std::ops::Not</code> トレイトの <code>Not::not</code> 関数の糖衣構文です.
+ですから <code>!</code> を使いたくないのであれば, 単純に <code>not</code> メソッドに置き換えることは常に可能です.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::ops::Not;
+</span><span>
+</span><span style="color:#65737e;">/// 引数 (bool) が false なら `Ok!` と出力する. true ならば何もしない.
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_false</span><span>(</span><span style="color:#bf616a;">condition</span><span>: </span><span style="color:#b48ead;">bool</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">if</span><span> condition.</span><span style="color:#96b5b4;">not</span><span>() {
+</span><span>        println!(&quot;</span><span style="color:#a3be8c;">Ok!</span><span>&quot;);
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>しかし (最初に <code>Not</code> トレイトをインポートする手間は気にしないにしても) <code>if not</code> ほどの読みやすさはありません.
+<code>if</code> と <code>not</code> が離れているのが問題ですが, それならばいっそ</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::ops::Not;
+</span><span>
+</span><span style="color:#65737e;">/// 引数 (bool) が false なら `Ok!` と出力する. true ならば何もしない.
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_false</span><span>(</span><span style="color:#bf616a;">condition</span><span>: </span><span style="color:#b48ead;">bool</span><span>) {
+</span><span>    </span><span style="color:#b48ead;">if </span><span>Not::not(condition) {
+</span><span>        println!(&quot;</span><span style="color:#a3be8c;">Ok!</span><span>&quot;);
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>とするのはどうでしょう. かなり冗長ですが, 否定演算子を決して見落としてはならない文脈ならば案外ありかもしれません.</p>
+</div>
+</article>
+
+  </main>
+
+  <footer>
+    <div class="footer-container">&copy;2021-2025 osanshouo</div>
+  </footer>
+</body>
+
+</html>
